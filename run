@@ -1,0 +1,11 @@
+#!/bin/bash
+
+#PBS -N ch3d
+#PBS -m abe
+#PBS -q standard
+
+cd ${HOME}/micro/chns3D
+
+make batch-install geo=${geo} problem=${problem}
+make clean
+make run

@@ -1,0 +1,15 @@
+/mpi_hosts
+/geometry.geo
+/problem.geo
+/problem.pde
+/view.geo
+/mesh
+/includes
+/output
+/pictures
+.cache
+
+Session.vim
+*.bak
+
+!*.gitkeep
