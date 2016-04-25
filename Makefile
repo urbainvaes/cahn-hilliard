@@ -12,8 +12,6 @@ endif
 ##################################################
 #  Link files and folder for (geometry,problem)  #
 ##################################################
-LINKS = geometry.geo problem.geo view.geo problem.pde mesh output pictures includes
-
 install :
 	@echo Choose geometry from: $$(ls inputs); \
 	echo -n "Enter geometry: " && read geo; \
@@ -23,13 +21,13 @@ install :
 
 
 CACHEDIR = .cache/$(geo)/$(problem)
-TARGETS1 = $(addprefix $(CACHEDIR)/, mesh output pictures includes)
-TARGETS2 = $(addprefix inputs/$(geo)/, geometry.geo view.geo)
-TARGETS3 = $(addprefix inputs/$(geo)/$(problem)/, problem.pde problem.geo)
+TARGETS_OUT = $(addprefix $(CACHEDIR)/, mesh output pictures includes)
+TARGETS_GEO = $(addprefix inputs/$(geo)/, geometry.geo view.geo)
+TARGETS_PRB = $(addprefix inputs/$(geo)/$(problem)/, problem.pde problem.geo)
 
 batch-install :
-	mkdir -p $(TARGETS1)
-	ln -sft . $(TARGETS1) $(TARGETS2) $(TARGETS3)
+	mkdir -p $(TARGETS_OUT)
+	ln -sft . $(TARGETS_OUT) $(TARGETS_GEO) $(TARGETS_PRB)
 
 
 ###############################
@@ -41,7 +39,7 @@ OUTDIR := $(shell readlink output)
 mesh : $(MESH)
 
 $(MESH) : geometry.geo problem.geo
-	gmsh $< -3 -o $@ > $(OUTDIR)/gmsh.log
+	gmsh $< -3 -o $@ | tee $(OUTDIR)/gmsh.log
 
 
 ###################
@@ -67,11 +65,11 @@ np = $(shell grep 'np = [0-9]*;' problem.geo | sed 's/[^0-9]*//g')
 
 $(OUTPUT) : solver.pde $(MESH) problem.pde $(GMSHVARS)
 	mpirun -np $(np) \
-		FreeFem++-mpi -ne -nw -v 0 solver.pde -plot 0 -out $(OUTDIR) > $(OUTDIR)/freefem.log
+		FreeFem++-mpi -ne -nw -v 0 solver.pde -plot 0 -out $(OUTDIR) | tee $(OUTDIR)/freefem.log
 
 # Run on the cluster
 submit :
-	ssh uv113@macomp01.ma.ic.ac.uk qsub -v geo=$(geo),problem=$(problem) micro/chns3D/run
+	ssh uv113@macomp01.ma.ic.ac.uk qsub -v geo=$(geo),problem=$(problem) micro/cahn-hilliard-3d/run
 
 
 ##############
@@ -79,7 +77,7 @@ submit :
 ##############
 
 # Make video
-VIDEO = pictures/$(shell readlink problem.pde | sed 's|inputs/||' | sed 's|/problem.pde||' | sed 's|/|-|g').mpg
+VIDEO = pictures/$(geo)-$(problem).mpg
 video : $(VIDEO)
 
 output/iso/done : view.geo $(OUTPUT)
@@ -100,6 +98,8 @@ view : $(VIDEO)
 ######################################################################
 #  Clean links, output of current problem, or all regenerable files  #
 ######################################################################
+LINKS = $(shell find . -type l -printf "%P ")
+
 clean-links :
 	rm -f $(LINKS)
 
