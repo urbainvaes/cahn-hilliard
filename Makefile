@@ -69,7 +69,7 @@ $(OUTPUT) : solver.pde $(MESH) problem.pde $(GMSHVARS)
 
 # Run on the cluster
 submit :
-	ssh uv113@macomp01.ma.ic.ac.uk qsub -N $(geo)-$(problem) -v geo=$(geo),problem=$(problem) micro/cahn-hilliard-3d/run
+	ssh uv113@macomp01.ma.ic.ac.uk "cd micro/cahn-hilliard-3d; qsub -N $(geo)-$(problem) -v geo=$(geo),problem=$(problem) run"
 
 
 ##############
