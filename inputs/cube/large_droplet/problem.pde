@@ -4,7 +4,7 @@ real radius = 0.2;
 real x1 = 0.5*Lx;
 real y1 = 0.5*Ly;
 real z1 = 0.5*Lz;
-func droplet1 = ((x - x1)^2 + (y - y1)^2 + (z - z1)^2 < radius^2 ? 1.5 : -0.5);
+func droplet1 = ((x - x1)^2 + (y - y1)^2 + (z - z1)^2 < radius^2 ? 1 : -1);
 
 func phi0 = droplet1;
 func mu0 = 0;

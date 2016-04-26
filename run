@@ -4,7 +4,7 @@
 #PBS -m abe
 #PBS -q standard
 
-cd ${HOME}/micro/chns3D
+cd ${HOME}/micro/cahn-hilliard-3d
 
 make batch-install geo=${geo} problem=${problem}
 make clean
