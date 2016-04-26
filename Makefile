@@ -29,6 +29,10 @@ batch-install :
 	mkdir -p $(TARGETS_OUT)
 	ln -sft . $(TARGETS_OUT) $(TARGETS_GEO) $(TARGETS_PRB)
 
+show-install :
+	@echo "Geometry: $(geo)"
+	@echo "Problem: $(problem)"
+
 
 ###############################
 #  Create mesh from geometry  #
@@ -69,7 +73,7 @@ $(OUTPUT) : solver.pde $(MESH) problem.pde $(GMSHVARS)
 
 # Run on the cluster
 submit :
-	ssh uv113@macomp01.ma.ic.ac.uk qsub -v geo=$(geo),problem=$(problem) micro/cahn-hilliard-3d/run
+	ssh uv113@macomp01.ma.ic.ac.uk qsub -N $(geo)-$(problem) -v geo=$(geo),problem=$(problem) micro/cahn-hilliard-3d/run
 
 
 ##############

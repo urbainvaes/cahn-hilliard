@@ -1,6 +1,5 @@
 #!/bin/bash
 
-#PBS -N ch3d
 #PBS -m abe
 #PBS -q standard
 
