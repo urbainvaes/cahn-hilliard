@@ -61,15 +61,11 @@ $(GMSHVARS) : geometry.geo problem.geo
 OUTPUT := $(OUTDIR)/output.msh
 run : $(OUTPUT)
 
-# Number of processors
-np = $(shell grep 'np = [0-9]*;' problem.geo | sed 's/[^0-9]*//g')
-
 # Target to keep in case of error
 .PRECIOUS : $(OUTPUT)
 
 $(OUTPUT) : solver.pde $(MESH) problem.pde $(GMSHVARS)
-	mpirun -np $(np) \
-		FreeFem++-mpi -ne -nw -v 0 solver.pde -plot 0 -out $(OUTDIR) | tee $(OUTDIR)/freefem.log
+	FreeFem++ -ne solver.pde -plot 0 -out $(OUTDIR) | tee $(OUTDIR)/freefem.log
 
 # Run on the cluster
 submit :
