@@ -5,6 +5,6 @@
 
 cd ${HOME}/micro/cahn-hilliard-3d
 
-make batch-install geo=${geo} problem=${problem}
 make clean
-make run
+make run geo=${geo} problem=${problem}
+make remote-video host="urbain@155.198.212.223" geo=${geo} problem=${problem}

@@ -1,12 +1,15 @@
-# Default target
-default : visualization
+default : all
 
 ifndef $(geo)
-geo = $(shell basename $(shell dirname $(shell readlink geometry.geo)))
+geo := $(shell basename $(shell dirname $(shell readlink geometry.geo)))
 endif
 
 ifndef $(problem)
-problem = $(shell basename $(shell dirname $(shell readlink problem.pde)))
+problem := $(shell basename $(shell dirname $(shell readlink problem.pde)))
+endif
+
+ifndef $(host)
+host := localhost
 endif
 
 ##################################################
@@ -17,15 +20,14 @@ install :
 	echo -n "Enter geometry: " && read geo; \
 	echo Choose problem from: $$(ls inputs/$${geo} -I "*.geo"); \
 	echo -n "Enter problem: " && read problem; \
-	make batch-install geo=$${geo} problem=$${problem};
-
+	make link geo=$${geo} problem=$${problem};
 
 CACHEDIR = .cache/$(geo)/$(problem)
 TARGETS_OUT = $(addprefix $(CACHEDIR)/, mesh output pictures includes)
 TARGETS_GEO = $(addprefix inputs/$(geo)/, geometry.geo view.geo)
 TARGETS_PRB = $(addprefix inputs/$(geo)/$(problem)/, problem.pde problem.geo)
 
-batch-install :
+link :
 	mkdir -p $(TARGETS_OUT)
 	ln -sft . $(TARGETS_OUT) $(TARGETS_GEO) $(TARGETS_PRB)
 
@@ -37,13 +39,13 @@ show-install :
 ###############################
 #  Create mesh from geometry  #
 ###############################
-MESH = mesh/mesh.msh
-OUTDIR := $(shell readlink output)
+OUTDIR := .cache/$(geo)/$(problem)
+MESH = $(OUTDIR)/mesh/mesh.msh
 
-mesh : $(MESH)
+mesh : link $(MESH)
 
 $(MESH) : geometry.geo problem.geo
-	gmsh $< -3 -o $@ | tee $(OUTDIR)/gmsh.log
+	gmsh $< -3 -o $@ | tee $(OUTDIR)/output/gmsh.log
 
 
 ###################
@@ -51,25 +53,22 @@ $(MESH) : geometry.geo problem.geo
 ###################
 
 # Parse variables from gmsh
-GMSHVARS = includes/gmsh.pde
-gmshexport : $(GMSHVARS)
+GMSHVARS = $(OUTDIR)/includes/gmsh.pde
+gmshexport : link $(GMSHVARS)
 
 $(GMSHVARS) : geometry.geo problem.geo
 	grep -h 'export' $^ | sed 's/^/real /' > $@;
 
 # Run freefem
-OUTPUT := $(OUTDIR)/output.msh
-run : $(OUTPUT)
+OUTPUT := $(OUTDIR)/output/thermodynamics.txt
+run : link $(OUTPUT)
 
 # Target to keep in case of error
 .PRECIOUS : $(OUTPUT)
 
 $(OUTPUT) : solver.pde $(MESH) problem.pde $(GMSHVARS)
-	FreeFem++ -ne solver.pde -plot 0 -out $(OUTDIR) | tee $(OUTDIR)/freefem.log
+	FreeFem++ -ne solver.pde -plot 0 -out $(OUTDIR)/output | tee $(OUTDIR)/output/freefem.log
 
-# Run on the cluster
-submit :
-	ssh uv113@macomp01.ma.ic.ac.uk "cd micro/cahn-hilliard-3d; qsub -N $(geo)-$(problem) -v geo=$(geo),problem=$(problem) run"
 
 
 ##############
@@ -77,22 +76,31 @@ submit :
 ##############
 
 # Make video
-VIDEO = pictures/$(geo)-$(problem).mpg
-video : $(VIDEO)
+VIDEO = $(OUTDIR)/pictures/$(geo)-$(problem).mpg
+video : link $(VIDEO)
 
-output/iso/done : view.geo $(OUTPUT)
-	gmsh $< -setnumber video 1
-
-$(VIDEO) : output/iso/done
+$(VIDEO) : view.geo $(OUTPUT)
+	gmsh -display :0 $< -setnumber video 1
 	mencoder "mf://output/iso/*.jpg" -mf fps=10 -o $(VIDEO) -ovc lavc -lavcopts vcodec=mpeg4:vhq
 
 # View in gmsh
-visualization : view.geo $(OUTPUT)
-	gmsh $<
+visualization : link view.geo $(OUTPUT)
+	gmsh view.geo
 
 # View video
-view : $(VIDEO)
-	vlc $(VIDEO)
+view : link $(VIDEO)
+	DISPLAY=:0 vlc -f $(VIDEO)
+
+
+###########################
+#  Run on remote machine  #
+###########################
+remote-% :
+	ssh  $(host) "cd micro/cahn-hilliard-3d; make $* geo=$(geo) problem=$(problem)"
+
+# Run on the cluster
+all :
+	ssh uv113@macomp01.ma.ic.ac.uk "cd micro/cahn-hilliard-3d; qsub -N $(geo)-$(problem) -v geo=$(geo),problem=$(problem) run"
 
 
 ######################################################################
