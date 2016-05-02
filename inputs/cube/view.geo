@@ -1,9 +1,8 @@
 Merge "geometry.geo";
-/* Merge "output/output.msh"; */
-Merge "mesh/mesh.msh";
+Merge "mesh.msh";
 
 // Generate list of files to be included
-System 'ls -v output/output-*.msh > includes.geo';
+System 'ls -v $(readlink output)/output-*.msh > includes.geo';
 System 'sed -i "s/^/Merge \"/" includes.geo';
 System 'sed -i "s/$/\";/" includes.geo';
 
@@ -92,6 +91,4 @@ For i In {nplanes+1:PostProcessing.NbViews-2}
   View[i+1].Visible = 1;
 EndFor
 
-If(Exists(video))
-  System "touch output/iso/done";
-EndIf
+Exit;

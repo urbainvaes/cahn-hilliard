@@ -4,7 +4,7 @@ real radius = 0.2;
 real x1 = 0.5*Lx;
 real y1 = 0.5*Ly;
 real z1 = 0.5*Lz;
-func droplet1 = ((x - x1)^2 + (y - y1)^2 + (z - z1)^2 < radius^2 ? 1.5 : -0.5);
+func droplet1 = ((x - x1)^2 + (y - y1)^2 + (z - z1)^2 < radius^2 ? 1 : -1);
 
 func phi0 = droplet1;
 func mu0 = 0;
@@ -14,3 +14,9 @@ func mu0 = 0;
 varf varBoundary([phi1,mu1], [phi2,mu2]) =
   on(1,phi1=-1) + on(2,phi1=-1) + on(3, phi1=-1) + on(4,phi1 = -1)
 ;
+
+// Value of epsiblon
+eps = 0.1;
+
+// Time step
+dt = 0.5 * 1e-6;

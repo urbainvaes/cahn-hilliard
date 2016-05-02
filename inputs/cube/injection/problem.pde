@@ -9,10 +9,12 @@ varf varBoundary([phi1,mu1], [phi2,mu2]) =
 ;
 
 // Value of epsilon
-eps = 0.02;
+eps = 0.1;
 
 // Value of the time step
-dt = 8*eps^4/M;
+/* dt = 8*eps^4/M; */
+dt = 0.1 * 1e-6;
 
 // Number of iterations
-nIter = 1000;
+/* nIter = 1000; */
+nIter = 100;

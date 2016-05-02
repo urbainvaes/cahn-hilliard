@@ -3,11 +3,11 @@
 /problem.geo
 /problem.pde
 /view.geo
-/mesh
+/meshes
 /includes
 /output
 /pictures
-.cache
+/output
 
 Session.vim
 *.bak
