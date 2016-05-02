@@ -12,12 +12,13 @@ load "gmsh"
 string ssparams="";
 
 // Process input parameters
-int plots = getARGV("-plot",0);
-string output = getARGV("-out","output");
+int plots      = getARGV("-plot",0);
+string output  = getARGV("-out","output");
+string theMesh = getARGV("-in","sh/mesh.msh");
 
 /// Import the mesh
 mesh3 Th;
-Th = gmshload3("mesh/mesh.msh");
+Th = gmshload3(theMesh);
 
 /// Declare default parameters
 
