@@ -3,13 +3,14 @@
 /problem.geo
 /problem.pde
 /view.geo
-/meshes
+/outputs
 /includes
 /output
 /pictures
-/output
+/mesh
+/logs
+.protected-*
 
+*.backup
 Session.vim
-*.bak
-
 !*.gitkeep

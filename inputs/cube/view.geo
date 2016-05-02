@@ -1,5 +1,5 @@
 Merge "geometry.geo";
-Merge "mesh.msh";
+Merge "output/mesh.msh";
 
 // Generate list of files to be included
 System 'ls -v $(readlink output)/output-*.msh > includes.geo';
