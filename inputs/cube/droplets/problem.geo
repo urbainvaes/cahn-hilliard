@@ -2,7 +2,7 @@
 np = 1;
 
 // Meshsize
-s  = 0.045;
+s  = 0.04;
 
 // Dimensions of the cube
 Lx = 1;    // export

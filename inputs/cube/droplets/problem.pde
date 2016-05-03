@@ -19,3 +19,11 @@ func mu0 = 0;
 varf varBoundary([phi1,mu1], [phi2,mu2]) =
   on(1,phi1=-1) + on(2,phi1=-1) + on(3,phi1=-1) + on(4,phi1=-1)
 ;
+
+// Value of epsilon
+eps = 0.1;
+
+// Time step and number of iterations
+/* real dt = 8.0*eps^4/M; */
+dt = .1 * 1e-6;
+nIter = 300;

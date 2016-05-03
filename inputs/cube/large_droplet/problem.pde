@@ -1,5 +1,5 @@
 // Initial condition
-real radius = 0.2;
+real radius = 0.3;
 
 real x1 = 0.5*Lx;
 real y1 = 0.5*Ly;
@@ -19,4 +19,4 @@ varf varBoundary([phi1,mu1], [phi2,mu2]) =
 eps = 0.1;
 
 // Time step
-dt = 0.5 * 1e-6;
+dt = 0.2 * 1e-6;
