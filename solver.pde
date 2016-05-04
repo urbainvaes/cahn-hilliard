@@ -98,7 +98,7 @@ for(int i = 0; i <= nIter; i++)
     file << i*dt           << "    "
          << freeEnergy     << "    "
          << massPhi        << "    "
-         << dt*dissipation << "    " << "    " << endl << endl;
+         << dt*dissipation << "    " << endl;
 
     // Print variables at current iteration
     cout << endl
