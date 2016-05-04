@@ -19,4 +19,7 @@ varf varBoundary([phi1,mu1], [phi2,mu2]) =
 eps = 0.1;
 
 // Time step
-dt = 0.2 * 1e-6;
+dt = 1e-6;
+
+// Number of iterations
+nIter = 300;
