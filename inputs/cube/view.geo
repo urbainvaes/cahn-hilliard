@@ -2,7 +2,7 @@ Merge "geometry.geo";
 Merge "output/mesh.msh";
 
 // Generate list of files to be included
-System 'ls -v output/output-*.msh > includes.geo';
+System "ls -v output/output-*.msh | sed '$d'  > includes.geo";
 System 'sed -i "s/^/Merge \"/" includes.geo';
 System 'sed -i "s/$/\";/" includes.geo';
 
