@@ -2,12 +2,12 @@
 np = 1;
 
 // Meshsize
-s  = 0.04;
+s  = 0.035;
 
 // Dimensions of the cube
 Lx = 1;    // export
-Ly = 1;    // export
-Lz = 0.8;  // export
+Ly = 0.65*Lx;    // export
+Lz = 0.65*Lx;  // export
 
 // Position of the circle
 Ox = Lx / 2.;
