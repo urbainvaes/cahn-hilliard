@@ -28,7 +28,7 @@ $(VIDEO) : view.geo output/thermodynamics.txt
 	mencoder "mf://output/iso/*.jpg" -mf fps=10 -o $(VIDEO) -ovc lavc -lavcopts vcodec=mpeg4:vhq
 
 visualization : view.geo output/thermodynamics.txt
-	gmsh view.geo
+	gmsh -display :0 view.geo
 
 view : $(VIDEO)
 	DISPLAY=:0 vlc -f $(VIDEO)

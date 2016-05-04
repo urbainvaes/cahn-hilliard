@@ -32,10 +32,6 @@ show-install :
 	@echo "Geometry: $(geo)"
 	@echo "Problem: $(problem)"
 
-# Run in isolated environment
-protected-% :
-	cd $(LINK_DIR); make -f local.mk $* geo=$(geo) problem=$(problem)
-
 #  Run on remote machine or submit to the math complute cluster queue
 ifndef $(host)
 host := localhost
@@ -51,9 +47,6 @@ link-videos :
 		ln -sfr $${file} videos/$${name}; \
 	done
 
-# Include local makefile
-# include local.mk
-
 # Clean
 uninstall :
 	rm -f $(shell find . -type l -printf "%P ")
@@ -63,5 +56,4 @@ clean-all : uninstall
 
 # Make protected targets by default
 .DEFAULT :
-	echo "Going to run protected-$@"
-	make protected-$@ geo=$(geo) problem=$(problem)
+	cd $(LINK_DIR); make -f local.mk $@
