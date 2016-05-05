@@ -35,7 +35,6 @@ fespace Vh(Th,P1), V2h(Th,[P1,P1]);
 
 Vh phiOld;
 V2h [phi, mu];
-V2h [phi2, mu2];
 
 /// Include problem file
 include "problem.pde"
