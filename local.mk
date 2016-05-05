@@ -33,8 +33,8 @@ visualization : view.geo output/thermodynamics.txt
 view : $(VIDEO)
 	DISPLAY=:0 vlc -f $(VIDEO)
 
-######################################################################
-#  Clean links, output of current problem, or all regenerable files  #
-######################################################################
+###################
+#  Clean outputs  #
+###################
 clean :
-	rm -rf  $(VIDEO) output/* includes/* mesh/*
+	rm -rf  pictures/* output/* includes/* logs/*

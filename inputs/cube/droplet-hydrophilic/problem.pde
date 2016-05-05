@@ -1,5 +1,5 @@
 // Initial condition
-real radius = 0.4*Lz;
+real radius = 0.9*Lz;
 
 real x1 = 0.5*Lx;
 real y1 = 0.5*Ly;
@@ -12,11 +12,11 @@ func mu0 = 0;
 
 // Boundary conditions
 varf varBoundary([phi1,mu1], [phi2,mu2]) =
-      int2d(Th,1) (0*mu2) + int2d(Th,2) (0*mu2);
+      int2d(Th,1) (-10*mu2) + int2d(Th,2) (-10*mu2) + int2d(Th,4) (10*mu2) 
 ;
 
 // Interface thickness
-eps = 0.1;
+eps = 0.2;
 
 // Number of iterations
 nIter = 300;

@@ -55,8 +55,8 @@ uninstall :
 	rm -f $(shell find . -type l -printf "%P ")
 
 clean-all : uninstall
-	rm -rf .protected-* outputs
+	rm -rf outputs
 
-# Make protected targets by default
+# Make targets in isolated directory by default
 .DEFAULT :
 	cd $(LINK_DIR); make -f local.mk $@
