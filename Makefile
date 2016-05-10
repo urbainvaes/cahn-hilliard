@@ -5,13 +5,10 @@ all :
 run-live :
 	ssh uv113@macomp01.ma.ic.ac.uk 'cd micro/cahn-hilliard-3d; make clean; make run; make remote-video host="urbain@155.198.212.223"'
 
-ifndef $(geo)
-geo := $(shell basename $(shell dirname $(shell readlink geometry.geo)))
-endif
-
-ifndef $(problem)
+# Default values for input variables
+geo     := $(shell basename $(shell dirname $(shell readlink geometry.geo)))
 problem := $(shell basename $(shell dirname $(shell readlink problem.pde)))
-endif
+host    := localhost
 
 # Install symlinks to problem files
 install :
@@ -36,10 +33,6 @@ show-install :
 	@echo "Problem: $(problem)"
 
 #  Run on remote machine or submit to the math complute cluster queue
-ifndef $(host)
-host := localhost
-endif
-
 remote-% :
 	ssh  $(host) "cd micro/cahn-hilliard-3d; make $* geo=$(geo) problem=$(problem)"
 
