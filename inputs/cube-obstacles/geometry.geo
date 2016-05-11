@@ -58,32 +58,42 @@ Return
 Macro Cylinder
   Point(index + 0) = {x    , y    , z - 0.5*L, s}; // Center
   Point(index + 1) = {x - r, y - r, z - 0.5*L, s};
-  Point(index + 2) = {x + r, y + r, z - 0.5*L, s};
+  Point(index + 2) = {x + r, y - r, z - 0.5*L, s};
+  Point(index + 3) = {x + r, y + r, z - 0.5*L, s};
+  Point(index + 4) = {x - r, y + r, z - 0.5*L, s};
 
   Circle(index + 1) = {index + 1,index + 0,index + 2};
-  Circle(index + 2) = {index + 2,index + 0,index + 1};
+  Circle(index + 2) = {index + 2,index + 0,index + 3};
+  Circle(index + 3) = {index + 3,index + 0,index + 4};
+  Circle(index + 4) = {index + 4,index + 0,index + 1};
 
-  Point(index + 3) = {x    , y    , z + 0.5*L, s}; // Center
-  Point(index + 4) = {x - r, y - r, z + 0.5*L, s};
-  Point(index + 5) = {x + r, y + r, z + 0.5*L, s};
+  Point(index + 5) = {x    , y    , z + 0.5*L, s}; // Center
+  Point(index + 6) = {x - r, y - r, z + 0.5*L, s};
+  Point(index + 7) = {x + r, y - r, z + 0.5*L, s};
+  Point(index + 8) = {x + r, y + r, z + 0.5*L, s};
+  Point(index + 9) = {x - r, y + r, z + 0.5*L, s};
 
-  Circle(index + 3) = {index + 4,index + 3,index + 5};
-  Circle(index + 4) = {index + 5,index + 3,index + 4};
+  Circle(index + 5) = {index + 6,index + 5,index + 7};
+  Circle(index + 6) = {index + 7,index + 5,index + 8};
+  Circle(index + 7) = {index + 8,index + 5,index + 9};
+  Circle(index + 8) = {index + 9,index + 5,index + 6};
 
-  Line(index + 5) = {index + 1, index + 4};
-  Line(index + 6) = {index + 2, index + 5};
+  Line(index + 9)  = {index + 1, index + 6};
+  Line(index + 10) = {index + 2, index + 7};
+  Line(index + 11) = {index + 3, index + 8};
+  Line(index + 12) = {index + 4, index + 9};
 
-  Line Loop(index + 1) = {index + 1, index + 2};
-  Line Loop(index + 2) = {index + 3, index + 4};
-  Line Loop(index + 3) = {index + 5, index + 3, -(index + 6), -(index + 1)};
-  Line Loop(index + 4) = {index + 5, -(index + 4), -(index + 6), index + 2};
-
+  Line Loop(index + 1) = {index + 1, index + 2, index + 3, index + 4};
+  Line Loop(index + 2) = {index + 5, index + 6, index + 7, index + 8};
   Plane Surface(index + 1) = {index + 1};
   Plane Surface(index + 2) = {index + 2};
-  Ruled Surface(index + 3) = {index + 3};
-  Ruled Surface(index + 4) = {index + 4};
 
-  Surface Loop(index + 1) = {index + 1, index + 3, index + 4, index + 2};
+  For i In {1:4}
+    Line Loop(index + 2 + i) = {index + i, index + 9 + i%4, -(index + 4 + i), -(index + 8 + i)};
+    Ruled Surface(index + 2 + i) = {index + 2 + i};
+  EndFor
+
+  Surface Loop(index + 1) = {index + 1, index + 3, index + 4, index + 5, index + 6, index + 2};
 Return
 
 // Outer cube
@@ -116,7 +126,7 @@ Call Cube;
 inner_cylinder = 2000;
 index = inner_cylinder;
 x = 0.7*Lx;
-y = 0.7*Ly;
+y = 0.3*Ly;
 z = 0.5*Lz;
 r = 0.1*Lx;
 L = 0.6*Lz;
@@ -181,5 +191,11 @@ Physical Volume (1) = {1};
 
 // View options
 Geometry.LabelType = 2;
-Geometry.Surfaces = 1;
 Geometry.SurfaceNumbers = 2;
+
+Color Gray {
+  Surface{
+    Physical Surface{13},
+    Physical Surface{14}
+  };
+}
