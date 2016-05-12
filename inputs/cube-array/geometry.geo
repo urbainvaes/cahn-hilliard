@@ -18,45 +18,35 @@ Include "problem.geo";
 
   outer_cube_ll = lineloops[];
 
-// Inner cube
-  dx   = 0.2*Lx;
-  dy   = 0.2*Ly;
-  dz   = 0.3*Lz;
-  x    = 0.3*Lx;
-  y    = 0.7*Ly;
-  z    = 0.5*Lz;
-  t    = 0.25*Pi;
+// Configuration of array
+  nx = 3;
+  ny = 3;
+  nz = 2;
+
+  dx = Lx/(2*nx + 1);
+  dy = Ly/(2*ny + 1);
+  dz = Lz/(2*nz + 1);
+
   surf = 1;
 
-  Call Cube;
+  Physical Surface("Array", 21) = {};
 
-  inner_cube_sl = surfaceloop[];
-  inner_cube_sl_index = surfaceloopindex;
+// Array of little cubes
+For i In {0:nx-1}
+  For j In {0:ny-1}
+    For k In {0:nz-1}
+      
+      x = 1.5*dx + 2*i*dx;
+      y = 1.5*dy + 2*j*dy;
+      z = 1.5*dz + 2*k*dz;
 
-// Inner cylinder
-  x = 0.7*Lx;
-  y = 0.3*Ly;
-  z = 0.5*Lz;
-  r = 0.1*Lx;
-  L = 0.6*Lz;
+      Call Cube;
 
-  Call Cylinder;
-
-  inner_cylinder_sl = surfaceloop[];
-  inner_cylinder_sl_index = surfaceloopindex;
-
-// Square
-  x  = 0.5*Lx;
-  y  = 0.5*Ly;
-  z  = Lz;
-  lx = 0.2 * Lx;
-  ly = 0.2 * Ly;
-
-  Call Square;
-
-  sloop = lloop;
-  square = newreg;
-  Plane Surface(square) = {lloop};
+      Physical Surface("Array") += {surfaceloop[]};
+      array_sl_indices[i*nz*ny + j*nz + k] = surfaceloopindex;
+    EndFor
+  EndFor
+EndFor
 
 // Circle
   x = 0.5*Lx;
@@ -76,12 +66,12 @@ Include "problem.geo";
   i3 = newreg; Plane Surface(i3) = outer_cube_ll[3];
   i4 = newreg; Plane Surface(i4) = outer_cube_ll[4];
   i5 = newreg; Plane Surface(i5) = outer_cube_ll[5];
-  i6 = newreg; Plane Surface(i6) = {outer_cube_ll[6], sloop};
+  i6 = newreg; Plane Surface(i6) = {outer_cube_ll[6]};
 
 // Define volume of domain
   outer_cube_sl_index = newreg;
-  Surface Loop(outer_cube_sl_index) = {circ, i1, i2, i3, i4, i5, i6, square};
-  Volume(1) = {outer_cube_sl_index, inner_cube_sl_index, inner_cylinder_sl_index};
+  Surface Loop(outer_cube_sl_index) = {circ, i1, i2, i3, i4, i5, i6};
+  Volume(1) = {outer_cube_sl_index, array_sl_indices[]};
 
 // Define physical entities
   // Outer cube
@@ -92,13 +82,8 @@ Include "problem.geo";
   Physical Surface(5) = {i5};
   Physical Surface(6) = {i6};
 
-  // Circle and square
+  // Circle
   Physical Surface(11) = {circ};
-  Physical Surface(12) = {square};
-
-  // Surfaces of the inner objects
-  Physical Surface(21) = inner_cube_sl[];
-  Physical Surface(22) = inner_cylinder_sl[];
 
   // Domain
   Physical Volume (1) = {1};
@@ -111,7 +96,6 @@ Include "problem.geo";
   {
     Surface
     {
-      Physical Surface{21},
-      Physical Surface{22}
+      Physical Surface{21}
     };
   }

@@ -12,19 +12,29 @@ Include "includes.geo";
 // Clean generated list
 System 'rm includes.geo';
 
+// Hide cube
+Hide {
+  Surface{
+    Physical Surface{1},
+    Physical Surface{2},
+    Physical Surface{3},
+    Physical Surface{4},
+    Physical Surface{5},
+    Physical Surface{6},
+    Physical Surface{11},
+    Physical Surface{12}
+  };
+}
+
 // View options
 Geometry.SurfaceNumbers = 0;
-
-// Use Euler angles instead of quaternion
 General.Trackball = 0;
-
-// Euler angles
 General.RotationX = 110;
 General.RotationY = 0;
 General.RotationZ = 30;
-
-// Specify which parts of the geometry and mesh to draw
+Mesh.ColorCarousel   = 2;
 Mesh.SurfaceEdges    = 0;
+Mesh.SurfaceFaces    = 1;
 Mesh.VolumeEdges     = 0;
 Geometry.Lines       = 0;
 Geometry.Surfaces    = 0;

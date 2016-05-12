@@ -43,5 +43,5 @@ Macro Cylinder
 
   surfaceloopindex = newreg;
   surfaceloop = {surfaces[1], surfaces[3], surfaces[4], surfaces[5], surfaces[6], surfaces[2]};
-  Surface Loop(surfaceloopindex) = surfaceloop;
+  Surface Loop(surfaceloopindex) = {surfaceloop[]};
 Return

@@ -5,32 +5,32 @@
 //      - index : starting index for points and lines
 Macro Cube
 
-  lx = 0.5*dx;
-  ly = 0.5*dy;
-  lz = 0.5*dz;
+  length_x = 0.5*dx;
+  length_y = 0.5*dy;
+  length_z = 0.5*dz;
 
-  For i In {0:1}
-    p[4*i + 1] = newp; Point(p[4*i + 1]) = {x - lx*Cos(t) + ly*Sin(t), y - lx*Sin(t) - ly*Cos(t), z + (2*i-1)*lz, s};
-    p[4*i + 2] = newp; Point(p[4*i + 2]) = {x + lx*Cos(t) + ly*Sin(t), y + lx*Sin(t) - ly*Cos(t), z + (2*i-1)*lz, s};
-    p[4*i + 3] = newp; Point(p[4*i + 3]) = {x + lx*Cos(t) - ly*Sin(t), y + lx*Sin(t) + ly*Cos(t), z + (2*i-1)*lz, s};
-    p[4*i + 4] = newp; Point(p[4*i + 4]) = {x - lx*Cos(t) - ly*Sin(t), y - lx*Sin(t) + ly*Cos(t), z + (2*i-1)*lz, s};
+  For index In {0:1}
+    points[4*index + 1] = newp; Point(points[4*index + 1]) = {x - length_x*Cos(t) + length_y*Sin(t), y - length_x*Sin(t) - length_y*Cos(t), z + (2*index-1)*length_z, s};
+    points[4*index + 2] = newp; Point(points[4*index + 2]) = {x + length_x*Cos(t) + length_y*Sin(t), y + length_x*Sin(t) - length_y*Cos(t), z + (2*index-1)*length_z, s};
+    points[4*index + 3] = newp; Point(points[4*index + 3]) = {x + length_x*Cos(t) - length_y*Sin(t), y + length_x*Sin(t) + length_y*Cos(t), z + (2*index-1)*length_z, s};
+    points[4*index + 4] = newp; Point(points[4*index + 4]) = {x - length_x*Cos(t) - length_y*Sin(t), y - length_x*Sin(t) + length_y*Cos(t), z + (2*index-1)*length_z, s};
 
-    l[4*i + 1] = newl; Line(l[4*i + 1]) = {p[4*i + 1], p[4*i + 2]};
-    l[4*i + 2] = newl; Line(l[4*i + 2]) = {p[4*i + 2], p[4*i + 3]};
-    l[4*i + 3] = newl; Line(l[4*i + 3]) = {p[4*i + 3], p[4*i + 4]};
-    l[4*i + 4] = newl; Line(l[4*i + 4]) = {p[4*i + 4], p[4*i + 1]};
+    lines[4*index + 1] = newl; Line(lines[4*index + 1]) = {points[4*index + 1], points[4*index + 2]};
+    lines[4*index + 2] = newl; Line(lines[4*index + 2]) = {points[4*index + 2], points[4*index + 3]};
+    lines[4*index + 3] = newl; Line(lines[4*index + 3]) = {points[4*index + 3], points[4*index + 4]};
+    lines[4*index + 4] = newl; Line(lines[4*index + 4]) = {points[4*index + 4], points[4*index + 1]};
   EndFor
 
-  For i In {1:4}
-    l[8 + i] = newl; Line(l[8 + i]) = {p[i], p[i+4]};
+  For index In {1:4}
+    lines[8 + index] = newl; Line(lines[8 + index]) = {points[index], points[index+4]};
   EndFor
 
-  lineloops[1] = newreg; Line Loop(lineloops[1]) = {l[1] ,  l[2] ,  l[3] ,   l[4] };
-  lineloops[2] = newreg; Line Loop(lineloops[2]) = {l[1] , l[10] , -l[5] ,  -l[9] };
-  lineloops[3] = newreg; Line Loop(lineloops[3]) = {l[2] , l[11] , -l[6] , -l[10] };
-  lineloops[4] = newreg; Line Loop(lineloops[4]) = {l[3] , l[12] , -l[7] , -l[11] };
-  lineloops[5] = newreg; Line Loop(lineloops[5]) = {l[4] ,  l[9] , -l[8] , -l[12] };
-  lineloops[6] = newreg; Line Loop(lineloops[6]) = {l[5] ,  l[6] ,  l[7] ,   l[8] };
+  lineloops[1] = newreg; Line Loop(lineloops[1]) = {lines[1] ,  lines[2] ,  lines[3] ,   lines[4] };
+  lineloops[2] = newreg; Line Loop(lineloops[2]) = {lines[1] , lines[10] , -lines[5] ,  -lines[9] };
+  lineloops[3] = newreg; Line Loop(lineloops[3]) = {lines[2] , lines[11] , -lines[6] , -lines[10] };
+  lineloops[4] = newreg; Line Loop(lineloops[4]) = {lines[3] , lines[12] , -lines[7] , -lines[11] };
+  lineloops[5] = newreg; Line Loop(lineloops[5]) = {lines[4] ,  lines[9] , -lines[8] , -lines[12] };
+  lineloops[6] = newreg; Line Loop(lineloops[6]) = {lines[5] ,  lines[6] ,  lines[7] ,   lines[8] };
 
   If (surf == 1)
     surfaces[1] = news; Plane Surface(surfaces[1]) = {lineloops[1]};
@@ -42,6 +42,6 @@ Macro Cube
 
     surfaceloopindex = newreg;
     surfaceloop = {surfaces[1], surfaces[2], surfaces[3], surfaces[4], surfaces[5], surfaces[6]};
-    Surface Loop(surfaceloopindex) = surfaceloop;
+    Surface Loop(surfaceloopindex) = {surfaceloop[]};
   EndIf
 Return
