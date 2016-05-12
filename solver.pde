@@ -1,7 +1,7 @@
 /// Include auxiliary files and load modules
-include "aux/write-mesh.pde"
-include "aux/getargs.pde"
-include "aux/clock.pde"
+include "aux/macros-freefem/write-mesh.pde"
+include "aux/macros-freefem/getargs.pde"
+include "aux/macros-freefem/clock.pde"
 include "includes/gmsh.pde"
 
 load "medit"

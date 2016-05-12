@@ -1,104 +1,10 @@
+Include "aux/macros-gmsh/square.geo";
+Include "aux/macros-gmsh/circle.geo";
+Include "aux/macros-gmsh/cube.geo";
+Include "aux/macros-gmsh/cylinder.geo";
 Include "problem.geo";
 
-// Input variables:
-//      - x, y, z: center of the cube
-//      - Lx, Ly, Lz : dimensions of the cube
-//      - index : starting index for points and lines
-Macro Cube
-
-  lx = 0.5*dx;
-  ly = 0.5*dy;
-  lz = 0.5*dz;
-
-  For i In {0:1}
-    i1 = index + 4*i + 1; Point(i1) = {x - lx*Cos(t) + ly*Sin(t), y - lx*Sin(t) - ly*Cos(t), z + (2*i-1)*lz, s};
-    i2 = index + 4*i + 2; Point(i2) = {x + lx*Cos(t) + ly*Sin(t), y + lx*Sin(t) - ly*Cos(t), z + (2*i-1)*lz, s};
-    i3 = index + 4*i + 3; Point(i3) = {x + lx*Cos(t) - ly*Sin(t), y + lx*Sin(t) + ly*Cos(t), z + (2*i-1)*lz, s};
-    i4 = index + 4*i + 4; Point(i4) = {x - lx*Cos(t) - ly*Sin(t), y - lx*Sin(t) + ly*Cos(t), z + (2*i-1)*lz, s};
-
-    Line(i1) = {i1,i2};
-    Line(i2) = {i2,i3};
-    Line(i3) = {i3,i4};
-    Line(i4) = {i4,i1};
-
-    p[4*i + 1] = i1; l[4*i + 1] = i1;
-    p[4*i + 2] = i2; l[4*i + 2] = i2;
-    p[4*i + 3] = i3; l[4*i + 3] = i3;
-    p[4*i + 4] = i4; l[4*i + 4] = i4;
-  EndFor
-
-  For i In {1:4}
-    Line(index + 8 + i) = {p[i], p[i+4]};
-    l[8 + i] = index + 8 + i;
-  EndFor
-
-  Line Loop(index + 1) = {l[1] ,  l[2] ,  l[3] ,   l[4] };
-  Line Loop(index + 2) = {l[1] , l[10] , -l[5] ,  -l[9] };
-  Line Loop(index + 3) = {l[2] , l[11] , -l[6] , -l[10] };
-  Line Loop(index + 4) = {l[3] , l[12] , -l[7] , -l[11] };
-  Line Loop(index + 5) = {l[4] ,  l[9] , -l[8] , -l[12] };
-  Line Loop(index + 6) = {l[5] ,  l[6] ,  l[7] ,   l[8] };
-
-  If (surf == 1)
-    ps[1] = index + 1; Plane Surface(ps[1]) = {ps[1]};
-    ps[2] = index + 2; Plane Surface(ps[2]) = {ps[2]};
-    ps[3] = index + 3; Plane Surface(ps[3]) = {ps[3]};
-    ps[4] = index + 4; Plane Surface(ps[4]) = {ps[4]};
-    ps[5] = index + 5; Plane Surface(ps[5]) = {ps[5]};
-    ps[6] = index + 6; Plane Surface(ps[6]) = {ps[6]};
-
-    Surface Loop(index + 1) = {ps[1],ps[2],ps[3],ps[4],ps[5],ps[6]};
-  EndIf
-Return
-
-// Input variables:
-//      - x, y, z: center of the cylinder
-//      - r, L : dimensions of the cylinder
-//      - index : starting index for points and lines
-Macro Cylinder
-  Point(index + 0) = {x    , y    , z - 0.5*L, s}; // Center
-  Point(index + 1) = {x - r, y - r, z - 0.5*L, s};
-  Point(index + 2) = {x + r, y - r, z - 0.5*L, s};
-  Point(index + 3) = {x + r, y + r, z - 0.5*L, s};
-  Point(index + 4) = {x - r, y + r, z - 0.5*L, s};
-
-  Circle(index + 1) = {index + 1,index + 0,index + 2};
-  Circle(index + 2) = {index + 2,index + 0,index + 3};
-  Circle(index + 3) = {index + 3,index + 0,index + 4};
-  Circle(index + 4) = {index + 4,index + 0,index + 1};
-
-  Point(index + 5) = {x    , y    , z + 0.5*L, s}; // Center
-  Point(index + 6) = {x - r, y - r, z + 0.5*L, s};
-  Point(index + 7) = {x + r, y - r, z + 0.5*L, s};
-  Point(index + 8) = {x + r, y + r, z + 0.5*L, s};
-  Point(index + 9) = {x - r, y + r, z + 0.5*L, s};
-
-  Circle(index + 5) = {index + 6,index + 5,index + 7};
-  Circle(index + 6) = {index + 7,index + 5,index + 8};
-  Circle(index + 7) = {index + 8,index + 5,index + 9};
-  Circle(index + 8) = {index + 9,index + 5,index + 6};
-
-  Line(index + 9)  = {index + 1, index + 6};
-  Line(index + 10) = {index + 2, index + 7};
-  Line(index + 11) = {index + 3, index + 8};
-  Line(index + 12) = {index + 4, index + 9};
-
-  Line Loop(index + 1) = {index + 1, index + 2, index + 3, index + 4};
-  Line Loop(index + 2) = {index + 5, index + 6, index + 7, index + 8};
-  Plane Surface(index + 1) = {index + 1};
-  Plane Surface(index + 2) = {index + 2};
-
-  For i In {1:4}
-    Line Loop(index + 2 + i) = {index + i, index + 9 + i%4, -(index + 4 + i), -(index + 8 + i)};
-    Ruled Surface(index + 2 + i) = {index + 2 + i};
-  EndFor
-
-  Surface Loop(index + 1) = {index + 1, index + 3, index + 4, index + 5, index + 6, index + 2};
-Return
-
 // Outer cube
-outer_cube = 0;
-index = outer_cube;
 dx = Lx;
 dy = Ly;
 dz = Lz;
@@ -108,6 +14,7 @@ z = 0.5*Lz;
 t = 0.0*Pi;
 surf = 0;
 Call Cube;
+outer_cube_ll = lineloops[];
 
 // Inner cube
 inner_cube = 1000;
@@ -116,77 +23,63 @@ dx = 0.2*Lx;
 dy = 0.2*Ly;
 dz = 0.3*Lz;
 x = 0.3*Lx;
-y = 0.3*Ly;
+y = 0.7*Ly;
 z = 0.5*Lz;
 t = 0.25*Pi;
 surf = 1;
 Call Cube;
+inner_cube_sl = surfaceloop[];
+inner_cube_sl_index = surfaceloopindex;
 
 // Inner cylinder
-inner_cylinder = 2000;
-index = inner_cylinder;
 x = 0.7*Lx;
 y = 0.3*Ly;
 z = 0.5*Lz;
 r = 0.1*Lx;
 L = 0.6*Lz;
 Call Cylinder;
+inner_cylinder_sl = surfaceloop[];
+inner_cylinder_sl_index = surfaceloopindex;
 
-// Define surface square
-Sx = 0.4 * Lx; // Length in x-direction
-Sy = 0.4 * Ly; // Length in y-direction
+// Surfaces
+x = 0.5*Lx; y = 0.5*Ly; z = Lz;
+lx = 0.2 * Lx; ly = 0.2 * Ly;
+Call Square;
+sloop = lloop;
+square = newreg;
+Plane Surface(square) = {lloop};
 
-sp1 = newp; Point(sp1) = {0.5*Lx - 0.5*Sx, 0.5*Ly - 0.5*Sy, Lz};
-sp2 = newp; Point(sp2) = {0.5*Lx + 0.5*Sx, 0.5*Ly - 0.5*Sy, Lz};
-sp3 = newp; Point(sp3) = {0.5*Lx + 0.5*Sx, 0.5*Ly + 0.5*Sy, Lz};
-sp4 = newp; Point(sp4) = {0.5*Lx - 0.5*Sx, 0.5*Ly + 0.5*Sy, Lz};
-
-sl1 = newl; Line(sl1) = {sp1,sp2};
-sl2 = newl; Line(sl2) = {sp2,sp3};
-sl3 = newl; Line(sl3) = {sp3,sp4};
-sl4 = newl; Line(sl4) = {sp4,sp1};
-
-sloop = newreg; Line Loop(sloop) = {sl1,sl2,sl3,sl4};
-square = newreg; Plane Surface(square) = {sloop};
-
-// Define surface circle
-cp0 = newp; Point(cp0) = {Ox    , Oy    , 0, s}; // Center
-cp1 = newp; Point(cp1) = {Ox - r, Oy - r, 0, s};
-cp2 = newp; Point(cp2) = {Ox + r, Oy - r, 0, s};
-cp3 = newp; Point(cp3) = {Ox + r, Oy + r, 0, s};
-cp4 = newp; Point(cp4) = {Ox - r, Oy + r, 0, s};
-
-cl1 = newl; Circle(cl1) = {cp1,cp0,cp2};
-cl2 = newl; Circle(cl2) = {cp2,cp0,cp3};
-cl3 = newl; Circle(cl3) = {cp3,cp0,cp4};
-cl4 = newl; Circle(cl4) = {cp4,cp0,cp1};
-
-cloop = newreg; Line Loop(cloop) = {cl1,cl2,cl3,cl4};
-circ = newreg; Plane Surface(circ) = {cloop};
+x = 0.5*Lx; y = 0.5*Ly; z = 0; r = 0.15;
+Call Circ;
+cloop = lloop;
+circ = newreg;
+Plane Surface(circ) = {cloop};
 
 // Define surfaces
-Plane Surface(1) = {1,cloop};
-Plane Surface(2) = {2};
-Plane Surface(3) = {3};
-Plane Surface(4) = {4};
-Plane Surface(5) = {5};
-Plane Surface(6) = {6,sloop};
+i1 = newreg; Plane Surface(i1) = {outer_cube_ll[1], cloop};
+i2 = newreg; Plane Surface(i2) = outer_cube_ll[2];
+i3 = newreg; Plane Surface(i3) = outer_cube_ll[3];
+i4 = newreg; Plane Surface(i4) = outer_cube_ll[4];
+i5 = newreg; Plane Surface(i5) = outer_cube_ll[5];
+i6 = newreg; Plane Surface(i6) = {outer_cube_ll[6], sloop};
 
 // Define volumes
-Surface Loop(1) = {square, 2, 3, 4, 5, 6, 1, circ};
-Volume(1) = {outer_cube + 1, inner_cube + 1, inner_cylinder + 1};
+outer_cube_sl_index = newreg;
+Surface Loop(outer_cube_sl_index) = {circ, i1, i2, i3, i4, i5, i6, square};
+Volume(1) = {outer_cube_sl_index, inner_cube_sl_index, inner_cylinder_sl_index};
 
 // Define physical entities
-Physical Surface(1) = {1};
-Physical Surface(2) = {2};
-Physical Surface(3) = {3};
-Physical Surface(4) = {4};
-Physical Surface(5) = {5};
-Physical Surface(6) = {6};
+Physical Surface(1) = {i1};
+Physical Surface(2) = {i2};
+Physical Surface(3) = {i3};
+Physical Surface(4) = {i4};
+Physical Surface(5) = {i5};
+Physical Surface(6) = {i6};
 Physical Surface(11) = {circ};
 Physical Surface(12) = {square};
-Physical Surface(13) = {inner_cube + 1, inner_cube + 2, inner_cube + 3, inner_cube + 4, inner_cube + 5, inner_cube + 6}; 
-Physical Surface(14) = {inner_cylinder + 1, inner_cylinder + 2, inner_cylinder + 3, inner_cylinder + 4}; 
+Physical Surface(13) = inner_cube_sl[];
+Physical Surface(14) = inner_cylinder_sl[];
+
 Physical Volume (1) = {1};
 
 // View options
