@@ -17,13 +17,13 @@ install :
 
 LINK_DIR = outputs/$(problem)
 LINK_OUT = $(addprefix $(LINK_DIR)/, output pictures logs)
-LINK_IN  = $(wildcard inputs/$(problem)/*)
-LINK_COM = local.mk solver.pde freefem geometries views
+LINK_IN  = $(addprefix $(shell pwd)/, $(wildcard inputs/$(problem)/*))
+LINK_COM = $(addprefix $(shell pwd)/, $(wildcard sources/*))
 
 link :
 	mkdir -p $(LINK_OUT)
-	ln -sfrt . $(LINK_OUT) $(LINK_IN)
-	ln -sfrt $(LINK_DIR) $(addprefix $(shell pwd)/, $(LINK_IN) $(LINK_COM))
+	ln -sfrt . $(LINK_OUT) $(LINK_IN) $(LINK_COM)
+	ln -sfrt $(LINK_DIR) $(LINK_IN) $(LINK_COM)
 
 show-install :
 	@echo "Problem: $(problem)"
@@ -34,8 +34,8 @@ remote-% :
 
 # Symlink all videos
 link-videos :
-	for file in $$(find $$(pwd) -name "video.mpg"); do \
-		name=$$(echo $${file} | sed "s#^.\+outputs/\([^/]\+\)/\([^/]\+\)/pictures/video.mpg#\1-\2.mpg#g"); \
+	for file in $$(find $$(pwd) -name "video.*"); do \
+		name=$$(echo $${file} | sed "s#^.\+outputs/\([^/]\+\)/pictures/video.\(.\+\)$#\1.\2#g"); \
 		ln -sfr $${file} videos/$${name}; \
 	done
 
