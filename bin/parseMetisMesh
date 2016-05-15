@@ -1,0 +1,24 @@
+#!/bin/bash
+#
+# Takes .msh as argument, generated using metis in gmsh with
+# "Mesh.MshFilePartitioned = 0"
+
+# Write nodes to file without change
+echo "$(cat $1 | sed '/$Elements/, /$EndElements/ d')" > $2
+
+# Get elements from file
+elements=$(cat $1 | sed -n -e '/$Elements/,/$EndElements/{/$Elements/d; /$EndElements/d; p}')
+
+echo '$Elements' >> $2
+
+# Get highest index of elements
+highestIndex=$(echo "$elements" | tail -2 | head -1 | cut -d' ' -f2)
+
+# Write elements of lower indices to file unchanged
+echo "$elements" | sed "/^[^ ]\+ ${highestIndex}/d" >> $2
+
+# Change physical label of elements of highest index
+echo "$elements" | sed -n "/^[^ ]\+ ${highestIndex}/p" | awk '$4=$4*1000+$7' >> $2
+
+# echo "$elements" | sed 1d | awk '$4=$4"00"$6' >> $2
+echo '$EndElements' >> $2

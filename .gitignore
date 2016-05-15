@@ -8,9 +8,8 @@
 /output
 /pictures
 /videos
-/mesh
 /logs
-.protected-*
+/config.mk
 
 *.backup
 Session.vim
