@@ -3,6 +3,10 @@
 ###################################
 include config.mk
 
+DIMENSION ?= 3
+GEOMETRY  ?= problem.geo
+VIEW      ?= view.geo
+
 ###############################
 #  Create mesh from geometry  #
 ###############################
@@ -41,19 +45,22 @@ ifeq ($(DIMENSION), 3)
 	gmsh -display :0 -setnumber video 1 $(GEOMETRY) $<
 	mencoder "mf://output/iso/*.jpg" -mf fps=10 -o $(VIDEO) -ovc lavc -lavcopts vcodec=mpeg4:vhq
 else
-	DISPLAY=:0 pvpython $< --input phi --video $(VIDEO)
+	DISPLAY=:0 pvpython $< --input phi --range -1,1 --video $(VIDEO)
 endif
 
 visualization : $(VIEW) output/thermodynamics.txt
 ifeq ($(DIMENSION), 3)
 	gmsh -display :0 $(GEOMETRY) $<
 else
-	DISPLAY=:0 pvpython $< --input phi
+	DISPLAY=:0 pvpython $< --input phi --range -1,1
 	DISPLAY=:0 pvpython $< --input mu
 endif
 
 view : $(VIDEO)
 	DISPLAY=:0 vlc -f $(VIDEO)
+
+plots :
+	gnuplot gnuplot/thermo.plt
 
 ###################
 #  Clean outputs  #
