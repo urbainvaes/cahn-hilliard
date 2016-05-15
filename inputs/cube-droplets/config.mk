@@ -1,0 +1,1 @@
+VIEW = views/cube.geo
