@@ -3,8 +3,9 @@
 #PBS -m abe
 #PBS -q huxley_standard
 
-cd ${HOME}/micro/cahn-hilliard-3d
+cd ${HOME}/micro/cahn-hilliard
 
-# make clean
-make run geo=${geo} problem=${problem}
-make remote-video host="urbain@155.198.212.223" geo=${geo} problem=${problem}
+make clean;
+make remote-mesh host="urbain@155.198.212.223" problem=${problem};
+make run problem=${problem};
+make remote-video host="urbain@155.198.212.223" problem=${problem}

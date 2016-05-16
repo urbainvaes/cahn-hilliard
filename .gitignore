@@ -1,16 +1,11 @@
-/mpi_hosts
-/geometry.geo
-/problem.geo
-/problem.pde
-/view.geo
-/outputs
-/includes
-/output
-/pictures
+/problem
+/tests
 /videos
-/logs
 /config.mk
 
+.mpi_hosts
+.problem
 *.backup
-Session.vim
 !*.gitkeep
+
+Session.vim

@@ -1,21 +1,20 @@
--include ssh.mk
-problem = $(shell cat .problem)
+include ssh.mk
+
+problem ?= $(shell cat .problem)
 
 install :
-	@echo Choose problem from: $$(ls inputs); \
+	@ echo Choose problem from: $$(ls inputs); \
 		echo -n "Enter problem: " && read problem; \
+		mkdir -p $(addprefix tests/$${problem}/, output pictures logs); \
+		cp -alft  tests/$${problem} sources/* inputs/$${problem}/*; \
+		rm -f problem && ln -sf inputs/$${problem} problem; \
 		echo $${problem} > .problem;
-	@make link
-
-link :
-	mkdir -p $(addprefix outputs/$(problem)/, output pictures logs)
-	cp -alt  outputs/$(problem) $(wildcard sources/*) $(wildcard inputs/$(problem)/*)
 
 uninstall :
-	rm -f .problem
+	rm -f .problem problem
 
 clean-all : uninstall
-	rm -rf outputs
+	rm -rf tests
 
 .DEFAULT :
-	cd outputs/$(problem); make -f local.mk $@
+	$(MAKE) -C tests/$(problem) $@
