@@ -17,4 +17,4 @@ dt = 0.3*eps^4/M;
 /* dt = 1 * 1e-5; */
 
 // Number of iterations
-nIter = 1000;
+nIter = 500;

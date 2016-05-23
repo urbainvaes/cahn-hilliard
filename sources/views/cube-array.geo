@@ -1,7 +1,7 @@
 Merge "../output/mesh.msh";
 
 // Generate list of files to be included
-System "ls -v output/output-*.msh | sed '$d'  > includes.geo";
+System "ls -v output/phase-*.msh | sed '$d'  > includes.geo";
 System 'sed -i "s/^\(.\+\)$/Merge \"\1\";/" includes.geo';
 
 // Include output files
@@ -21,15 +21,22 @@ Hide {
   };
 }
 
+Mesh.SurfaceFaces    = 1;
+
 // View options
 Geometry.SurfaceNumbers = 0;
+
+// Use Euler angles instead of quaternion
 General.Trackball = 0;
+
+// Euler angles
 General.RotationX = 110;
 General.RotationY = 0;
 General.RotationZ = 30;
 Mesh.ColorCarousel   = 2;
+
+// Specify which parts of the geometry and mesh to draw
 Mesh.SurfaceEdges    = 0;
-Mesh.SurfaceFaces    = 1;
 Mesh.VolumeEdges     = 0;
 Geometry.Lines       = 0;
 Geometry.Surfaces    = 0;
@@ -83,7 +90,7 @@ EndFor
 For i In {nplanes+1:PostProcessing.NbViews-2}
   Draw;
   If(Exists(video))
-    System "mkdir -p ../output/iso";
+    System "mkdir -p output/iso";
     Print Sprintf("../output/iso/isosurface-%04g.jpg", i);
   EndIf
   If(!Exists(video))

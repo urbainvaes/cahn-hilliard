@@ -22,15 +22,30 @@ string ssparams="";
 int adapt      = getARGV("-adapt",0);
 int plots      = getARGV("-plot",0);
 
-/// Import the mesh
 #if DIMENSION == 2
-mesh Th;
-Th = gmshload("output/mesh.msh");
+#define MESH mesh
+#define GMSHLOAD gmshload
 #endif
 
 #if DIMENSION == 3
-mesh3 Th;
-Th = gmshload3("output/mesh.msh");
+#define MESH mesh3
+#define GMSHLOAD gmshload3
+#endif
+
+/// Import the mesh
+#ifndef MPI
+MESH Th;
+Th = GMSHLOAD("output/mesh.msh");
+#endif
+
+#ifdef MPI
+MESH Th;
+if (mpirank == 0)
+{
+  Th = GMSHLOAD("output/mesh.msh");
+}
+broadcast(processor(0), Th);
+int processRegion = 1000 + mpirank + 1;
 #endif
 
 /// Declare default parameters
@@ -51,7 +66,7 @@ real hmin = hmax / 100;
 
 /// Define functional spaces
 #if DIMENSION == 2
-    fespace Vh(Th,P2), V2h(Th,[P2,P2]);
+fespace Vh(Th,P2), V2h(Th,[P2,P2]);
 #endif
 
 #if DIMENSION == 3
@@ -80,8 +95,15 @@ macro Grad(u) [dx(u), dy(u), dz(u)] //EOM
 
 #define AUX_INTEGRAL(dim) int ## dim ## d
 #define INTEGRAL(dim) AUX_INTEGRAL(dim)
+
+#ifdef MPI
+#define INTREGION Th, processRegion
+#else
+#define INTREGION Th
+#endif
+
 varf varCH([phi1,mu1], [phi2,mu2]) =
-  INTEGRAL(DIMENSION)(Th)(
+  INTEGRAL(DIMENSION)(INTREGION)(
     phi1*phi2/dt
     + M*(Grad(mu1)'*Grad(phi2))
     - mu1*mu2
@@ -92,14 +114,14 @@ varf varCH([phi1,mu1], [phi2,mu2]) =
 ;
 
 varf varCHrhs([phi1,mu1], [phi2,mu2]) =
-  INTEGRAL(DIMENSION)(Th)(
+  INTEGRAL(DIMENSION)(INTREGION)(
     phiOld*phi2/dt
     + lambda*invEps2*0.5*phiOld*phiOld*phiOld*mu2
     + lambda*invEps2*0.5*phiOld*mu2
     )
 ;
 
-#if DIMENISON == 3
+#if DIMENSION == 3
 /// Output file
 ofstream foutHeader("output/output.msh");
 
@@ -114,89 +136,259 @@ writeElements(foutHeader, Vh, Th);
 // Open output file
 ofstream file("output/thermodynamics.txt");
 
+// Extensive physical variables
+real freeEnergy,
+     massPhi,
+     dissipation;
+
+real timeStart,
+     timeMacro,
+     timeMatrixBulk,
+     timeMatrixBc,
+     timeMatrix,
+     timeRhsBulk,
+     timeRhsBc,
+     timeRhs,
+     timeFactorization,
+     timeSolution;
+
+#ifdef MPI
+real freeEnergyReg,
+     massPhiReg,
+     dissipationReg;
+
+real timeMatrixRegion,
+     timeMatrixTotal,
+     timeRhsRegion,
+     timeRhsTotal;
+#endif
+
 for(int i = 0; i <= nIter; i++)
 {
-  real timeStart = tic();
+  timeStart = clock(); tic();
 
   // Update previous solution
   phiOld = phi;
 
   // Calculate macroscopic variables
-  real freeEnergy  = INTEGRAL(DIMENSION)(Th)   (0.5*lambda*(Grad(phi)'*Grad(phi)) + 0.25*lambda*invEps2*(phi^2 - 1)^2);
-  real massPhi     = INTEGRAL(DIMENSION)(Th)   (phi);
-  real dissipation = INTEGRAL(DIMENSION)(Th)   (M*(Grad(mu)'*Grad(mu)));
+  #ifdef MPI
+  freeEnergyReg  = INTEGRAL(DIMENSION)(Th, processRegion) (0.5*lambda*(Grad(phi)'*Grad(phi)) + 0.25*lambda*invEps2*(phi^2 - 1)^2);
+  massPhiReg     = INTEGRAL(DIMENSION)(Th, processRegion) (phi);
+  dissipationReg = INTEGRAL(DIMENSION)(Th, processRegion) (M*(Grad(mu)'*Grad(mu)));
 
-  // Save data to files
-  #if DIMENSION == 2
-  savevtk("output/phi."+i+".vtk", Th, phi, dataname="PhaseField");
-  savevtk("output/mu."+i+".vtk",  Th, mu,  dataname="ChemicalPotential");
-  #endif
-  #if DIMENSION == 3
-  ofstream fo("output/output-" + i + ".msh");
-  writeHeader(fo); write1dData(fo, "Cahn-Hilliard", i*dt, i, phiOld);
+  mpiAllReduce(freeEnergyReg,  freeEnergy,  mpiCommWorld, mpiSUM);
+  mpiAllReduce(massPhiReg,     massPhi,     mpiCommWorld, mpiSUM);
+  mpiAllReduce(dissipationReg, dissipation, mpiCommWorld, mpiSUM);
   #endif
 
-  file << i*dt           << "    "
-    << freeEnergy     << "    "
-    << massPhi        << "    "
-    << dt*dissipation << "    " << endl;
+  #ifndef MPI
+  freeEnergy  = INTEGRAL(DIMENSION)(Th)   (0.5*lambda*(Grad(phi)'*Grad(phi)) + 0.25*lambda*invEps2*(phi^2 - 1)^2);
+  massPhi     = INTEGRAL(DIMENSION)(Th)   (phi);
+  dissipation = INTEGRAL(DIMENSION)(Th)   (M*(Grad(mu)'*Grad(mu)));
+  #endif
 
-  // Print variables at current iteration
-  cout << endl
-    << "** ITERATION **"      << endl
-    << "Time = "              << i*dt                        << endl
-    << "Iteration = "         << i                           << endl
-    << "Mass = "              << massPhi                     << endl
-    << "Free energy bulk = "  << freeEnergy                  << endl;
+  timeMacro = tic();
 
-  // Visualize solution at current time step
-  if (plots)
+  #ifdef MPI
+  if (mpirank == 0)
+  #endif
   {
+    // Save data to files
     #if DIMENSION == 2
-    plot(phi, wait=true, fill=true);
-    plot(Th, wait=true);
+    savevtk("output/phi."+i+".vtk", Th, phi, dataname="PhaseField");
+    savevtk("output/mu."+i+".vtk",  Th, mu,  dataname="ChemicalPotential");
     #endif
+
     #if DIMENSION == 3
-    medit("Phi",Th,phi,wait=true);
-    medit("Mu",Th,mu,wait=true);
+    ofstream fo("output/phase-" + i + ".msh");
+    writeHeader(fo); write1dData(fo, "Cahn-Hilliard", i*dt, i, phiOld);
     #endif
+
+    file << i*dt           << "    "
+         << freeEnergy     << "    "
+         << massPhi        << "    "
+         << dt*dissipation << "    " << endl;
+
+    // Print variables at current iteration
+    cout << endl
+      << "** ITERATION **"      << endl
+      << "Time = "              << i*dt          << endl
+      << "Iteration = "         << i             << endl
+      << "Mass = "              << massPhi       << endl
+      << "Free energy bulk = "  << freeEnergy    << endl;
+
+    // Visualize solution at current time step
+    if (plots)
+    {
+      #if DIMENSION == 2
+      plot(phi, wait=true, fill=true);
+      plot(Th, wait=true);
+      #endif
+
+      #if DIMENSION == 3
+      medit("Phi",Th,phi,wait=true);
+      medit("Mu",Th,mu,wait=true);
+      #endif
+    }
   }
 
   // Exit if required
   if (i == nIter) break;
 
-  // Calculate of the matrix
-  matrix matVolume = varCH(V2h, V2h);
+  #ifdef MPI
+  mpiBarrier(mpiCommWorld);
+  #endif
+
+  tic();
+
+  // Calculate the matrix
+  #ifdef MPI
+  matrix matRegion = varCH(V2h, V2h);
+  timeMatrixRegion = tic();
+
+  matrix matBulk;
+  mpiAllReduce(matRegion,matBulk,mpiCommWorld,mpiSUM);
+  mpiAllReduce(timeMatrixRegion,timeMatrixTotal,mpiCommWorld,mpiSUM);
+  timeMatrixBulk = timeMatrixRegion + tic();
+
+  matrix matCH;
+  if (mpirank == 0)
+  {
+      matrix matBoundary = varBoundary(V2h, V2h);
+      timeMatrixBc = tic();
+
+      matCH = matBulk + matBoundary;
+      timeMatrix = tic() + timeMatrixBulk + timeMatrixBc;
+
+      set(matCH,solver=sparsesolver);
+      timeFactorization = tic();
+  }
+  #endif
+
+  #ifndef MPI
+  matrix matBulk = varCH(V2h, V2h);
+  timeMatrixBulk = tic();
+
   matrix matBoundary = varBoundary(V2h, V2h);
-  matrix matCH = matVolume + matBoundary;
-  real timeMatrix = tic();
+  timeMatrixBc = tic();
+
+  matrix matCH = matBulk + matBoundary;
+  timeMatrix = tic() + timeMatrixBulk + timeMatrixBc;
+
+  set(matCH,solver=sparsesolver);
+  timeFactorization = tic();
+  #endif
 
   // Calculate the right-hand side
-  real[int] rhsVolume = varCHrhs(0, V2h);
-  real[int] rhsBoundary = varBoundary(0, V2h);
-  real[int] rhsCH = rhsVolume + rhsBoundary;
-  real timeRhs = tic();
+  #ifdef MPI
+  real[int] rhsRegion = varCHrhs(0, V2h);
+  timeRhsRegion = tic();
 
-  // Set solver for linear system
-  set(matCH,solver=sparsesolver);
-  real timeSetSolver = tic();
+  real[int] rhsBulk(rhsRegion.n);
+  mpiAllReduce(rhsRegion,rhsBulk,mpiCommWorld,mpiSUM);
+  mpiAllReduce(timeRhsRegion,timeRhsTotal,mpiCommWorld,mpiSUM);
+  timeRhsBulk = tic() + timeRhsRegion;
+
+  real[int] rhsCH(rhsRegion.n);
+  if (mpirank == 0)
+  {
+      real[int] rhsBoundary = varBoundary(0, V2h);
+      timeRhsBc = tic();
+
+      rhsCH = rhsBulk + rhsBoundary;
+      timeRhs = tic() + timeRhsBulk + timeRhsBc;
+  }
+  #endif
+
+  #ifndef MPI
+  real[int] rhsBulk = varCHrhs(0, V2h);
+  timeRhsBulk = tic();
+
+  real[int] rhsBoundary = varBoundary(0, V2h);
+  timeRhsBc  = tic();
+
+  real[int] rhsCH = rhsBulk + rhsBoundary;
+  timeRhs = timeRhsBulk + timeRhsBc + tic();
+  #endif
 
   // Calculate the solution
-  phi[] = matCH^-1*rhsCH;
-  real timesolution = tic();
+  #ifdef MPI
+  if (mpirank == 0)
+  #endif
+  {
+    ofstream fout("matrix.txt");
+    fout << matCH;
+    ofstream foutrhs("rhs.txt");
+    fout << rhsCH;
+    phi[] = matCH^-1*rhsCH;
+    timeSolution = tic();
+  }
+  #ifdef MPI
+  broadcast(processor(0), phi[]);
+  #endif
 
   #if DIMENSION == 2
   if (adapt)
   {
-    Th = adaptmesh(Th, phi, mu, err = meshError, hmax = hmax, hmin = hmin);
-    [phi, mu] = [phi, mu];
+    #ifdef MPI
+    if (mpirank == 0)
+    #endif
+    {
+      Th = adaptmesh(Th, phi, mu, err = meshError, hmax = hmax, hmin = hmin);
+      [phi, mu] = [phi, mu];
+    }
+    #ifdef MPI
+    broadcast(processor(0), Th);
+    broadcast(processor(0), phi[]);
+    #endif
   }
   #endif
 
-  cout << endl
-    << "** TIME OF COMPUTATIONS **         " << endl
-    << "Calculation of matrix              " << timeMatrix          << endl
-    << "Calculation of the right-hand side " << timeRhs             << endl
-    << "Solution  of the linear system     " << timesolution        << endl
-    << "Total time spent in iteration      " << clock() - timeStart << endl;
+  // Print time of iteration
+  #ifdef MPI
+  if (mpirank == 0)
+  #endif
+  {
+    cout << endl
+         << "** TIME OF COMPUTATIONS **           " << endl
+         << "Matrix: total time of computations   " << timeMatrix          << endl;
+    #ifdef MPI
+    cout << "Matrix: computation of volume terms  " << timeMatrixTotal     << endl
+         << "Matrix: time spent in process 0      " << timeMatrixBulk      << endl
+         << "Matrix: boundary conditions          " << timeMatrixBc        << endl;
+    #endif
+  }
+  #ifdef MPI
+  mpiBarrier(mpiCommWorld);
+  cout   << "... Time for region " << mpirank << ": " << timeMatrixRegion << endl;
+  mpiBarrier(mpiCommWorld);
+  #endif
+
+  #ifdef MPI
+  if (mpirank == 0)
+  #endif
+  {
+    cout << endl
+         << "Rhs: total time of computations      " << timeRhs             << endl;
+    #ifdef MPI
+    cout << "Rhs: computation of volume terms     " << timeRhsTotal        << endl
+         << "Rhs: time spent in process 0         " << timeRhsBulk         << endl
+         << "Rhs: boundary conditions             " << timeRhsBc           << endl;
+    #endif
+  }
+  #ifdef MPI
+  mpiBarrier(mpiCommWorld);
+  cout   << "... Time for region " << mpirank << ": " << timeRhsRegion << endl;
+  mpiBarrier(mpiCommWorld);
+  #endif
+
+  #ifdef MPI
+  if (mpirank == 0)
+  #endif
+  {
+    cout << endl
+         << "Factorization of the matrix          " << timeFactorization   << endl
+         << "Solution  of the linear system       " << timeSolution        << endl
+         << "Total time spent in process 0        " << clock() - timeStart << endl;
+  }
 }

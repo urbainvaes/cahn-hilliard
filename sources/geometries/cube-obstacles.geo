@@ -1,7 +1,7 @@
-Include "aux/macros-gmsh/square.geo";
-Include "aux/macros-gmsh/circle.geo";
-Include "aux/macros-gmsh/cube.geo";
-Include "aux/macros-gmsh/cylinder.geo";
+Include "macros-gmsh/square.geo";
+Include "macros-gmsh/circle.geo";
+Include "macros-gmsh/cube.geo";
+Include "macros-gmsh/cylinder.geo";
 Include "problem.geo";
 
 // Outer cube

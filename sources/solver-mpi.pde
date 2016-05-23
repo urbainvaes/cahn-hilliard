@@ -1,15 +1,13 @@
 /// Include auxiliary files and load modules
-include "aux/write-mesh.pde"
-include "aux/getargs.pde"
-include "aux/clock.pde"
-include "includes/gmsh.pde"
+include "freefem/write-mesh.pde"
+include "freefem/getargs.pde"
+include "freefem/clock.pde"
+include "geometry.pde"
 
 load "gmsh";
 load "metis";
 load "iovtk";
 load "isoline";
-load "MPICG";
-
 int meshAdaptation = getARGV("-adapt",0);
 int plots = getARGV("-plot",0);
 

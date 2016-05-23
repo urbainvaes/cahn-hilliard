@@ -1,5 +1,5 @@
 // Meshsize
-/* s  = 0.045; */
+/* s  = 0.035; */
 s  = 0.07;
 
 // Dimensions of the cube

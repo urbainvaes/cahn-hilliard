@@ -2,7 +2,7 @@ Merge "geometry.geo";
 Merge "output/mesh.msh";
 
 // Generate list of files to be included
-System "ls -v output/output-*.msh | sed '$d'  > includes.geo";
+System "ls -v output/phase-*.msh | sed '$d'  > includes.geo";
 System 'sed -i "s/^/Merge \"/" includes.geo';
 System 'sed -i "s/$/\";/" includes.geo';
 
@@ -89,7 +89,7 @@ For i In {nplanes+1:PostProcessing.NbViews-2}
   Draw;
   If(Exists(video))
     System "mkdir -p output/iso";
-    Print Sprintf("output/iso/isosurface-%04g.jpg", i);
+    Print Sprintf("../output/iso/isosurface-%04g.jpg", i);
   EndIf
   If(!Exists(video))
     Sleep 0.1;
