@@ -185,7 +185,7 @@ VIEW = view.py              # File used for post-processing
 Once all the elements of the simulation have been specified, it can be run.
 Since the folder *inputs* can contain the parameters for many simulations,
 the first step is to specify that we want to run the *example-droplets* example.
-This is done with the command `make install`, which creates the directory *tests/example-droplets*, 
+This is done with the command `make install`, which creates the directory *tests/example-droplets*,
 which is where the different programs (gmsh, FreeFem++, gnuplot) will be executed,
 and where the outputs and temporary files will be stored.
 
@@ -219,6 +219,20 @@ Below, **GEOMETRY**, **PROBLEM** and **VIEW** are the variables defined in the c
 - **video** : same as **visualization**, but create a video from the frames.
 - **view** : view video using vlc.
 - **plots** : create plots of the physical quantities based on script in *sources/gnuplot/thermo.plt*.
+
+### Use predefined geometries and views
+In the simple example above, we created new files for the geometry, the problem and the post-processing,
+and referred to these files for the configuration file *config.mk*.
+Often, however, one would like to use the same geometry or post-processing for different simulations.
+In addition, this repository defines geometries in *sources/geometries* and views in *sources/views*.
+Since these two folders will both be copied to the simulation directory (*tests/simulation-name*),
+they can be used for the simulation.
+For example, instead of rewriting a *.geo* for a square, one could use the readily available file *sources/geometries/square.geo*,
+and refer to it from the configuration file.
+The path to the file must be relative to the execution directory, i.e. we have to write 
+```
+GEOMETRY = geometries/square.geo.
+```
 
 ## Authors
 Benjamin Aymard started the project in October 2015, and Urbain Vaes joined in March 2016.
