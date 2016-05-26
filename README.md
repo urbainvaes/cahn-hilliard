@@ -174,7 +174,7 @@ else:
 ```
 
 To finish specifying the problem, we must create a configuration file *config.mk* in the same directory,
-to specify that the files we created describe the geometry, the problem, and the post-processing.
+to specify that the geometry, problem, and post-processing are described by the files we created.
 ```
 DIMENSION = 2               # Dimension of the problem
 GEOMETRY = square.geo       # File describing the geometry
