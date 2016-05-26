@@ -1,9 +1,10 @@
-/// Include auxiliary files and load modules
+// Include auxiliary files and load modules//{{{
 include "freefem/write-mesh.pde"
 include "freefem/getargs.pde"
-include "freefem/clock.pde"
+include "freefem/clock.pde"//{{{//}}}
 include "geometry.pde"
-
+//}}}
+// Load modules//{{{
 load "gmsh"
 
 #if DIMENSION == 2
@@ -14,14 +15,12 @@ load "iovtk";
 #if DIMENSION == 3
 load "medit"
 #endif
-
-// Parameters for solver
-string ssparams="";
-
-// Process input parameters
+//}}}
+// Process input parameters//{{{
 int adapt      = getARGV("-adapt",0);
 int plots      = getARGV("-plot",0);
-
+//}}}
+// Import the mesh//{{{
 #if DIMENSION == 2
 #define MESH mesh
 #define GMSHLOAD gmshload
@@ -32,23 +31,24 @@ int plots      = getARGV("-plot",0);
 #define GMSHLOAD gmshload3
 #endif
 
-/// Import the mesh
 #ifndef MPI
 MESH Th;
 Th = GMSHLOAD("output/mesh.msh");
 #endif
-
-#ifdef MPI
-MESH Th;
-if (mpirank == 0)
-{
-  Th = GMSHLOAD("output/mesh.msh");
-}
-broadcast(processor(0), Th);
-int processRegion = 1000 + mpirank + 1;
+//}}}
+// Define functional spaces//{{{
+#if DIMENSION == 2
+fespace Vh(Th,P2), V2h(Th,[P2,P2]);
 #endif
 
-/// Declare default parameters
+#if DIMENSION == 3
+fespace Vh(Th,P1), V2h(Th,[P1,P1]);
+#endif
+
+Vh phiOld;
+V2h [phi, mu];
+//}}}
+// Declare default parameters//{{{
 
 // Cahn-Hilliard parameters
 real M       = 1;
@@ -63,27 +63,18 @@ real nIter = 300;
 real meshError = 1.e-2;
 real hmax = 0.1;
 real hmin = hmax / 100;
-
-/// Define functional spaces
-#if DIMENSION == 2
-fespace Vh(Th,P2), V2h(Th,[P2,P2]);
-#endif
-
-#if DIMENSION == 3
-fespace Vh(Th,P1), V2h(Th,[P1,P1]);
-#endif
-
-Vh phiOld;
-V2h [phi, mu];
-
-/// Include problem file
+//}}}
+// Include problem file//{{{
 include "problem.pde"
-
-/// Calculate dependent parameters
+//}}}
+// Calculate dependent parameters//{{{
 real eps2 = eps*eps;
 real invEps2 = 1./eps2;
-
-// Define variational formulation
+//}}}
+// Define variational formulation//{{{
+#ifdef MPI
+int processRegion = 1000 + mpirank + 1;
+#endif
 
 #if DIMENSION == 2
 macro Grad(u) [dx(u), dy(u)] //EOM
@@ -120,6 +111,7 @@ varf varCHrhs([phi1,mu1], [phi2,mu2]) =
     + lambda*invEps2*0.5*phiOld*mu2
     )
 ;
+//}}}
 
 #if DIMENSION == 3
 /// Output file
@@ -131,12 +123,12 @@ writeNodes(foutHeader, Vh);
 writeElements(foutHeader, Vh, Th);
 #endif
 
-/// Loop in time
+// Loop in time//{{{
 
 // Open output file
 ofstream file("output/thermodynamics.txt");
 
-// Extensive physical variables
+// Declare extensive physical variables//{{{
 real freeEnergy,
      massPhi,
      dissipation;
@@ -162,15 +154,14 @@ real timeMatrixRegion,
      timeRhsRegion,
      timeRhsTotal;
 #endif
-
+//}}}
 for(int i = 0; i <= nIter; i++)
 {
+  // Update previous solution//{{{
   timeStart = clock(); tic();
-
-  // Update previous solution
   phiOld = phi;
-
-  // Calculate macroscopic variables
+//}}}
+  // Calculate macroscopic variables//{{{
   #ifdef MPI
   freeEnergyReg  = INTEGRAL(DIMENSION)(Th, processRegion) (0.5*lambda*(Grad(phi)'*Grad(phi)) + 0.25*lambda*invEps2*(phi^2 - 1)^2);
   massPhiReg     = INTEGRAL(DIMENSION)(Th, processRegion) (phi);
@@ -188,12 +179,12 @@ for(int i = 0; i <= nIter; i++)
   #endif
 
   timeMacro = tic();
-
+  //}}}
+  // Save data to files and stdout//{{{
   #ifdef MPI
   if (mpirank == 0)
   #endif
   {
-    // Save data to files
     #if DIMENSION == 2
     savevtk("output/phi."+i+".vtk", Th, phi, dataname="PhaseField");
     savevtk("output/mu."+i+".vtk",  Th, mu,  dataname="ChemicalPotential");
@@ -216,8 +207,13 @@ for(int i = 0; i <= nIter; i++)
       << "Iteration = "         << i             << endl
       << "Mass = "              << massPhi       << endl
       << "Free energy bulk = "  << freeEnergy    << endl;
-
-    // Visualize solution at current time step
+  }
+  //}}}
+  // Visualize solution at current time step//{{{
+  #ifdef MPI
+  if (mpirank == 0)
+  #endif
+  {
     if (plots)
     {
       #if DIMENSION == 2
@@ -231,8 +227,8 @@ for(int i = 0; i <= nIter; i++)
       #endif
     }
   }
-
-  // Exit if required
+  //}}}
+  // Exit if required//{{{
   if (i == nIter) break;
 
   #ifdef MPI
@@ -240,8 +236,8 @@ for(int i = 0; i <= nIter; i++)
   #endif
 
   tic();
-
-  // Calculate the matrix
+  //}}}
+  // Calculate the matrix//{{{
   #ifdef MPI
   matrix matRegion = varCH(V2h, V2h);
   timeMatrixRegion = tic();
@@ -250,6 +246,9 @@ for(int i = 0; i <= nIter; i++)
   mpiAllReduce(matRegion,matBulk,mpiCommWorld,mpiSUM);
   mpiAllReduce(timeMatrixRegion,timeMatrixTotal,mpiCommWorld,mpiSUM);
   timeMatrixBulk = timeMatrixRegion + tic();
+
+  // Parameters for solver
+  string ssparams="";
 
   matrix matCH;
   if (mpirank == 0)
@@ -278,8 +277,8 @@ for(int i = 0; i <= nIter; i++)
   set(matCH,solver=sparsesolver);
   timeFactorization = tic();
   #endif
-
-  // Calculate the right-hand side
+  //}}}
+  // Calculate the right-hand side//{{{
   #ifdef MPI
   real[int] rhsRegion = varCHrhs(0, V2h);
   timeRhsRegion = tic();
@@ -310,8 +309,8 @@ for(int i = 0; i <= nIter; i++)
   real[int] rhsCH = rhsBulk + rhsBoundary;
   timeRhs = timeRhsBulk + timeRhsBc + tic();
   #endif
-
-  // Calculate the solution
+  //}}}
+  // Solve the linear system//{{{
   #ifdef MPI
   if (mpirank == 0)
   #endif
@@ -326,7 +325,8 @@ for(int i = 0; i <= nIter; i++)
   #ifdef MPI
   broadcast(processor(0), phi[]);
   #endif
-
+  //}}}
+  // Adapt mesh//{{{
   #if DIMENSION == 2
   if (adapt)
   {
@@ -343,8 +343,8 @@ for(int i = 0; i <= nIter; i++)
     #endif
   }
   #endif
-
-  // Print time of iteration
+  //}}}
+  // Print the times to stdout//{{{
   #ifdef MPI
   if (mpirank == 0)
   #endif
@@ -391,4 +391,6 @@ for(int i = 0; i <= nIter; i++)
          << "Solution  of the linear system       " << timeSolution        << endl
          << "Total time spent in process 0        " << clock() - timeStart << endl;
   }
+  //}}}
 }
+//}}}
