@@ -112,17 +112,6 @@ varf varCHrhs([phi1,mu1], [phi2,mu2]) =
     )
 ;
 //}}}
-
-#if DIMENSION == 3
-/// Output file
-ofstream foutHeader("output/output.msh");
-
-// Write header, nodes and elements
-writeHeader(foutHeader);
-writeNodes(foutHeader, Vh);
-writeElements(foutHeader, Vh, Th);
-#endif
-
 // Loop in time//{{{
 
 // Open output file
