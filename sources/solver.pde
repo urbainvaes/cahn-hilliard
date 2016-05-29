@@ -1,10 +1,10 @@
-// Include auxiliary files and load modules//{{{
+// Include auxiliary files and load modules {{{
 include "freefem/write-mesh.pde"
 include "freefem/getargs.pde"
-include "freefem/clock.pde"//{{{//}}}
+include "freefem/clock.pde"
 include "geometry.pde"
 //}}}
-// Load modules//{{{
+// Load modules {{{
 load "gmsh"
 
 #if DIMENSION == 2
@@ -16,11 +16,11 @@ load "iovtk";
 load "medit"
 #endif
 //}}}
-// Process input parameters//{{{
+// Process input parameters {{{
 int adapt      = getARGV("-adapt",0);
 int plots      = getARGV("-plot",0);
 //}}}
-// Import the mesh//{{{
+// Import the mesh {{{
 #if DIMENSION == 2
 #define MESH mesh
 #define GMSHLOAD gmshload
@@ -31,12 +31,10 @@ int plots      = getARGV("-plot",0);
 #define GMSHLOAD gmshload3
 #endif
 
-#ifndef MPI
 MESH Th;
 Th = GMSHLOAD("output/mesh.msh");
-#endif
 //}}}
-// Define functional spaces//{{{
+// Define functional spaces {{{
 #if DIMENSION == 2
 fespace Vh(Th,P2), V2h(Th,[P2,P2]);
 #endif
@@ -45,15 +43,21 @@ fespace Vh(Th,P2), V2h(Th,[P2,P2]);
 fespace Vh(Th,P1), V2h(Th,[P1,P1]);
 #endif
 
-Vh phiOld;
 V2h [phi, mu];
+Vh u = 0, v = 0, w = 0, p = 0, q = 0;
+Vh phiOld, uOld, vOld, wOld;
+Vh test;
 //}}}
-// Declare default parameters//{{{
+// Declare default parameters {{{
 
 // Cahn-Hilliard parameters
 real M       = 1;
 real lambda  = 1;
 real eps     = 0.01;
+
+// Navier-Stokes parameters
+real nu = 1;
+real alpha = 0.01;
 
 // Time parameters
 real dt = 8.0*eps^4/M;
@@ -64,24 +68,32 @@ real meshError = 1.e-2;
 real hmax = 0.1;
 real hmin = hmax / 100;
 //}}}
-// Include problem file//{{{
+// Include problem file {{{
 include "problem.pde"
 //}}}
-// Calculate dependent parameters//{{{
+// Calculate dependent parameters {{{
 real eps2 = eps*eps;
 real invEps2 = 1./eps2;
 //}}}
-// Define variational formulation//{{{
+// Define variational formulations {{{
+
+// Macros {{{
 #ifdef MPI
 int processRegion = 1000 + mpirank + 1;
 #endif
 
 #if DIMENSION == 2
 macro Grad(u) [dx(u), dy(u)] //EOM
+macro Div(u,v) dx(u) + dy(v) //EOM
+#define UVEC u, v
+#define UOLDVEC uOld, vOld
 #endif
 
 #if DIMENSION == 3
 macro Grad(u) [dx(u), dy(u), dz(u)] //EOM
+macro Div(u,v,w) dx(u) + dy(v) + dz(w) //EOM
+#define UVEC u, v, w
+#define UOLDVEC uOld, vOld, wOld
 #endif
 
 #define AUX_INTEGRAL(dim) int ## dim ## d
@@ -92,11 +104,13 @@ macro Grad(u) [dx(u), dy(u), dz(u)] //EOM
 #else
 #define INTREGION Th
 #endif
-
+//}}}
+// Cahn-Hilliard {{{
 varf varCH([phi1,mu1], [phi2,mu2]) =
   INTEGRAL(DIMENSION)(INTREGION)(
     phi1*phi2/dt
     + M*(Grad(mu1)'*Grad(phi2))
+    - phi1*([UOLDVEC]'*Grad(phi2))
     - mu1*mu2
     + lambda*(Grad(phi1)'*Grad(mu2))
     + lambda*invEps2*0.5*3*phiOld*phiOld*phi1*mu2
@@ -112,7 +126,53 @@ varf varCHrhs([phi1,mu1], [phi2,mu2]) =
     )
 ;
 //}}}
-// Loop in time//{{{
+// // Navier-Stokes {{{
+// problem pb4u(u,w,init=n,solver=CG,eps=epsu)
+//     =int2d(Th)(u*w/dt +nuNS*(dx(u)*dx(w)+dy(u)*dy(w)))
+//     -int2d(Th)((convect([uOld,vOld],-dt,uOld)/dt-dx(p))*w
+// + alpha*mu*dx(phi)*w)
+// //case: pipe/droplet
+//         + on(1,u = uWall*4*y*(1-y)) + on(2,4,u = 0)
+//         //+ on(1,u = uWall*4*y*(2-y)) + on(2,4,u = 0)//channel with heterogeneous substrate
+// //case:MED/porous medium
+//         //+ on(1,2,3,4,5,u = 0)
+//     ;
+
+// solve pb4v(v,w,init=n,solver=CG,eps=epsv)
+//     = int2d(Th)(v*w/dt +nuNS*(dx(v)*dx(w)+dy(v)*dy(w)))
+//     -int2d(Th)((convect([uOld,vOld],-dt,vOld)/dt-dy(p))*w
+// + alpha*mu*dy(phi)*w
+// - 1*w//gravity
+// )
+// //case: pipe/droplet
+//         + on(1,2,3,4,v = 0)
+// //case:MED, porous medium
+//         //+ on(2,v = uWall*4*x*(5-x)) + on(1,3,5,v = 0)
+// ;
+
+// solve pb4p(q,w,solver=CG,init=n,eps=epsp) = int2d(Th)(dx(q)*dx(w)+dy(q)*dy(w))
+// - int2d(Th)((dx(u)+ dy(v))*w/dt)
+// //case: pipe
+//     + on(3,q=0)
+// //case: droplet
+//     //+ on(1,3,4,q=0)
+// //case: MED/porous medium
+//     //+ on(4,q=0)
+// ;
+//}}}
+//}}}
+// Create output file for the mesh {{{
+// This is only useful if P2 or higher elements are used.
+#if DIMENSION == 3
+ofstream foutHeader("output/output.msh");
+
+// Write header, nodes and elements
+writeHeader(foutHeader);
+writeNodes(foutHeader, Vh);
+writeElements(foutHeader, Vh, Th);
+#endif
+//}}}
+// Loop in time {{{
 
 // Open output file
 ofstream file("output/thermodynamics.txt");
@@ -149,7 +209,7 @@ for(int i = 0; i <= nIter; i++)
   // Update previous solution//{{{
   timeStart = clock(); tic();
   phiOld = phi;
-//}}}
+  //}}}
   // Calculate macroscopic variables//{{{
   #ifdef MPI
   freeEnergyReg  = INTEGRAL(DIMENSION)(Th, processRegion) (0.5*lambda*(Grad(phi)'*Grad(phi)) + 0.25*lambda*invEps2*(phi^2 - 1)^2);
@@ -313,6 +373,40 @@ for(int i = 0; i <= nIter; i++)
   }
   #ifdef MPI
   broadcast(processor(0), phi[]);
+  #endif
+  //}}}
+  // Navier stokes {{{
+  Vh uOld = u, vOld = v, pold=p;
+  #if DIMENSION == 3
+  Vh wOld = w;
+  #endif
+  real vol = INTEGRAL(DIMENSION)(Th)(1.);
+  solve pb4u(u,test,solver=LU)
+      =INTEGRAL(DIMENSION)(Th)(u*test/dt +nu*(Grad(u)'*Grad(test)))
+      -INTEGRAL(DIMENSION)(Th)((convect([UOLDVEC],-dt,uOld)/dt-dx(p))*test)
+      -INTEGRAL(DIMENSION)(Th) (alpha*mu*dx(phi)*test)
+      + on(1,2, u = 0);
+  solve pb4v(v,test,solver=LU)
+      = INTEGRAL(DIMENSION)(Th)(v*test/dt +nu*(dx(v)*dx(test)+dy(v)*dy(test)))
+      -INTEGRAL(DIMENSION)(Th)((convect([UOLDVEC],-dt,vOld)/dt-dy(p))*test)
+      -INTEGRAL(DIMENSION)(Th) (alpha*mu*dy(phi)*test)
+      + on(1,2, v = 0);
+  #if DIMENSION == 3
+  solve pb4w(w,test,solver=LU)
+      = INTEGRAL(DIMENSION)(Th)(w*test/dt +nu*(Grad(w)'*Grad(test)))
+      -INTEGRAL(DIMENSION)(Th)((convect([UOLDVEC],-dt,wOld)/dt-dz(p))*test)
+      -INTEGRAL(DIMENSION)(Th) (alpha*mu*dz(phi)*test)
+      + on(1,2, w = 0);
+  #endif
+  real meandiv = INTEGRAL(DIMENSION)(Th)(Div(UVEC))/vol;
+  solve pb4p(q,test,solver=LU)= int2d(Th)(Grad(q)'*Grad(test))
+      - INTEGRAL(DIMENSION)(Th)((Div(UVEC)-meandiv)*test/dt);
+  real meanpq = INTEGRAL(DIMENSION)(Th)(pold - q)/vol;
+  p = pold-q-meanpq;
+  u = u + dx(q)*dt;
+  v = v + dy(q)*dt;
+  #if DIMENSION == 3
+  w = w + dz(q)*dt;
   #endif
   //}}}
   // Adapt mesh//{{{
