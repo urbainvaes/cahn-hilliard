@@ -110,7 +110,7 @@ varf varCH([phi1,mu1], [phi2,mu2]) =
   INTEGRAL(DIMENSION)(INTREGION)(
     phi1*phi2/dt
     + M*(Grad(mu1)'*Grad(phi2))
-    - phi1*([UOLDVEC]'*Grad(phi2))
+    // - phi1*([UOLDVEC]'*Grad(phi2))
     - mu1*mu2
     + lambda*(Grad(phi1)'*Grad(mu2))
     + lambda*invEps2*0.5*3*phiOld*phiOld*phi1*mu2
@@ -120,7 +120,8 @@ varf varCH([phi1,mu1], [phi2,mu2]) =
 
 varf varCHrhs([phi1,mu1], [phi2,mu2]) =
   INTEGRAL(DIMENSION)(INTREGION)(
-    phiOld*phi2/dt
+    // phiOld*phi2/dt
+    convect([UOLDVEC],-dt,phiOld)/dt*phi2
     + lambda*invEps2*0.5*phiOld*phiOld*phiOld*mu2
     + lambda*invEps2*0.5*phiOld*mu2
     )
@@ -209,6 +210,11 @@ for(int i = 0; i <= nIter; i++)
   // Update previous solution//{{{
   timeStart = clock(); tic();
   phiOld = phi;
+  uOld = u;
+  vOld = v;
+  #if DIMENSION == 3
+  wOld = w;
+  #endif
   //}}}
   // Calculate macroscopic variables//{{{
   #ifdef MPI
@@ -237,6 +243,7 @@ for(int i = 0; i <= nIter; i++)
     #if DIMENSION == 2
     savevtk("output/phi."+i+".vtk", Th, phi, dataname="PhaseField");
     savevtk("output/mu."+i+".vtk",  Th, mu,  dataname="ChemicalPotential");
+    savevtk("output/velocity"+i+".vtk",Th,[u,v]);
     #endif
 
     #if DIMENSION == 3
@@ -382,20 +389,29 @@ for(int i = 0; i <= nIter; i++)
   #endif
   real vol = INTEGRAL(DIMENSION)(Th)(1.);
   solve pb4u(u,test,solver=LU)
-      =INTEGRAL(DIMENSION)(Th)(u*test/dt +nu*(Grad(u)'*Grad(test)))
-      -INTEGRAL(DIMENSION)(Th)((convect([UOLDVEC],-dt,uOld)/dt-dx(p))*test)
-      -INTEGRAL(DIMENSION)(Th) (alpha*mu*dx(phi)*test)
+      = INTEGRAL(DIMENSION)(Th)(u*test/dt +nu*(Grad(u)'*Grad(test)))
+      - INTEGRAL(DIMENSION)(Th)(
+          (convect([UOLDVEC],-dt,uOld)/dt-dx(p))*test
+          + alpha*mu*dx(phi)*test
+          )
       + on(1,2, u = 0);
   solve pb4v(v,test,solver=LU)
-      = INTEGRAL(DIMENSION)(Th)(v*test/dt +nu*(dx(v)*dx(test)+dy(v)*dy(test)))
-      -INTEGRAL(DIMENSION)(Th)((convect([UOLDVEC],-dt,vOld)/dt-dy(p))*test)
-      -INTEGRAL(DIMENSION)(Th) (alpha*mu*dy(phi)*test)
+      = INTEGRAL(DIMENSION)(Th)(
+          v*test/dt +nu*(Grad(v)'*Grad(test))
+          )
+      - INTEGRAL(DIMENSION)(Th)(
+          (convect([UOLDVEC],-dt,vOld)/dt-dy(p))*test
+          + alpha*mu*dy(phi)*test
+          // + 1e3*phi*test
+          )
       + on(1,2, v = 0);
   #if DIMENSION == 3
   solve pb4w(w,test,solver=LU)
       = INTEGRAL(DIMENSION)(Th)(w*test/dt +nu*(Grad(w)'*Grad(test)))
-      -INTEGRAL(DIMENSION)(Th)((convect([UOLDVEC],-dt,wOld)/dt-dz(p))*test)
-      -INTEGRAL(DIMENSION)(Th) (alpha*mu*dz(phi)*test)
+      -INTEGRAL(DIMENSION)(Th)(
+          (convect([UOLDVEC],-dt,wOld)/dt-dz(p))*test
+          + alpha*mu*dz(phi)*test
+          )
       + on(1,2, w = 0);
   #endif
   real meandiv = INTEGRAL(DIMENSION)(Th)(Div(UVEC))/vol;
