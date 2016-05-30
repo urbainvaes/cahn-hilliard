@@ -126,40 +126,39 @@ varf varCHrhs([phi1,mu1], [phi2,mu2]) =
     + lambda*invEps2*0.5*phiOld*mu2
     )
 ;
+
 //}}}
-// // Navier-Stokes {{{
-// problem pb4u(u,w,init=n,solver=CG,eps=epsu)
-//     =int2d(Th)(u*w/dt +nuNS*(dx(u)*dx(w)+dy(u)*dy(w)))
-//     -int2d(Th)((convect([uOld,vOld],-dt,uOld)/dt-dx(p))*w
-// + alpha*mu*dx(phi)*w)
-// //case: pipe/droplet
-//         + on(1,u = uWall*4*y*(1-y)) + on(2,4,u = 0)
-//         //+ on(1,u = uWall*4*y*(2-y)) + on(2,4,u = 0)//channel with heterogeneous substrate
-// //case:MED/porous medium
-//         //+ on(1,2,3,4,5,u = 0)
-//     ;
-
-// solve pb4v(v,w,init=n,solver=CG,eps=epsv)
-//     = int2d(Th)(v*w/dt +nuNS*(dx(v)*dx(w)+dy(v)*dy(w)))
-//     -int2d(Th)((convect([uOld,vOld],-dt,vOld)/dt-dy(p))*w
-// + alpha*mu*dy(phi)*w
-// - 1*w//gravity
-// )
-// //case: pipe/droplet
-//         + on(1,2,3,4,v = 0)
-// //case:MED, porous medium
-//         //+ on(2,v = uWall*4*x*(5-x)) + on(1,3,5,v = 0)
-// ;
-
-// solve pb4p(q,w,solver=CG,init=n,eps=epsp) = int2d(Th)(dx(q)*dx(w)+dy(q)*dy(w))
-// - int2d(Th)((dx(u)+ dy(v))*w/dt)
-// //case: pipe
-//     + on(3,q=0)
-// //case: droplet
-//     //+ on(1,3,4,q=0)
-// //case: MED/porous medium
-//     //+ on(4,q=0)
-// ;
+// Navier-Stokes {{{
+varf varU(u,test) =
+  INTEGRAL(DIMENSION)(Th)(
+    u*test/dt + nu*(Grad(u)'*Grad(test))
+    );
+varf varUrhs(u,test) =
+  INTEGRAL(DIMENSION)(Th)(
+    (convect([UOLDVEC],-dt,uOld)/dt-dx(p))*test
+    + alpha*mu*dx(phi)*test
+    );
+varf varV(v,test) =
+  INTEGRAL(DIMENSION)(Th)(
+    v*test/dt + nu*(Grad(v)'*Grad(test))
+    );
+varf varVrhs(v,test) =
+  INTEGRAL(DIMENSION)(Th)(
+    (convect([UOLDVEC],-dt,vOld)/dt-dy(p))*test
+    + alpha*mu*dy(phi)*test
+    - 1e8*phi*test
+    );
+#if DIMENSION == 3
+varf varW(w,test) =
+  INTEGRAL(DIMENSION)(Th)(
+    w*test/dt +nu*(Grad(w)'*Grad(test))
+    );
+varf varWrhs(w,test) =
+  INTEGRAL(DIMENSION)(Th)(
+    (convect([UOLDVEC],-dt,wOld)/dt-dz(p))*test
+    + alpha*mu*dz(phi)*test
+    );
+#endif
 //}}}
 //}}}
 // Create output file for the mesh {{{
@@ -388,35 +387,50 @@ for(int i = 0; i <= nIter; i++)
   Vh wOld = w;
   #endif
   real vol = INTEGRAL(DIMENSION)(Th)(1.);
-  solve pb4u(u,test,solver=LU)
-      = INTEGRAL(DIMENSION)(Th)(u*test/dt +nu*(Grad(u)'*Grad(test)))
-      - INTEGRAL(DIMENSION)(Th)(
-          (convect([UOLDVEC],-dt,uOld)/dt-dx(p))*test
-          + alpha*mu*dx(phi)*test
-          )
-      + on(1,2, u = 0);
-  solve pb4v(v,test,solver=LU)
-      = INTEGRAL(DIMENSION)(Th)(
-          v*test/dt +nu*(Grad(v)'*Grad(test))
-          )
-      - INTEGRAL(DIMENSION)(Th)(
-          (convect([UOLDVEC],-dt,vOld)/dt-dy(p))*test
-          + alpha*mu*dy(phi)*test
-          // + 1e3*phi*test
-          )
-      + on(1,2, v = 0);
+
+  matrix matUBulk = varU(Vh, Vh);
+  matrix matUBoundary = varBoundaryU(Vh, Vh);
+  matrix matU = matUBulk + matUBoundary;
+  real[int] rhsUBulk = varUrhs(0, Vh);
+  real[int] rhsUBoundary = varBoundaryU(0, Vh);
+  real[int] rhsU = rhsUBulk + rhsUBoundary;
+  set(matU,solver=sparsesolver);
+  u[] = matU^-1*rhsU;
+
+  matrix matVBulk = varV(Vh, Vh);
+  matrix matVBoundary = varBoundaryV(Vh, Vh);
+  matrix matV = matVBulk + matVBoundary;
+  real[int] rhsVBulk = varVrhs(0, Vh);
+  real[int] rhsVBoundary = varBoundaryV(0, Vh);
+  real[int] rhsV = rhsVBulk + rhsVBoundary;
+  set(matV,solver=sparsesolver);
+  v[] = matV^-1*rhsV;
+
   #if DIMENSION == 3
-  solve pb4w(w,test,solver=LU)
-      = INTEGRAL(DIMENSION)(Th)(w*test/dt +nu*(Grad(w)'*Grad(test)))
-      -INTEGRAL(DIMENSION)(Th)(
-          (convect([UOLDVEC],-dt,wOld)/dt-dz(p))*test
-          + alpha*mu*dz(phi)*test
-          )
-      + on(1,2, w = 0);
+  matrix matWBulk = varW(Vh, Vh);
+  matrix matWBoundary = varBoundaryW(Vh, Vh);
+  matrix matW = matWBulk + matWBoundary;
+  real[int] rhsWBulk = varWrhs(0, Vh);
+  real[int] rhsWBoundary = varBoundaryW(0, Vh);
+  real[int] rhsW = rhsWBulk + rhsWBoundary;
+  set(matW,solver=sparsesolver);
+  w[] = matW^-1*rhsW;
   #endif
   real meandiv = INTEGRAL(DIMENSION)(Th)(Div(UVEC))/vol;
-  solve pb4p(q,test,solver=LU)= int2d(Th)(Grad(q)'*Grad(test))
-      - INTEGRAL(DIMENSION)(Th)((Div(UVEC)-meandiv)*test/dt);
+  varf varP(q,test) =
+    INTEGRAL(DIMENSION)(Th)(
+      Grad(q)'*Grad(test)
+      );
+  varf varPrhs(q,test) =
+    INTEGRAL(DIMENSION)(Th)(
+      (Div(UVEC)-meandiv)*test/dt
+      );
+  matrix matP = varP(Vh, Vh);
+  real[int] rhsP = varPrhs(0, Vh);
+  set(matP,solver=sparsesolver);
+  q[] = matP^-1*rhsP;
+  // solve pb4p(q,test,solver=LU)= int2d(Th)(Grad(q)'*Grad(test))
+  //     - INTEGRAL(DIMENSION)(Th)((Div(UVEC)-meandiv)*test/dt);
   real meanpq = INTEGRAL(DIMENSION)(Th)(pold - q)/vol;
   p = pold-q-meanpq;
   u = u + dx(q)*dt;
