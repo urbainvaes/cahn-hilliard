@@ -10,25 +10,23 @@ Include "../includes.geo";
 // Clean generated list
 System 'rm includes.geo';
 
-// View options
-Geometry.SurfaceNumbers = 0;
-
 // Use Euler angles instead of quaternion
 General.Trackball = 0;
 
-// Euler angles
+// Upside down
 General.RotationX = 110;
 General.RotationY = 0;
 General.RotationZ = 30;
-Mesh.ColorCarousel   = 2;
 
-// Specify which parts of the geometry and mesh to draw
+Mesh.ColorCarousel   = 2;
 Mesh.SurfaceEdges    = 0;
 Mesh.VolumeEdges     = 0;
+
 Geometry.Lines       = 0;
 Geometry.Surfaces    = 0;
 Geometry.Points      = 0;
 Geometry.SurfaceType = 0;
+Geometry.SurfaceNumbers = 0;
 
 // Number of cutting planes
 nplanes = 3;
