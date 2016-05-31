@@ -56,8 +56,10 @@ real lambda  = 1;
 real eps     = 0.01;
 
 // Navier-Stokes parameters
+#ifdef NS
 real nu = 1;
 real alpha = 0.01;
+#endif
 
 // Time parameters
 real dt = 8.0*eps^4/M;
@@ -112,7 +114,6 @@ varf varCH([phi1,mu1], [phi2,mu2]) =
   INTEGRAL(DIMENSION)(INTREGION)(
     phi1*phi2/dt
     + M*(Grad(mu1)'*Grad(phi2))
-    // - phi1*([UOLDVEC]'*Grad(phi2))
     - mu1*mu2
     + lambda*(Grad(phi1)'*Grad(mu2))
     + lambda*invEps2*0.5*3*phiOld*phiOld*phi1*mu2
@@ -122,14 +123,18 @@ varf varCH([phi1,mu1], [phi2,mu2]) =
 
 varf varCHrhs([phi1,mu1], [phi2,mu2]) =
   INTEGRAL(DIMENSION)(INTREGION)(
-    // phiOld*phi2/dt
+    #ifdef NS
     convect([UOLDVEC],-dt,phiOld)/dt*phi2
+    #else
+    phiOld*phi2/dt
+    #endif
     + lambda*invEps2*0.5*phiOld*phiOld*phiOld*mu2
     + lambda*invEps2*0.5*phiOld*mu2
     )
 ;
 
 //}}}
+#ifdef NS
 // Navier-Stokes {{{
 varf varU(u,test) =
   INTEGRAL(DIMENSION)(Th)(
@@ -148,6 +153,7 @@ varf varVrhs(v,test) =
   INTEGRAL(DIMENSION)(Th)(
     (convect([UOLDVEC],-dt,vOld)/dt-dy(p))*test
     + alpha*mu*dy(phi)*test
+    - 1e8*phi*test
     );
 #if DIMENSION == 3
 varf varW(w,test) =
@@ -158,8 +164,8 @@ varf varWrhs(w,test) =
   INTEGRAL(DIMENSION)(Th)(
     (convect([UOLDVEC],-dt,wOld)/dt-dz(p))*test
     + alpha*mu*dz(phi)*test
-    - 1e8*phi*test
     );
+#endif
 #endif
 //}}}
 //}}}
@@ -385,6 +391,7 @@ for(int i = 0; i <= nIter; i++)
   #endif
   //}}}
   // Navier stokes {{{
+  #ifdef NS
   Vh uOld = u, vOld = v, pold=p;
   #if DIMENSION == 3
   Vh wOld = w;
@@ -440,6 +447,7 @@ for(int i = 0; i <= nIter; i++)
   v = v + dy(q)*dt;
   #if DIMENSION == 3
   w = w + dz(q)*dt;
+  #endif
   #endif
   //}}}
   // Adapt mesh//{{{
