@@ -12,7 +12,19 @@ func mu0 = 0;
 
 // Boundary conditions
 varf varBoundary([phi1,mu1], [phi2,mu2]) =
-  on(1,phi1=-1) + on(2,phi1=-1) + on(3, phi1=-1) + on(4,phi1 = -1)
+  int2d(Th,1,2,3,4) (-5*mu2)
+;
+
+varf varBoundaryU(u, unused) =
+  on(1,2,3,4, u = 0);
+;
+
+varf varBoundaryV(v, unused) =
+  on(1,2,3,4, v = 0);
+;
+
+varf varBoundaryW(w, unused) =
+  on(1,2,3,4, w = 0);
 ;
 
 // Value of epsiblon
