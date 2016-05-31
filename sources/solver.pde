@@ -146,7 +146,6 @@ varf varVrhs(v,test) =
   INTEGRAL(DIMENSION)(Th)(
     (convect([UOLDVEC],-dt,vOld)/dt-dy(p))*test
     + alpha*mu*dy(phi)*test
-    - 1e8*phi*test
     );
 #if DIMENSION == 3
 varf varW(w,test) =
@@ -157,6 +156,7 @@ varf varWrhs(w,test) =
   INTEGRAL(DIMENSION)(Th)(
     (convect([UOLDVEC],-dt,wOld)/dt-dz(p))*test
     + alpha*mu*dz(phi)*test
+    - 1e8*phi*test
     );
 #endif
 //}}}
