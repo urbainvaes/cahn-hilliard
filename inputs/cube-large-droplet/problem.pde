@@ -28,7 +28,7 @@ varf varBoundaryW(w, unused) =
 ;
 
 // Value of epsiblon
-eps = 0.1;
+eps = 0.05;
 
 // Time step
 dt = 1e-6;

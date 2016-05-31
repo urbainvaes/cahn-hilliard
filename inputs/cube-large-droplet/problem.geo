@@ -1,6 +1,6 @@
 // Meshsize
 /* s  = 0.03; */
-s  = 0.08;
+s  = 0.04;
 
 // Dimensions of the cube
 Lx = 1;    // export
