@@ -36,7 +36,7 @@ EndIf
   x = 0.5*Lx;
   y = 0.5*Ly;
   z = 0;
-  r = 0.1;
+  r = 0.1*Lx;
 
   Call Circ;
 
