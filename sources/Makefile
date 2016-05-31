@@ -5,6 +5,7 @@ include config.mk
 
 DIMENSION ?= 3
 GEOMETRY  ?= problem.geo
+PROBLEM   ?= problem.pde
 VIEW      ?= view.geo
 
 ###############################
@@ -30,18 +31,18 @@ geometry.pde : $(GEOMETRY)
 
 processed_solver.pde : solver.pde config.mk
 ifdef NP
-	cpp -w -DDIMENSION=$(DIMENSION) -DMPI $< | \
+	cpp -w -DDIMENSION=$(DIMENSION) -DPROBLEM=$(PROBLEM) -DMPI $< | \
 		sed '/^\#/d' | sed 's#^\(macro.\+\)$$#\1 //EOM#' | sed '/^$$/d' > $@
 else
-	cpp -w -DDIMENSION=$(DIMENSION) $< | \
+	cpp -w -DDIMENSION=$(DIMENSION) -DPROBLEM=$(PROBLEM) $< | \
 		sed '/^\#/d' | sed 's#^\(macro.\+\)$$#\1 //EOM#' | sed '/^$$/d' > $@
 endif
 
-output/thermodynamics.txt : processed_solver.pde problem.pde output/mesh.msh geometry.pde
+output/thermodynamics.txt : processed_solver.pde $(PROBLEM) output/mesh.msh geometry.pde
 ifdef NP
-	mpirun -np $(NP) FreeFem++-mpi -ne $< -plot 0 | tee logs/freefem.log
+	mpirun -np $(NP) FreeFem++-mpi -ne -v 0 $< -plot 0 | tee logs/freefem.log
 else
-	FreeFem++ -ne $< -plot 0 | tee logs/freefem.log
+	FreeFem++ -ne -v 0 $< -plot 0 | tee logs/freefem.log
 endif
 
 ##############
