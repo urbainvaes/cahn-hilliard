@@ -29,7 +29,7 @@ run : output/thermodynamics.txt
 geometry.pde : $(GEOMETRY)
 	grep -h 'export' $^ | sed 's/^/real /' > $@;
 
-processed_solver.pde : solver.pde config.mk
+processed_solver.pde : solver.pde $(PROBLEM) config.mk
 ifdef NP
 	cpp -w -DDIMENSION=$(DIMENSION) -DPROBLEM=$(PROBLEM) -DMPI $< | \
 		sed '/^\#/d' | sed 's#^\(macro.\+\)$$#\1 //EOM#' | sed '/^$$/d' > $@
