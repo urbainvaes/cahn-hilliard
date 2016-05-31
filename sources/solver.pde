@@ -77,7 +77,9 @@ Vh phiOld;
 V2h [phi, mu];
 
 /// Include problem file
-include "problem.pde"
+#define xstr(s) str(s)
+#define str(s) #s
+#include xstr(PROBLEM)
 
 /// Calculate dependent parameters
 real eps2 = eps*eps;
@@ -248,8 +250,8 @@ for(int i = 0; i <= nIter; i++)
 
   matrix matBulk;
   mpiAllReduce(matRegion,matBulk,mpiCommWorld,mpiSUM);
-  mpiAllReduce(timeMatrixRegion,timeMatrixTotal,mpiCommWorld,mpiSUM);
   timeMatrixBulk = timeMatrixRegion + tic();
+  mpiAllReduce(timeMatrixBulk,timeMatrixTotal,mpiCommWorld,mpiSUM);
 
   matrix matCH;
   if (mpirank == 0)
@@ -258,11 +260,12 @@ for(int i = 0; i <= nIter; i++)
       timeMatrixBc = tic();
 
       matCH = matBulk + matBoundary;
-      timeMatrix = tic() + timeMatrixBulk + timeMatrixBc;
-
-      set(matCH,solver=sparsesolver);
-      timeFactorization = tic();
+      timeMatrix =  timeMatrixBulk + timeMatrixBc + tic();
   }
+
+  // set(matCH,solver=sparsesolver);
+  set(matCH,solver=sparsesolver,sparams=ssparams);
+  timeFactorization = tic();
   #endif
 
   #ifndef MPI
@@ -273,7 +276,7 @@ for(int i = 0; i <= nIter; i++)
   timeMatrixBc = tic();
 
   matrix matCH = matBulk + matBoundary;
-  timeMatrix = tic() + timeMatrixBulk + timeMatrixBc;
+  timeMatrix = timeMatrixBulk + timeMatrixBc + tic();
 
   set(matCH,solver=sparsesolver);
   timeFactorization = tic();
@@ -286,8 +289,8 @@ for(int i = 0; i <= nIter; i++)
 
   real[int] rhsBulk(rhsRegion.n);
   mpiAllReduce(rhsRegion,rhsBulk,mpiCommWorld,mpiSUM);
-  mpiAllReduce(timeRhsRegion,timeRhsTotal,mpiCommWorld,mpiSUM);
-  timeRhsBulk = tic() + timeRhsRegion;
+  timeRhsBulk = timeRhsRegion + tic();
+  mpiAllReduce(timeRhsBulk,timeRhsTotal,mpiCommWorld,mpiSUM);
 
   real[int] rhsCH(rhsRegion.n);
   if (mpirank == 0)
@@ -296,7 +299,7 @@ for(int i = 0; i <= nIter; i++)
       timeRhsBc = tic();
 
       rhsCH = rhsBulk + rhsBoundary;
-      timeRhs = tic() + timeRhsBulk + timeRhsBc;
+      timeRhs = timeRhsBulk + timeRhsBc + tic();
   }
   #endif
 
