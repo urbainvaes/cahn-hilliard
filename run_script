@@ -1,0 +1,10 @@
+#!/bin/bash
+
+#PBS -m abe
+#PBS -q standard
+
+cd ${HOME}/cahn-hilliard
+
+# make clean
+make run problem=${problem}
+make remote-video host="urbain@155.198.212.223" problem=${problem}
