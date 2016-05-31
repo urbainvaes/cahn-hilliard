@@ -18,9 +18,17 @@ varf varBoundary([phi1,mu1], [phi2,mu2]) =
   int1d(Th,2) (0*mu2)
 ;
 
+varf varBoundaryU(u, unused) =
+  on(1,2, u = 0);
+;
+
+varf varBoundaryV(v, unused) =
+  on(1,2, v = 0);
+;
+
 // Interface thickness
-/* eps = 0.01; */
-eps = 0.2;
+eps = 0.03;
+/* eps = 0.2; */
 
 // Time step
 /* dt = 8.0*eps^4/M; */

@@ -3,6 +3,11 @@ Include "macros-gmsh/circle.geo";
 Include "macros-gmsh/cube.geo";
 Include "macros-gmsh/cylinder.geo";
 
+If (!Exists(Lx)) Lx = 1; EndIf
+If (!Exists(Ly)) Ly = 1; EndIf
+If (!Exists(Lz)) Lz = 1; EndIf
+If (!Exists(s)) s = 0.07; EndIf
+
 // Outer cube
   dx   = Lx;
   dy   = Ly;
