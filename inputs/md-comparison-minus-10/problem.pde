@@ -1,5 +1,5 @@
 // Initial condition
-real radius = 15;
+real radius = 30.0/70.0*Lx;
 
 real x1 = 0.5*Lx;
 real y1 = 0.5*Ly;
@@ -10,10 +10,10 @@ func phi0 = droplet1;
 func mu0 = 0;
 [phi, mu] = [phi0, mu0];
 
-epsilon = 0.05*Lx;
-dt = 8.0*eps^4/M;
+eps = 0.05;
+dt = 1e-6;
 
 // Boundary conditions
 varf varBoundary([phi1,mu1], [phi2,mu2]) =
-  int2d(Th,1,2,3,4) (-10*mu2)
+  int2d(Th,1) (-10*mu2) + int2d(Th,2) (-10*mu2)
 ;

@@ -1,7 +1,7 @@
 // Dimensions of the cube
-Lx = 70;    // export
-Ly = 70;    // export
-Lz = 40;    // export
+Lx = 1;      // export
+Ly = Lx;     // export
+Lz = 0.6*Lx; // export
 
 // Meshsize
 s  = 0.04*Lx;

@@ -34,4 +34,4 @@ eps = 0.05;
 dt = 1e-6;
 
 // Number of iterations
-nIter = 300;
+nIter = 400;
