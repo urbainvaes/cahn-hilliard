@@ -350,17 +350,18 @@ for(int i = 0; i <= nIter; i++)
   #endif
   {
     cout << endl
-         << "** TIME OF COMPUTATIONS **           " << endl
-         << "Matrix: total time of computations   " << timeMatrix          << endl;
+         << "** TIME OF COMPUTATIONS **    " << endl
+         << "Matrix: assembly (master)     " << timeMatrix          << endl
+         << "Matrix: volume terms          " << timeMatrixBulk      << endl
+         << "Matrix: boundary conditions   " << timeMatrixBc        << endl
+         << "Matrix: factorization         " << timeFactorization   << endl;
     #ifdef MPI
-    cout << "Matrix: computation of volume terms  " << timeMatrixTotal     << endl
-         << "Matrix: time spent in process 0      " << timeMatrixBulk      << endl
-         << "Matrix: boundary conditions          " << timeMatrixBc        << endl;
+    cout << "Matrix: volume terms (total)  " << timeMatrixTotal     << endl;
     #endif
   }
   #ifdef MPI
   mpiBarrier(mpiCommWorld);
-  cout   << "... Time for region " << mpirank << ": " << timeMatrixRegion << endl;
+  cout   << "... Time for region " << mpirank << ": " << timeMatrixRegion << "  (Including broadcast: " << timeMatrixBulk << ")" << endl;
   mpiBarrier(mpiCommWorld);
   #endif
 
@@ -369,16 +370,16 @@ for(int i = 0; i <= nIter; i++)
   #endif
   {
     cout << endl
-         << "Rhs: total time of computations      " << timeRhs             << endl;
+         << "Rhs: assembly (master)       " << timeRhs             << endl
+         << "Rhs: volume terms            " << timeRhsBulk         << endl
+         << "Rhs: boundary conditions     " << timeRhsBc           << endl;
     #ifdef MPI
-    cout << "Rhs: computation of volume terms     " << timeRhsTotal        << endl
-         << "Rhs: time spent in process 0         " << timeRhsBulk         << endl
-         << "Rhs: boundary conditions             " << timeRhsBc           << endl;
+    cout << "Rhs: volume terms (total)    " << timeRhsTotal        << endl;
     #endif
   }
   #ifdef MPI
   mpiBarrier(mpiCommWorld);
-  cout   << "... Time for region " << mpirank << ": " << timeRhsRegion << endl;
+  cout   << "... Time for region " << mpirank << ": " << timeRhsRegion << "  (Including broadcast: " << timeRhsBulk << ")" << endl;
   mpiBarrier(mpiCommWorld);
   #endif
 
@@ -387,7 +388,6 @@ for(int i = 0; i <= nIter; i++)
   #endif
   {
     cout << endl
-         << "Factorization of the matrix          " << timeFactorization   << endl
          << "Solution  of the linear system       " << timeSolution        << endl
          << "Total time spent in process 0        " << clock() - timeStart << endl;
   }
