@@ -105,7 +105,7 @@ nIter = 400;
 ```
 - The program used for visualization in 2D is **paraview**, and so the view must be callable by pvpython.
   The specification of this part is less flexible, and we recommend that you start by taking the following script.
-```
+```python
 # Import modules
 import re
 import glob
