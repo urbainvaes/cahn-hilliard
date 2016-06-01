@@ -1,9 +1,9 @@
 // Initial condition
-real radius = 0.3;
+real radius = 0.3*Lx;
 
 real x1 = 0.5*Lx;
 real y1 = 0.5*Ly;
-real z1 = 0.5*Lz;
+real z1 = radius;
 func droplet1 = ((x - x1)^2 + (y - y1)^2 + (z - z1)^2 < radius^2 ? 1 : -1);
 
 func phi0 = droplet1;
@@ -28,10 +28,10 @@ varf varBoundaryW(w, unused) =
 ;
 
 // Value of epsiblon
-eps = 0.05;
+eps = 0.01;
 
 // Time step
-dt = 1e-6;
+dt = 8*eps^4;
 
 // Number of iterations
 nIter = 400;

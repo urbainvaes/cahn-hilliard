@@ -14,11 +14,13 @@ load "iovtk";
 
 #if DIMENSION == 3
 load "medit"
+load "mshmet"
+load "mmg3d-v4.0"
 #endif
 //}}}
 // Process input parameters {{{
-int adapt      = getARGV("-adapt",0);
-int plots      = getARGV("-plot",0);
+int adapt = getARGV("-adapt",1);
+int plots = getARGV("-plot",0);
 //}}}
 // Import the mesh {{{
 #if DIMENSION == 2
@@ -31,8 +33,8 @@ int plots      = getARGV("-plot",0);
 #define GMSHLOAD gmshload3
 #endif
 
-MESH Th;
-Th = GMSHLOAD("output/mesh.msh");
+MESH Th; Th = GMSHLOAD("output/mesh.msh");
+MESH ThOut; ThOut = GMSHLOAD("output/mesh.msh");
 //}}}
 // Define functional spaces {{{
 #if DIMENSION == 2
@@ -43,9 +45,13 @@ fespace Vh(Th,P2), V2h(Th,[P2,P2]);
 fespace Vh(Th,P1), V2h(Th,[P1,P1]);
 #endif
 
+// Mesh on which to project solution for visualization
+fespace VhOut(ThOut,P1);
+
 V2h [phi, mu];
 Vh u = 0, v = 0, w = 0, p = 0, q = 0;
 Vh phiOld, uOld, vOld, wOld;
+VhOut phiOut, muOut, uOut, vOut, wOut;
 Vh test;
 //}}}
 // Declare default parameters {{{
@@ -254,8 +260,16 @@ for(int i = 0; i <= nIter; i++)
     #endif
 
     #if DIMENSION == 3
+    if(adapt)
+    {
+        phiOut = phi;
+        muOut  = mu;
+        uOut = u;
+        vOut = v;
+        wOut = w;
+    }
     ofstream fo("output/phase-" + i + ".msh");
-    writeHeader(fo); write1dData(fo, "Cahn-Hilliard", i*dt, i, phiOld);
+    writeHeader(fo); write1dData(fo, "Cahn-Hilliard", i*dt, i, phiOut);
     #endif
 
     file << i*dt           << "    "
@@ -379,10 +393,6 @@ for(int i = 0; i <= nIter; i++)
   if (mpirank == 0)
   #endif
   {
-    ofstream fout("matrix.txt");
-    fout << matCH;
-    ofstream foutrhs("rhs.txt");
-    fout << rhsCH;
     phi[] = matCH^-1*rhsCH;
     timeSolution = tic();
   }
@@ -451,22 +461,33 @@ for(int i = 0; i <= nIter; i++)
   #endif
   //}}}
   // Adapt mesh//{{{
-  #if DIMENSION == 2
   if (adapt)
   {
     #ifdef MPI
     if (mpirank == 0)
     #endif
+    #if DIMENSION == 2
     {
       Th = adaptmesh(Th, phi, mu, err = meshError, hmax = hmax, hmin = hmin);
       [phi, mu] = [phi, mu];
     }
+    #endif
+
+    #if DIMENSION == 3
+    {
+      real[int] metricField = mshmet(Th,aniso=1,phi);
+      Th = mmg3d(Th,metric=metricField);
+      [phi, mu] = [phi, mu];
+      u = u; v = v; w = w; p = p;
+      // medit("Mesh",Th,phi,wait=false);
+    }
+    #endif
+
     #ifdef MPI
     broadcast(processor(0), Th);
     broadcast(processor(0), phi[]);
     #endif
   }
-  #endif
   //}}}
   // Print the times to stdout//{{{
   #ifdef MPI

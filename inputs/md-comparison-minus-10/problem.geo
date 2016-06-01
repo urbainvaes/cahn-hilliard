@@ -4,6 +4,6 @@ Ly = Lx;     // export
 Lz = 0.6*Lx; // export
 
 // Meshsize
-s  = 0.04*Lx;
+s  = 0.07*Lx;
 
 Include "geometries/cube.geo";
