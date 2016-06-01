@@ -1,4 +1,7 @@
+If(!Exists(fL))
 fL = 2.;
+EndIf
+
 fS = fL;
 eps = .2;
 
@@ -32,33 +35,33 @@ Extrude {0, 0, Lz} {
   Line{l1,l2,l3,l4};
 }
 
-Lx = Lx/fL; Ly = Ly/fL; Lz = Lz/fL; s = s/fS;
-p5 = newp; Point(p5) = {-Lx/2. , -Ly/2. , 0 , s};
-p6 = newp; Point(p6) = {Lx/2.  , -Ly/2. , 0 , s};
-p7 = newp; Point(p7) = {Lx/2.  , Ly/2.  , 0 , s};
-p8 = newp; Point(p8) = {-Lx/2. , Ly/2.  , 0 , s};
+Sx = Lx/fL; Sy = Ly/fL; Sz = Lz/fL; s = s/fS;
+p5 = newp; Point(p5) = {-Sx/2. , -Sy/2. , 0 , s};
+p6 = newp; Point(p6) = {Sx/2.  , -Sy/2. , 0 , s};
+p7 = newp; Point(p7) = {Sx/2.  , Sy/2.  , 0 , s};
+p8 = newp; Point(p8) = {-Sx/2. , Sy/2.  , 0 , s};
 
 l5 = newl; Line(l5) = {p5, p6};
 l6 = newl; Line(l6) = {p6, p7};
 l7 = newl; Line(l7) = {p7, p8};
 l8 = newl; Line(l8) = {p8, p5};
 
-Extrude {0, 0, Lz} {
+Extrude {0, 0, Sz} {
   Line{l5,l6,l7,l8};
 }
 
-Lx = Lx*(1+eps); Ly = Ly*(1+eps); Lz = Lz*(1+eps); s = s*fS;
-p9  = newp; Point(p9)  = {-Lx/2. , -Ly/2. , 0 , s};
-p10 = newp; Point(p10) = {Lx/2.  , -Ly/2. , 0 , s};
-p11 = newp; Point(p11) = {Lx/2.  , Ly/2.  , 0 , s};
-p12 = newp; Point(p12) = {-Lx/2. , Ly/2.  , 0 , s};
+Mx = Sx*(1+eps); My = Sy*(1+eps); Mz = Sz*(1+eps); s = s*fS;
+p9  = newp; Point(p9)  = {-Mx/2. , -My/2. , 0 , s};
+p10 = newp; Point(p10) = {Mx/2.  , -My/2. , 0 , s};
+p11 = newp; Point(p11) = {Mx/2.  , My/2.  , 0 , s};
+p12 = newp; Point(p12) = {-Mx/2. , My/2.  , 0 , s};
 
 l9  = newl; Line(l9)  = {p9,  p10};
 l10 = newl; Line(l10) = {p10, p11};
 l11 = newl; Line(l11) = {p11, p12};
 l12 = newl; Line(l12) = {p12,  p9};
 
-Extrude {0, 0, Lz} {
+Extrude {0, 0, Mz} {
   Line{l9,l10,l11,l12};
 }
 
@@ -83,3 +86,12 @@ Volume(78) = {77};
 Physical Volume("Domain", 1) = {78, 76, 74};
 Physical Surface("Bottom", 1) = {66, 64, 62};
 Physical Surface("Rest", 2) = {72, 20, 8, 12, 16};
+
+Translate {Lx/2., Ly/2., 0.} {
+  Volume{74, 76, 78};
+}
+
+// View options
+Geometry.LabelType = 2;
+Geometry.Surfaces = 1;
+Geometry.SurfaceNumbers = 2;
