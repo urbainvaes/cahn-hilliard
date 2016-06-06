@@ -4,9 +4,31 @@
 include config.mk
 
 DIMENSION ?= 3
+
+# Files
 GEOMETRY  ?= problem.geo
 PROBLEM   ?= problem.pde
 VIEW      ?= view.geo
+
+# Flags
+cpp_flags = -DDIMENSION=$(DIMENSION) -DPROBLEM=$(PROBLEM)
+ff_flags = -plot 0
+
+ifdef NS
+	cpp_flags += -DNS
+endif
+
+ifdef ELECTRO
+	cpp_flags += -DELECTRO
+endif
+
+ifdef NP
+	cpp_flags += -DMPI
+endif
+
+ifdef ADAPT
+	ff_flags += -adapt 1
+endif
 
 ###############################
 #  Create mesh from geometry  #
@@ -30,19 +52,13 @@ geometry.pde : $(GEOMETRY)
 	grep -h 'export' $^ | sed 's/^/real /' > $@;
 
 processed_solver.pde : solver.pde $(PROBLEM) config.mk
-ifdef NP
-	cpp -w -DDIMENSION=$(DIMENSION) -DPROBLEM=$(PROBLEM) -DMPI $< | \
-		sed '/^\#/d' | sed 's#^\(macro.\+\)$$#\1 //EOM#' | sed '/^$$/d' > $@
-else
-	cpp -w -DDIMENSION=$(DIMENSION) -DPROBLEM=$(PROBLEM) $< | \
-		sed '/^\#/d' | sed 's#^\(macro.\+\)$$#\1 //EOM#' | sed '/^$$/d' > $@
-endif
+	cpp -w $(cpp_flags) $< | sed '/^\#/d' | sed 's#^\(macro.\+\)$$#\1 //EOM#' | sed '/^$$/d' > $@
 
 output/thermodynamics.txt : processed_solver.pde $(PROBLEM) output/mesh.msh geometry.pde
 ifdef NP
-	mpirun -np $(NP) FreeFem++-mpi -ne -v 0 $< -plot 0 | tee logs/freefem.log
+	mpirun -np $(NP) FreeFem++-mpi -ne -v 0 $< $(ff_flags) | tee logs/freefem.log
 else
-	FreeFem++ -ne -v 0 $< -plot 0 | tee logs/freefem.log
+	FreeFem++ -ne -v 0 $< $(ff_flags) | tee logs/freefem.log
 endif
 
 ##############

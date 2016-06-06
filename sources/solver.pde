@@ -19,7 +19,7 @@ load "mmg3d-v4.0"
 #endif
 //}}}
 // Process input parameters {{{
-int adapt = getARGV("-adapt",1);
+int adapt = getARGV("-adapt",0);
 int plots = getARGV("-plot",0);
 //}}}
 // Import the mesh {{{
