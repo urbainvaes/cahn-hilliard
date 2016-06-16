@@ -1,0 +1,9 @@
+#!/bin/bash
+
+# Argument 1: the mesh
+# Argument 2: node data
+
+echo "Merge \"$1\"; Merge \"$2\"; Save View[0] \"${2%.msh}.pos\";" > tmp.geo
+gmsh -v 0 tmp.geo -0
+rm tmp.geo
+rm tmp.geo_unrolled
