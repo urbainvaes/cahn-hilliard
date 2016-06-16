@@ -20,7 +20,7 @@ load "mmg3d-v4.0"
 //}}}
 // Process input parameters {{{
 int adapt = getARGV("-adapt",0);
-int plots = getARGV("-plot",0);
+int plot = getARGV("-plot",0);
 //}}}
 // Import the mesh {{{
 #if DIMENSION == 2
@@ -291,7 +291,7 @@ for(int i = 0; i <= nIter; i++)
   if (mpirank == 0)
   #endif
   {
-    if (plots)
+    if (plot)
     {
       #if DIMENSION == 2
       plot(phi, wait=true, fill=true);
