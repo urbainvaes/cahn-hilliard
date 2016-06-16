@@ -11,8 +11,8 @@ PROBLEM   ?= problem.pde
 VIEW      ?= view.geo
 
 # Flags
-cpp_flags = -DDIMENSION=$(DIMENSION) -DPROBLEM=$(PROBLEM)
-ff_flags = -plot 0
+cpp_flags = -DDIMENSION=$(DIMENSION) -DPROBLEM=$(PROBLEM) -DGEOMETRY=$(GEOMETRY)
+ff_flags = -ne -v 0
 
 ifdef NS
 	cpp_flags += -DNS
@@ -28,6 +28,10 @@ endif
 
 ifdef ADAPT
 	ff_flags += -adapt 1
+endif
+
+ifdef PLOT
+	ff_flags += -plot 1
 endif
 
 ###############################
@@ -56,9 +60,9 @@ processed_solver.pde : solver.pde $(PROBLEM) config.mk
 
 output/thermodynamics.txt : processed_solver.pde $(PROBLEM) output/mesh.msh geometry.pde
 ifdef NP
-	mpirun -np $(NP) FreeFem++-mpi -ne -v 0 $< $(ff_flags) | tee logs/freefem.log
+	mpirun -np $(NP) FreeFem++-mpi $< $(ff_flags) | tee logs/freefem.log
 else
-	FreeFem++ -ne -v 0 $< $(ff_flags) | tee logs/freefem.log
+	FreeFem++ $< $(ff_flags) | tee logs/freefem.log
 endif
 
 ##############
