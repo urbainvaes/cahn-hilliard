@@ -1,5 +1,5 @@
 // Initial condition
-real radius = 30.0/70.0*Lx;
+real radius = 0.4*Lx;
 
 real x1 = 0.5*Lx;
 real y1 = 0.5*Ly;
@@ -15,5 +15,5 @@ dt = 1e-6;
 
 // Boundary conditions
 varf varBoundary([phi1,mu1], [phi2,mu2]) =
-  int2d(Th,1) (-10*mu2) + int2d(Th,2) (-10*mu2)
+  int2d(Th,1) (-1*mu2) + int2d(Th,2) (-1*mu2)
 ;

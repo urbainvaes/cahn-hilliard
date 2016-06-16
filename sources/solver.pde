@@ -73,8 +73,16 @@ real nIter = 300;
 
 // Mesh parameters
 real meshError = 1.e-2;
+
+#if DIMENSION == 2
+real hmax = 0.05;
+real hmin = hmax / 64;
+#endif
+
+#if DIMENSION == 3
 real hmax = 0.1;
-real hmin = hmax / 100;
+real hmin = hmax/5;
+#endif
 //}}}
 // Include problem file {{{
 #define xstr(s) str(s)
