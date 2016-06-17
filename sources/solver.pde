@@ -159,6 +159,9 @@ varf varCHrhs([phi1,mu1], [phi2,mu2]) =
     #endif
     + lambda*invEps2*0.5*phiOld*phiOld*phiOld*mu2
     + lambda*invEps2*0.5*phiOld*mu2
+    #ifdef ELECTRO
+    + 0.25 * (epsilonR2 - epsilonR1) * (Grad(theta)'*Grad(theta)) * mu2
+    #endif
     )
 ;
 
