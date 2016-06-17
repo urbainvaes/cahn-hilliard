@@ -10,6 +10,7 @@ parser = optparse.OptionParser()
 parser.add_option('-v', '--video', dest = 'file_video')
 parser.add_option('-i', '--input', dest = 'field_name')
 parser.add_option('-r', '--range', dest = 'range')
+parser.add_option('-p', '--plots', dest = 'dirplots')
 (options, args) = parser.parse_args()
 
 # Ask for file name if undefined
@@ -61,5 +62,11 @@ display.SetRepresentationType('Surface')
 # Save video or play animation
 if options.file_video is not None:
     WriteAnimation(options.file_video, Magnification=1, FrameRate=40.0, Compression=True)
+elif options.dirplots is not None:
+    index = 0;
+    while True:
+        animationScene.GoToNext()
+        SaveScreenshot(options.dirplots+"/"+options.field_name+"."+str(index)+".png", magnification=1, quality=100, view=renderView)
+        index = index + 1
 else:
     animationScene.Play()
