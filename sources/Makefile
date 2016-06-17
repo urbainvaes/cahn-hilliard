@@ -22,6 +22,10 @@ ifdef ELECTRO
 	cpp_flags += -DELECTRO
 endif
 
+ifdef GRAVITY
+	cpp_flags += -DGRAVITY
+endif
+
 ifdef NP
 	cpp_flags += -DMPI
 endif
