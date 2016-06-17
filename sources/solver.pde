@@ -66,6 +66,11 @@ real eps     = 0.01;
 real nu = 1;
 real alpha = 0.01;
 #endif
+// Electric parameters
+#ifdef ELECTRO
+real epsilonR1 = 1;
+real epsilonR2 = 2;
+#endif
 
 // Time parameters
 real dt = 8.0*eps^4/M;
@@ -81,7 +86,7 @@ real hmin = hmax / 64;
 
 #if DIMENSION == 3
 real hmax = 0.1;
-real hmin = hmax/5;
+real hmin = hmax/10;
 #endif
 //}}}
 // Include problem file {{{
@@ -180,6 +185,16 @@ varf varWrhs(w,test) =
     + alpha*mu*dz(phi)*test
     );
 #endif
+#endif
+//}}}
+// Poisson for electric potential {{{
+#ifdef ELECTRO
+varf varPotential(theta,test) =
+  INTEGRAL(DIMENSION)(Th)(
+    0.5*(epsilonR1*(1 - phi) + epsilonR2*(1 + phi))
+    * Grad(theta)'*Grad(test)
+    )
+  ;
 #endif
 //}}}
 //}}}
@@ -319,6 +334,16 @@ for(int i = 0; i <= nIter; i++)
   #endif
 
   tic();
+  //}}}
+  // Poisson for electric potential {{{
+  #ifdef ELECTRO
+  matrix matPotentialBulk = varPotential(Vh, Vh);
+  matrix matPotentialBoundary = varBoundaryPotential(Vh, Vh);
+  matrix matPotential = matPotentialBulk + matPotentialBoundary;
+  real[int] rhsPotential = varBoundaryPotential(0, Vh);
+  set(matPotential,solver=sparsesolver);
+  theta[] = matPotential^-1*rhsPotential;
+  #endif
   //}}}
   // Calculate the matrix {{{
   #ifdef MPI
