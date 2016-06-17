@@ -477,18 +477,39 @@ for(int i = 0; i <= nIter; i++)
     #if DIMENSION == 2
     {
       Th = adaptmesh(Th, phi, mu, err = meshError, hmax = hmax, hmin = hmin);
-      [phi, mu] = [phi, mu];
     }
     #endif
 
     #if DIMENSION == 3
     {
-      real[int] metricField = mshmet(Th,aniso=1,phi);
-      Th = mmg3d(Th,metric=metricField);
-      [phi, mu] = [phi, mu];
-      u = u; v = v; w = w; p = p;
-      // medit("Mesh",Th,phi,wait=false);
+      {
+        real[int] metricField = mshmet(Th, phi, aniso = 0, hmin = hmin, hmax = hmax, nbregul = 1);
+        ofstream bgm("output/mshmet-" + i + ".msh");
+        adaptField = adaptField;
+        adaptField[] = metricField;
+        writeHeader(bgm);
+        write1dData(bgm, "Size field", i*dt, i, adaptField);
+        // Th = mmg3d(Th, metric=metricField);
+      }
+      system("./bin/msh2pos output/mesh-"+i+".msh output/mshmet-"+i+".msh");
+      system("gmsh -v 0 " + xstr(GEOMETRY) + " -3 -bgm 'output/mshmet-"+i+".pos' -o 'output/mesh-" + (i + 1) + ".msh'");
+      Th = gmshload3("output/mesh-" + (i + 1) + ".msh");
     }
+    #endif
+    [phi, mu] = [phi, mu];
+
+    #ifdef NS
+    u = u;
+    v = v;
+    p = p;
+    q = q;
+    #if DIMENSION == 3
+    w = w;
+    #endif
+    #endif
+
+    #ifdef ELECTRO
+    theta = theta;
     #endif
 
     #ifdef MPI
@@ -497,7 +518,7 @@ for(int i = 0; i <= nIter; i++)
     #endif
   }
   //}}}
-  // Print the times to stdout//{{{
+  // Print the times to stdout {{{
   #ifdef MPI
   if (mpirank == 0)
   #endif
