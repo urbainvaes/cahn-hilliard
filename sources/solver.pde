@@ -256,7 +256,7 @@ for(int i = 0; i <= nIter; i++)
 
   timeMacro = tic();
   //}}}
-  // Save data to files and stdout//{{{
+  // Save data to files and stdout {{{
   #ifdef MPI
   if (mpirank == 0)
   #endif
@@ -294,7 +294,7 @@ for(int i = 0; i <= nIter; i++)
       << "Free energy bulk = "  << freeEnergy    << endl;
   }
   //}}}
-  // Visualize solution at current time step//{{{
+  // Visualize solution at current time step {{{
   #ifdef MPI
   if (mpirank == 0)
   #endif
@@ -302,18 +302,16 @@ for(int i = 0; i <= nIter; i++)
     if (plot)
     {
       #if DIMENSION == 2
-      plot(phi, wait=true, fill=true);
-      plot(Th, wait=true);
+      plot(phi, fill=true);
       #endif
 
       #if DIMENSION == 3
-      medit("Phi",Th,phi,wait=true);
-      medit("Mu",Th,mu,wait=true);
+      medit("Phi",Th,phi,wait = false);
       #endif
     }
   }
   //}}}
-  // Exit if required//{{{
+  // Exit if required {{{
   if (i == nIter) break;
 
   #ifdef MPI
@@ -322,7 +320,7 @@ for(int i = 0; i <= nIter; i++)
 
   tic();
   //}}}
-  // Calculate the matrix//{{{
+  // Calculate the matrix {{{
   #ifdef MPI
   matrix matRegion = varCH(V2h, V2h);
   timeMatrixRegion = tic();
@@ -335,11 +333,11 @@ for(int i = 0; i <= nIter; i++)
   matrix matCH;
   if (mpirank == 0)
   {
-      matrix matBoundary = varBoundary(V2h, V2h);
-      timeMatrixBc = tic();
+    matrix matBoundary = varBoundary(V2h, V2h);
+    timeMatrixBc = tic();
 
-      matCH = matBulk + matBoundary;
-      timeMatrix =  timeMatrixBulk + timeMatrixBc + tic();
+    matCH = matBulk + matBoundary;
+    timeMatrix =  timeMatrixBulk + timeMatrixBc + tic();
   }
 
   // Parameters for solver
@@ -364,7 +362,7 @@ for(int i = 0; i <= nIter; i++)
   timeFactorization = tic();
   #endif
   //}}}
-  // Calculate the right-hand side//{{{
+  // Calculate the right-hand side {{{
   #ifdef MPI
   real[int] rhsRegion = varCHrhs(0, V2h);
   timeRhsRegion = tic();
@@ -377,11 +375,11 @@ for(int i = 0; i <= nIter; i++)
   real[int] rhsCH(rhsRegion.n);
   if (mpirank == 0)
   {
-      real[int] rhsBoundary = varBoundary(0, V2h);
-      timeRhsBc = tic();
+    real[int] rhsBoundary = varBoundary(0, V2h);
+    timeRhsBc = tic();
 
-      rhsCH = rhsBulk + rhsBoundary;
-      timeRhs = timeRhsBulk + timeRhsBc + tic();
+    rhsCH = rhsBulk + rhsBoundary;
+    timeRhs = timeRhsBulk + timeRhsBc + tic();
   }
   #endif
 
@@ -468,7 +466,7 @@ for(int i = 0; i <= nIter; i++)
   #endif
   #endif
   //}}}
-  // Adapt mesh//{{{
+  // Adapt mesh {{{
   if (adapt)
   {
     #ifdef MPI
