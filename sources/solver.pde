@@ -1,3 +1,6 @@
+/* TODO: Add boundary condition for pressure correction (urbain, Fri 17 Jun 2016 12:08:06 PM BST) */
+
+
 // Include auxiliary files and load modules {{{
 include "freefem/write-mesh.pde"
 include "freefem/getargs.pde"
@@ -38,7 +41,7 @@ MESH ThOut; ThOut = GMSHLOAD("output/mesh.msh");
 //}}}
 // Define functional spaces {{{
 #if DIMENSION == 2
-fespace Vh(Th,P2), V2h(Th,[P2,P2]);
+fespace Vh(Th,P1), V2h(Th,[P1,P1]);
 #endif
 
 #if DIMENSION == 3
@@ -48,11 +51,23 @@ fespace Vh(Th,P1), V2h(Th,[P1,P1]);
 // Mesh on which to project solution for visualization
 fespace VhOut(ThOut,P1);
 
+// Phase field
 V2h [phi, mu];
+Vh phiOld;
+VhOut phiOut, muOut;
+
+// Adaptation
+Vh adaptField;
+
+#ifdef NS
 Vh u = 0, v = 0, w = 0, p = 0, q = 0;
-Vh phiOld, uOld, vOld, wOld;
-VhOut phiOut, muOut, uOut, vOut, wOut;
-Vh test;
+Vh uOld, vOld, wOld;
+VhOut uOut, vOut, wOut;
+#endif
+
+#ifdef ELECTRO
+Vh theta;
+#endif
 //}}}
 // Declare default parameters {{{
 
@@ -63,8 +78,8 @@ real eps     = 0.01;
 
 // Navier-Stokes parameters
 #ifdef NS
-real nu = 1;
-real alpha = 0.01;
+real Re = 0.1;
+real Ca = 100;
 #endif
 
 #ifdef GRAVITY
@@ -164,13 +179,12 @@ varf varCHrhs([phi1,mu1], [phi2,mu2]) =
     #endif
     )
 ;
-
 //}}}
-#ifdef NS
 // Navier-Stokes {{{
+#ifdef NS
 varf varU(u,test) =
   INTEGRAL(DIMENSION)(Th)(
-    u*test/dt + nu*(Grad(u)'*Grad(test))
+    u*test/dt + (1/Re)*(Grad(u)'*Grad(test))
     );
 varf varUrhs(u,test) =
   INTEGRAL(DIMENSION)(Th)(
@@ -182,7 +196,7 @@ varf varUrhs(u,test) =
     );
 varf varV(v,test) =
   INTEGRAL(DIMENSION)(Th)(
-    v*test/dt + nu*(Grad(v)'*Grad(test))
+    v*test/dt + (1/Re)*(Grad(v)'*Grad(test))
     );
 varf varVrhs(v,test) =
   INTEGRAL(DIMENSION)(Th)(
@@ -195,7 +209,7 @@ varf varVrhs(v,test) =
 #if DIMENSION == 3
 varf varW(w,test) =
   INTEGRAL(DIMENSION)(Th)(
-    w*test/dt +nu*(Grad(w)'*Grad(test))
+    w*test/dt +(1/Re)*(Grad(w)'*Grad(test))
     );
 varf varWrhs(w,test) =
   INTEGRAL(DIMENSION)(Th)(
@@ -222,12 +236,6 @@ varf varPotential(theta,test) =
 // Create output file for the mesh {{{
 // This is only useful if P2 or higher elements are used.
 #if DIMENSION == 3
-ofstream foutHeader("output/output.msh");
-
-// Write header, nodes and elements
-writeHeader(foutHeader);
-writeNodes(foutHeader, Vh);
-writeElements(foutHeader, Vh, Th);
 #endif
 //}}}
 // Loop in time {{{
@@ -235,7 +243,31 @@ writeElements(foutHeader, Vh, Th);
 // Open output file
 ofstream file("output/thermodynamics.txt");
 
-// Declare extensive physical variables//{{{
+// Adapt mesh before starting computation {{{
+if (adapt)
+{
+  #if DIMENSION == 3
+  system("cp output/mesh.msh output/mesh-init-0.msh");
+  for(int i = 0; i < 3; i++)
+  {
+      {
+        ofstream bgm("output/mshmet-init-"+i+".msh");
+        real[int] metricField = mshmet(Th, phi, aniso = 0, hmin = hmin, hmax = hmax, nbregul = 1);
+        adaptField = adaptField;
+        adaptField[] = metricField;
+        writeHeader(bgm);
+        write1dData(bgm, "Size field", i*dt, i, adaptField);
+      }
+      system("./bin/msh2pos output/mesh-init-"+i+".msh output/mshmet-init-"+i+".msh");
+      system("gmsh -v 0 " + xstr(GEOMETRY) + " -3 -bgm 'output/mshmet-init-"+i+".pos' -o 'output/mesh-init-" + (i + 1) + ".msh'");
+      Th = gmshload3("output/mesh-init-" + (i + 1) + ".msh");
+      [phi, mu] = [phi0, mu0];
+  }
+  #endif
+}
+
+//}}}
+// Declare extensive physical variables {{{
 real freeEnergy,
      massPhi,
      dissipation;
@@ -264,17 +296,35 @@ real timeMatrixRegion,
 //}}}
 for(int i = 0; i <= nIter; i++)
 {
-  // Update previous solution//{{{
+  // Update previous solution {{{
   timeStart = clock(); tic();
   phiOld = phi;
+#ifdef NS
   uOld = u;
   vOld = v;
-  #if DIMENSION == 3
+#if DIMENSION == 3
   wOld = w;
-  #endif
+#endif
+#endif
   //}}}
-  // Calculate macroscopic variables//{{{
-  #ifdef MPI
+
+  ofstream interface("output/interface."+ i +".xyz");
+  for (int j = 0; j<Th.nv ;j++)
+  {
+      if (abs(phiOld[][j]) < 0.2)
+      {
+          #if DIMENSION == 2
+          interface << "1 " << Th(j).x << " " << Th(j).y << endl;
+          #endif
+
+          #if DIMENSION == 3
+          interface << "1 " << Th(j).x << " " << Th(j).y << " " << Th(j).z << endl;
+          #endif
+      }
+  }
+
+  // Calculate macroscopic variables {{{
+#ifdef MPI
   freeEnergyReg  = INTEGRAL(DIMENSION)(Th, processRegion) (0.5*lambda*(Grad(phi)'*Grad(phi)) + 0.25*lambda*invEps2*(phi^2 - 1)^2);
   massPhiReg     = INTEGRAL(DIMENSION)(Th, processRegion) (phi);
   dissipationReg = INTEGRAL(DIMENSION)(Th, processRegion) (M*(Grad(mu)'*Grad(mu)));
@@ -282,39 +332,72 @@ for(int i = 0; i <= nIter; i++)
   mpiAllReduce(freeEnergyReg,  freeEnergy,  mpiCommWorld, mpiSUM);
   mpiAllReduce(massPhiReg,     massPhi,     mpiCommWorld, mpiSUM);
   mpiAllReduce(dissipationReg, dissipation, mpiCommWorld, mpiSUM);
-  #endif
+#endif
 
-  #ifndef MPI
-  freeEnergy  = INTEGRAL(DIMENSION)(Th)   (0.5*lambda*(Grad(phi)'*Grad(phi)) + 0.25*lambda*invEps2*(phi^2 - 1)^2);
-  massPhi     = INTEGRAL(DIMENSION)(Th)   (phi);
-  dissipation = INTEGRAL(DIMENSION)(Th)   (M*(Grad(mu)'*Grad(mu)));
-  #endif
+#ifndef MPI
+  freeEnergy  = INTEGRAL(DIMENSION)(Th) (
+      0.5*lambda*(Grad(phi)'*Grad(phi))
+      + 0.25*lambda*invEps2*(phi^2 - 1)^2
+#ifdef ELECTRO
+      - 0.25 * (epsilonR1*(1 - phi) + epsilonR2*(1 + phi)) * Grad(theta)'*Grad(theta)
+#endif
+      );
+  massPhi     = INTEGRAL(DIMENSION)(Th) (phi);
+  dissipation = INTEGRAL(DIMENSION)(Th) (M*(Grad(mu)'*Grad(mu)));
+#endif
 
   timeMacro = tic();
   //}}}
   // Save data to files and stdout {{{
-  #ifdef MPI
+#ifdef MPI
   if (mpirank == 0)
-  #endif
+#endif
   {
-    #if DIMENSION == 2
-    savevtk("output/phi."+i+".vtk", Th, phi, dataname="PhaseField");
-    savevtk("output/mu."+i+".vtk",  Th, mu,  dataname="ChemicalPotential");
-    savevtk("output/velocity"+i+".vtk",Th,[u,v]);
-    #endif
+#if DIMENSION == 2
 
-    #if DIMENSION == 3
+    savevtk("output/phi."+i+".vtk", Th, phi, dataname="Phase");
+    savevtk("output/mu."+i+".vtk",  Th, mu,  dataname="ChemicalPotential");
+
+#ifdef NS
+    savevtk("output/velocity."+i+".vtk",Th,[u,v], dataname="Velocity");
+#endif
+
+#ifdef ELECTRO
+    savevtk("output/potential."+i+".vtk",Th,theta, dataname="Potential");
+#endif
+
+#endif
+
+#if DIMENSION == 3
+    {
+    ofstream currentMesh("output/mesh-" + i + ".msh");
+    ofstream data("output/phase-" + i + ".msh");
+
     if(adapt)
     {
-        phiOut = phi;
-        muOut  = mu;
-        uOut = u;
-        vOut = v;
-        wOut = w;
+      phiOut = phi;
+      muOut  = mu;
+#ifdef NS
+      uOut = u;
+      vOut = v;
+      wOut = w;
+#endif
+      writeHeader(currentMesh);
+      writeNodes(currentMesh, Vh);
+      writeElements(currentMesh, Vh, Th);
+
+      writeHeader(data);
+      write1dData(data, "Cahn-Hilliard", i*dt, i, phiOld);
+
     }
-    ofstream fo("output/phase-" + i + ".msh");
-    writeHeader(fo); write1dData(fo, "Cahn-Hilliard", i*dt, i, phiOut);
-    #endif
+    else
+    {
+      writeHeader(data); write1dData(data, "Cahn-Hilliard", i*dt, i, phiOld);
+    }
+    }
+      system("./bin/msh2pos output/mesh-" + i + ".msh output/phase-" + i + ".msh");
+    // ! phi[]
+#endif
 
     file << i*dt           << "    "
          << freeEnergy     << "    "
@@ -357,14 +440,14 @@ for(int i = 0; i <= nIter; i++)
   tic();
   //}}}
   // Poisson for electric potential {{{
-  #ifdef ELECTRO
+#ifdef ELECTRO
   matrix matPotentialBulk = varPotential(Vh, Vh);
   matrix matPotentialBoundary = varBoundaryPotential(Vh, Vh);
   matrix matPotential = matPotentialBulk + matPotentialBoundary;
   real[int] rhsPotential = varBoundaryPotential(0, Vh);
   set(matPotential,solver=sparsesolver);
   theta[] = matPotential^-1*rhsPotential;
-  #endif
+#endif
   //}}}
   // Calculate the matrix {{{
   #ifdef MPI
@@ -491,12 +574,14 @@ for(int i = 0; i <= nIter; i++)
   real meandiv = INTEGRAL(DIMENSION)(Th)(Div(UVEC))/vol;
   varf varP(q,test) =
     INTEGRAL(DIMENSION)(Th)(
-      Grad(q)'*Grad(test)
-      );
+        Grad(q)'*Grad(test)
+        )
+    + on(5, q = 0);
   varf varPrhs(q,test) =
     INTEGRAL(DIMENSION)(Th)(
-      (Div(UVEC)-meandiv)*test/dt
-      );
+        (Div(UVEC)-meandiv)*test/dt
+        )
+    + on(5, q = 0);
   matrix matP = varP(Vh, Vh);
   real[int] rhsP = varPrhs(0, Vh);
   set(matP,solver=sparsesolver);
