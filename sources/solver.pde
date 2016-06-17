@@ -106,7 +106,7 @@ real hmin = hmax / 64;
 
 #if DIMENSION == 3
 real hmax = 0.1;
-real hmin = hmax/10;
+real hmin = hmax/5;
 #endif
 //}}}
 // Include problem file {{{
@@ -237,11 +237,6 @@ varf varPotential(theta,test) =
 #if DIMENSION == 3
 #endif
 //}}}
-// Loop in time {{{
-
-// Open output file
-ofstream file("output/thermodynamics.txt");
-
 // Adapt mesh before starting computation {{{
 if (adapt)
 {
@@ -259,12 +254,21 @@ if (adapt)
       system("gmsh -v 0 " + xstr(GEOMETRY) + " -3 -bgm 'output/mshmet-init-"+i+".pos' -o 'output/mesh-init-" + (i + 1) + ".msh'");
       Th = gmshload3("output/mesh-init-" + (i + 1) + ".msh");
       [phi, mu] = [phi0, mu0];
-      medit("Phi", Th, phi, wait = false);
+
+      if(plot)
+      {
+          medit("Phi", Th, phi, wait = false);
+      }
   }
   #endif
 }
 
 //}}}
+// Loop in time {{{
+
+// Open output file
+ofstream file("output/thermodynamics.txt");
+
 // Declare extensive physical variables {{{
 real freeEnergy,
      massPhi,
@@ -613,7 +617,7 @@ for(int i = 0; i <= nIter; i++)
         Vh metricField;
         metricField[] = mshmet(Th, phi, aniso = 0, hmin = hmin, hmax = hmax, nbregul = 1);
         ofstream bgm("output/mshmet-" + i + ".msh");
-        writeHeader(bgm); write1dData(bgm, "Size field", i*dt, i, adaptField);
+        writeHeader(bgm); write1dData(bgm, "Size field", i*dt, i, metricField);
       }
       system("./bin/msh2pos output/mesh-"+i+".msh output/mshmet-"+i+".msh");
       system("gmsh -v 0 " + xstr(GEOMETRY) + " -3 -bgm 'output/mshmet-"+i+".pos' -o 'output/mesh-" + (i + 1) + ".msh'");
