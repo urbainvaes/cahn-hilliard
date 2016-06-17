@@ -66,6 +66,12 @@ real eps     = 0.01;
 real nu = 1;
 real alpha = 0.01;
 #endif
+
+#ifdef GRAVITY
+real rho1 = -1;
+real rho2 = 1;
+#endif
+
 // Electric parameters
 #ifdef ELECTRO
 real epsilonR1 = 1;
@@ -97,6 +103,10 @@ real hmin = hmax/10;
 // Calculate dependent parameters {{{
 real eps2 = eps*eps;
 real invEps2 = 1./eps2;
+
+#ifdef GRAVITY
+Vh rho = 0.5*(rho1*(1 - phi) + rho2*(1 + phi));
+#endif
 //}}}
 // Define variational formulations {{{
 
@@ -162,7 +172,10 @@ varf varU(u,test) =
 varf varUrhs(u,test) =
   INTEGRAL(DIMENSION)(Th)(
     (convect([UOLDVEC],-dt,uOld)/dt-dx(p))*test
-    + alpha*mu*dx(phi)*test
+    + (1/Ca)*mu*dx(phi)*test
+    #ifdef GRAVITY
+    + gx*phi*test
+    #endif
     );
 varf varV(v,test) =
   INTEGRAL(DIMENSION)(Th)(
@@ -171,8 +184,10 @@ varf varV(v,test) =
 varf varVrhs(v,test) =
   INTEGRAL(DIMENSION)(Th)(
     (convect([UOLDVEC],-dt,vOld)/dt-dy(p))*test
-    + alpha*mu*dy(phi)*test
-    - 1e8*phi*test
+    + (1/Ca)*mu*dy(phi)*test
+    #ifdef GRAVITY
+    + gy*phi*test
+    #endif
     );
 #if DIMENSION == 3
 varf varW(w,test) =
@@ -182,7 +197,10 @@ varf varW(w,test) =
 varf varWrhs(w,test) =
   INTEGRAL(DIMENSION)(Th)(
     (convect([UOLDVEC],-dt,wOld)/dt-dz(p))*test
-    + alpha*mu*dz(phi)*test
+    + (1/Ca)*mu*dz(phi)*test
+    #ifdef GRAVITY
+    + gz*phi*test
+    #endif
     );
 #endif
 #endif
