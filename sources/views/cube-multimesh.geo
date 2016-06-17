@@ -32,12 +32,7 @@ System 'rm includes.geo';
 
 nSteps = PostProcessing.NbViews;
 
-/* View.Visible = 1; */
 For i In {0:nSteps-1}
-  /* If (i != 0) */
-  /*   View[i - 1].Visible = 0; */
-  /* EndIf */
-  /* View[i].Visible = 1; */
 
   Plugin(CutPlane).A = 1;
   Plugin(CutPlane).B = 0;
@@ -74,12 +69,6 @@ For i In {0:nSteps-1}
   View[nSteps + 4*i + 3].Visible = 1;
 
   Draw;
-
-  View[nSteps + 4*i].Visible = 0;
-  View[nSteps + 4*i + 1].Visible = 0;
-  View[nSteps + 4*i + 2].Visible = 0;
-  View[nSteps + 4*i + 3].Visible = 0;
-
   If(Exists(video))
     System "mkdir -p output/iso";
     Print Sprintf("../output/iso/isosurface-%04g.jpg", i);
@@ -87,6 +76,12 @@ For i In {0:nSteps-1}
   If(!Exists(video))
     Sleep 0.2;
   EndIf
+
+  View[nSteps + 4*i].Visible = 0;
+  View[nSteps + 4*i + 1].Visible = 0;
+  View[nSteps + 4*i + 2].Visible = 0;
+  View[nSteps + 4*i + 3].Visible = 0;
+
 EndFor
 
 Exit;
