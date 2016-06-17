@@ -246,13 +246,20 @@ ofstream file("output/thermodynamics.txt");
 if (adapt)
 {
   #if DIMENSION == 3
+  system("cp output/mesh.msh output/mesh-init-0.msh");
   for(int i = 0; i < 3; i++)
   {
-    Vh h;
-    h[] = mshmet(Th, phi, aniso = 0, hmin = hmin, hmax = hmax, nbregul = 1);
-    Th=tetgreconstruction(Th,switch="raAQ",sizeofvolume=h*h*h/6.);
-    [phi, mu] = [phi0, mu0];
-    medit("Phi", Th, phi, wait = false);
+      {
+        Vh metricField;
+        metricField[] = mshmet(Th, phi, aniso = 0, hmin = hmin, hmax = hmax, nbregul = 1);
+        ofstream bgm("output/mshmet-init-"+i+".msh");
+        writeHeader(bgm); write1dData(bgm, "Size field", i*dt, i, metricField);
+      }
+      system("./bin/msh2pos output/mesh-init-"+i+".msh output/mshmet-init-"+i+".msh");
+      system("gmsh -v 0 " + xstr(GEOMETRY) + " -3 -bgm 'output/mshmet-init-"+i+".pos' -o 'output/mesh-init-" + (i + 1) + ".msh'");
+      Th = gmshload3("output/mesh-init-" + (i + 1) + ".msh");
+      [phi, mu] = [phi0, mu0];
+      medit("Phi", Th, phi, wait = false);
   }
   #endif
 }
@@ -603,13 +610,10 @@ for(int i = 0; i <= nIter; i++)
     #if DIMENSION == 3
     {
       {
-        real[int] metricField = mshmet(Th, phi, aniso = 0, hmin = hmin, hmax = hmax, nbregul = 1);
+        Vh metricField;
+        metricField[] = mshmet(Th, phi, aniso = 0, hmin = hmin, hmax = hmax, nbregul = 1);
         ofstream bgm("output/mshmet-" + i + ".msh");
-        adaptField = adaptField;
-        adaptField[] = metricField;
-        writeHeader(bgm);
-        write1dData(bgm, "Size field", i*dt, i, adaptField);
-        // Th = mmg3d(Th, metric=metricField);
+        writeHeader(bgm); write1dData(bgm, "Size field", i*dt, i, adaptField);
       }
       system("./bin/msh2pos output/mesh-"+i+".msh output/mshmet-"+i+".msh");
       system("gmsh -v 0 " + xstr(GEOMETRY) + " -3 -bgm 'output/mshmet-"+i+".pos' -o 'output/mesh-" + (i + 1) + ".msh'");
