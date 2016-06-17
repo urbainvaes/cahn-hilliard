@@ -1,6 +1,5 @@
 /* TODO: Add boundary condition for pressure correction (urbain, Fri 17 Jun 2016 12:08:06 PM BST) */
 
-
 // Include auxiliary files and load modules {{{
 include "freefem/write-mesh.pde"
 include "freefem/getargs.pde"
@@ -18,7 +17,7 @@ load "iovtk";
 #if DIMENSION == 3
 load "medit"
 load "mshmet"
-load "mmg3d-v4.0"
+load "tetgen"
 #endif
 //}}}
 // Process input parameters {{{
@@ -247,21 +246,13 @@ ofstream file("output/thermodynamics.txt");
 if (adapt)
 {
   #if DIMENSION == 3
-  system("cp output/mesh.msh output/mesh-init-0.msh");
   for(int i = 0; i < 3; i++)
   {
-      {
-        ofstream bgm("output/mshmet-init-"+i+".msh");
-        real[int] metricField = mshmet(Th, phi, aniso = 0, hmin = hmin, hmax = hmax, nbregul = 1);
-        adaptField = adaptField;
-        adaptField[] = metricField;
-        writeHeader(bgm);
-        write1dData(bgm, "Size field", i*dt, i, adaptField);
-      }
-      system("./bin/msh2pos output/mesh-init-"+i+".msh output/mshmet-init-"+i+".msh");
-      system("gmsh -v 0 " + xstr(GEOMETRY) + " -3 -bgm 'output/mshmet-init-"+i+".pos' -o 'output/mesh-init-" + (i + 1) + ".msh'");
-      Th = gmshload3("output/mesh-init-" + (i + 1) + ".msh");
-      [phi, mu] = [phi0, mu0];
+    Vh h;
+    h[] = mshmet(Th, phi, aniso = 0, hmin = hmin, hmax = hmax, nbregul = 1);
+    Th=tetgreconstruction(Th,switch="raAQ",sizeofvolume=h*h*h/6.);
+    [phi, mu] = [phi0, mu0];
+    medit("Phi", Th, phi, wait = false);
   }
   #endif
 }
