@@ -22,7 +22,7 @@ load "tetgen"
 //}}}
 // Process input parameters {{{
 int adapt = getARGV("-adapt",0);
-int plot = getARGV("-plot",0);
+int plotSol = getARGV("-plot",0);
 //}}}
 // Import the mesh {{{
 #if DIMENSION == 2
@@ -84,6 +84,9 @@ real Ca = 100;
 #ifdef GRAVITY
 real rho1 = -1;
 real rho2 = 1;
+
+real gx = 0;
+real gy = -1e8;
 #endif
 
 // Electric parameters
@@ -106,7 +109,7 @@ real hmin = hmax / 64;
 
 #if DIMENSION == 3
 real hmax = 0.1;
-real hmin = hmax/5;
+real hmin = hmax/20;
 #endif
 //}}}
 // Include problem file {{{
@@ -240,6 +243,19 @@ varf varPotential(theta,test) =
 // Adapt mesh before starting computation {{{
 if (adapt)
 {
+  #if DIMENSION == 2
+  Th = adaptmesh(Th, phi, mu, err = meshError, hmax = hmax, hmin = hmin);
+  [phi, mu] = [phi0, mu0];
+    #ifdef NS
+    u = u;
+    v = v;
+    p = p;
+    q = q;
+    #if DIMENSION == 3
+    w = w;
+    #endif
+    #endif
+  #endif
   #if DIMENSION == 3
   system("cp output/mesh.msh output/mesh-init-0.msh");
   for(int i = 0; i < 3; i++)
@@ -255,14 +271,13 @@ if (adapt)
       Th = gmshload3("output/mesh-init-" + (i + 1) + ".msh");
       [phi, mu] = [phi0, mu0];
 
-      if(plot)
+      if(plotSol)
       {
           medit("Phi", Th, phi, wait = false);
       }
   }
   #endif
 }
-
 //}}}
 // Loop in time {{{
 
@@ -420,7 +435,7 @@ for(int i = 0; i <= nIter; i++)
   if (mpirank == 0)
   #endif
   {
-    if (plot)
+    if (plotSol)
     {
       #if DIMENSION == 2
       plot(phi, fill=true);
@@ -525,7 +540,7 @@ for(int i = 0; i <= nIter; i++)
   timeRhs = timeRhsBulk + timeRhsBc + tic();
   #endif
   //}}}
-  // Solve the linear system//{{{
+  // Solve the linear system {{{
   #ifdef MPI
   if (mpirank == 0)
   #endif
