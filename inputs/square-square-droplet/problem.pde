@@ -1,6 +1,6 @@
 // Define initial conditions
 real xMiddle = 0.5*Lx;
-real yMiddle = 0.5*Ly;
+real yMiddle = -0.0*Ly;
 real thicknessX = 0.4*Lx;
 real thicknessY = 0.4*Ly;
 
