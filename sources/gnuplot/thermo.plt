@@ -36,7 +36,8 @@ set size ratio -1
 set xlabel "x"
 set ylabel "y"
 do for [ii=1:n:1] {
-   outfile = sprintf('.tmp/contactLine%04.0f.png',ii)
+   system("mkdir -p pictures/contactline")
+   outfile = sprintf('pictures/contactline/contactLine%04.0f.png',ii)
    set output outfile
    set title "Contact line - iteration ".ii #textcolor rgb "white"
    plot input_dir.'contactLine'.ii.'.dat' u 1:2 w l ls 3 notitle
@@ -45,5 +46,5 @@ do for [ii=1:n:1] {
 # Create movie with mencoder
 ENCODER = system('which mencoder');
 if (strlen(ENCODER)==0) print '=== mencoder not found ==='; exit
-CMD = 'mencoder mf://.tmp/*.png -mf fps=25:type=png -ovc lavc -lavcopts vcodec=mpeg4:mbd=2:trell -oac copy -o '.output_dir.'contactLine.avi'
+CMD = 'mencoder mf://pictures/contactline/*.png -mf fps=25:type=png -ovc lavc -lavcopts vcodec=mpeg4:mbd=2:trell -oac copy -o '.output_dir.'contactLine.avi'
 system(CMD)
