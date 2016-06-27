@@ -12,6 +12,7 @@ load "gmsh"
 #if DIMENSION == 2
 load "metis";
 load "iovtk";
+load "isoline";
 #endif
 
 #if DIMENSION == 3
@@ -82,8 +83,8 @@ real Ca = 100;
 #endif
 
 #ifdef GRAVITY
-real rho1 = -1;
-real rho2 = 1;
+real rho1 = 1;
+real rho2 = 2;
 
 real gx = 0;
 real gy = -1e8;
@@ -103,8 +104,8 @@ real nIter = 300;
 real meshError = 1.e-2;
 
 #if DIMENSION == 2
-real hmax = 0.05;
-real hmin = hmax / 64;
+real hmax = 0.08;
+real hmin = hmax / 20;
 #endif
 
 #if DIMENSION == 3
@@ -371,12 +372,28 @@ for(int i = 0; i <= nIter; i++)
 #endif
   {
 #if DIMENSION == 2
-
     savevtk("output/phi."+i+".vtk", Th, phi, dataname="Phase");
     savevtk("output/mu."+i+".vtk",  Th, mu,  dataname="ChemicalPotential");
 
+    real[int,int] xy(3,1);
+    isoline(Th, phi, xy, close=0, iso=0.0, smoothing=0.1, file="output/contactLine"+i+".dat");
+
+    // Export to gnuplot
+    {
+        ofstream fgnuplot("output/phi."+i+".gnuplot");
+        for (int ielem=0; ielem<Th.nt; ielem++)
+        {
+            for (int j=0; j <3; j++)
+            {
+                fgnuplot << Th[ielem][j].x << " " << Th[ielem][j].y << " " << phiOld[][Vh(ielem,j)] << endl;
+            }
+            fgnuplot << Th[ielem][0].x << " " << Th[ielem][0].y << " " << phiOld[][Vh(ielem,0)] << "\n\n\n";
+        }
+    }
+
 #ifdef NS
-    savevtk("output/velocity."+i+".vtk",Th,[u,v], dataname="Velocity");
+    savevtk("output/velocity."+i+".vtk", Th, [u,v,0], dataname="Velocity");
+    savevtk("output/pressure."+i+".vtk", Th, p, dataname="Pressure");
 #endif
 
 #ifdef ELECTRO
