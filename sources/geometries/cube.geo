@@ -18,6 +18,10 @@ If (!Exists(s))
   s = 0.07;
 EndIf
 
+If (!Exists(r))
+  r = 0.1*Lx;
+EndIf
+
 // Outer cube
   dx   = Lx;
   dy   = Ly;
@@ -36,7 +40,6 @@ EndIf
   x = 0.5*Lx;
   y = 0.5*Ly;
   z = 0;
-  r = 0.1*Lx;
 
   Call Circ;
 
