@@ -104,8 +104,8 @@ real nIter = 300;
 real meshError = 1.e-2;
 
 #if DIMENSION == 2
-real hmax = 0.08;
-real hmin = hmax / 20;
+real hmax = 0.1;
+real hmin = hmax / 10;
 #endif
 
 #if DIMENSION == 3
@@ -264,7 +264,7 @@ if (adapt)
       {
         Vh metricField;
         metricField[] = mshmet(Th, phi, aniso = 0, hmin = hmin, hmax = hmax, nbregul = 1);
-        ofstream bgm("output/mshmet-init-"+i+".msh");
+        ofstream bgm("output/mesh/mshmet-init-"+i+".msh");
         writeHeader(bgm); write1dData(bgm, "Size field", i*dt, i, metricField);
       }
       system("./bin/msh2pos output/mesh-init-"+i+".msh output/mshmet-init-"+i+".msh");
@@ -281,6 +281,9 @@ if (adapt)
 }
 //}}}
 // Loop in time {{{
+
+// Create output directories
+system("mkdir -p output/interface output/phi output/mu output/iso output/mesh output/potential");
 
 // Open output file
 ofstream file("output/thermodynamics.txt");
@@ -326,7 +329,7 @@ for(int i = 0; i <= nIter; i++)
 #endif
   //}}}
 
-  ofstream interface("output/interface."+ i +".xyz");
+  ofstream interface("output/interface/interface."+ i +".xyz");
   for (int j = 0; j<Th.nv ;j++)
   {
       if (abs(phiOld[][j]) < 0.2)
@@ -372,15 +375,15 @@ for(int i = 0; i <= nIter; i++)
 #endif
   {
 #if DIMENSION == 2
-    savevtk("output/phi."+i+".vtk", Th, phi, dataname="Phase");
-    savevtk("output/mu."+i+".vtk",  Th, mu,  dataname="ChemicalPotential");
+    savevtk("output/phi/phi."+i+".vtk", Th, phi, dataname="Phase");
+    savevtk("output/mu/mu."+i+".vtk",  Th, mu,  dataname="ChemicalPotential");
 
     real[int,int] xy(3,1);
-    isoline(Th, phi, xy, close=0, iso=0.0, smoothing=0.1, file="output/contactLine"+i+".dat");
+    isoline(Th, phi, xy, close=false, iso=0.0, smoothing=0.1, file="output/iso/contactLine"+i+".dat");
 
     // Export to gnuplot
     {
-        ofstream fgnuplot("output/phi."+i+".gnuplot");
+        ofstream fgnuplot("output/phi/phi."+i+".gnuplot");
         for (int ielem=0; ielem<Th.nt; ielem++)
         {
             for (int j=0; j <3; j++)
@@ -397,15 +400,15 @@ for(int i = 0; i <= nIter; i++)
 #endif
 
 #ifdef ELECTRO
-    savevtk("output/potential."+i+".vtk",Th,theta, dataname="Potential");
+    savevtk("output/potential/potential."+i+".vtk",Th,theta, dataname="Potential");
 #endif
 
 #endif
 
 #if DIMENSION == 3
     {
-    ofstream currentMesh("output/mesh-" + i + ".msh");
-    ofstream data("output/phase-" + i + ".msh");
+    ofstream currentMesh("output/mesh/mesh-" + i + ".msh");
+    ofstream data("output/phi/phase-" + i + ".msh");
 
     if(adapt)
     {
@@ -648,7 +651,7 @@ for(int i = 0; i <= nIter; i++)
       {
         Vh metricField;
         metricField[] = mshmet(Th, phi, aniso = 0, hmin = hmin, hmax = hmax, nbregul = 1);
-        ofstream bgm("output/mshmet-" + i + ".msh");
+        ofstream bgm("output/mesh/mshmet-" + i + ".msh");
         writeHeader(bgm); write1dData(bgm, "Size field", i*dt, i, metricField);
       }
       system("./bin/msh2pos output/mesh-"+i+".msh output/mshmet-"+i+".msh");
