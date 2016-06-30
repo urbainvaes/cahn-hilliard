@@ -1,6 +1,6 @@
 // Define initial conditions
 real xMiddle = 0.5*Lx;
-real yMiddle = -0.0*Ly;
+real yMiddle = 0.0*Ly;
 real thicknessX = 0.4*Lx;
 real thicknessY = 0.4*Ly;
 
@@ -15,7 +15,7 @@ func mu0 = 0;
 
 // Define boundary conditions
 varf varBoundary([phi1,mu1], [phi2,mu2]) =
-  int1d(Th,2) (0*mu2)
+  int1d(Th,1,2) (-0*mu2)
 ;
 
 varf varBoundaryU(u, unused) =
@@ -27,12 +27,11 @@ varf varBoundaryV(v, unused) =
 ;
 
 // Interface thickness
-eps = 0.03;
+eps = 0.01;
 /* eps = 0.2; */
 
 // Time step
-/* dt = 8.0*eps^4/M; */
 dt = 1e-6;
 
 // Number of iterations
-nIter = 300;
+nIter = 500;
