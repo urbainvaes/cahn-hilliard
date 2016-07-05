@@ -21,7 +21,7 @@ if options.field_name is None:
 paraview.simple._DisableFirstRenderCameraReset()
 
 # Read data file
-files = sorted(glob.glob("output/"+options.field_name+".*.vtk"), key=lambda x: int(x.split('.')[1]))
+files = sorted(glob.glob("output/"+options.field_name+"/"+options.field_name+".*.vtk"), key=lambda x: int(x.split('.')[1]))
 scalarField = LegacyVTKReader(FileNames=files)
 
 # Retrieve name of scalar field

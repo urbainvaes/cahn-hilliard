@@ -6,7 +6,8 @@ EndIf
 If (!Exists(Ly))
   Ly = 1; // export
 EndIf
-If (!Exists(Lz)) w = 0.4; EndIf // Width of region of injection
+
+If (!Exists(w)) w = 0.4; EndIf // Width of region of injection
 If (!Exists(s)) s = 0.03; EndIf
 
 // Define domain

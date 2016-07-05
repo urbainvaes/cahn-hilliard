@@ -3,3 +3,4 @@ GEOMETRY = problem.geo
 VIEW = views/cube-multimesh.geo
 
 ADAPT = 1
+PLOT = 1

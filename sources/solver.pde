@@ -20,6 +20,10 @@ load "medit"
 load "mshmet"
 load "tetgen"
 #endif
+
+// Create output directories
+system("mkdir -p output/interface output/phi output/mu output/velocity output/pressure output/iso output/mesh output/potential");
+
 //}}}
 // Process input parameters {{{
 int adapt = getARGV("-adapt",0);
@@ -83,11 +87,11 @@ real Ca = 100;
 #endif
 
 #ifdef GRAVITY
-real rho1 = 1;
-real rho2 = 2;
+real rho1 = -1;
+real rho2 = 1;
 
-real gx = 0;
-real gy = -1e8;
+real gx = 1e8;
+real gy = 0;
 #endif
 
 // Electric parameters
@@ -105,7 +109,7 @@ real meshError = 1.e-2;
 
 #if DIMENSION == 2
 real hmax = 0.1;
-real hmin = hmax / 10;
+real hmin = hmax/20;
 #endif
 
 #if DIMENSION == 3
@@ -282,9 +286,6 @@ if (adapt)
 //}}}
 // Loop in time {{{
 
-// Create output directories
-system("mkdir -p output/interface output/phi output/mu output/iso output/mesh output/potential");
-
 // Open output file
 ofstream file("output/thermodynamics.txt");
 
@@ -395,8 +396,8 @@ for(int i = 0; i <= nIter; i++)
     }
 
 #ifdef NS
-    savevtk("output/velocity."+i+".vtk", Th, [u,v,0], dataname="Velocity");
-    savevtk("output/pressure."+i+".vtk", Th, p, dataname="Pressure");
+    savevtk("output/velocity/velocity."+i+".vtk", Th, [u,v,0], dataname="Velocity");
+    savevtk("output/velocity/pressure."+i+".vtk", Th, p, dataname="Pressure");
 #endif
 
 #ifdef ELECTRO
