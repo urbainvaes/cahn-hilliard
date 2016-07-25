@@ -1,12 +1,12 @@
 # Number of time steps
 n = system("ls output/phi/phi.*.vtk | wc -l") - 1
 
-set term png
+set term pdf
 
 system("mkdir -p pictures/gnuplot")
 do for [i=1:n:1] {
 
-  outfile = sprintf('pictures/gnuplot/phase.%04.0f.png',i)
+  outfile = sprintf('pictures/gnuplot/phase.%04.0f.pdf',i)
   set output outfile
 
   set table "geometry.dat"
@@ -14,7 +14,7 @@ do for [i=1:n:1] {
   unset table
 
   unset key
-  set size square
+  set size ratio -1
   unset colorbox
   set cbrange [-1.5:1.5]
   set title "Phase field at iteration ".i

@@ -1,15 +1,15 @@
 // Dimensions of square
 
 If (!Exists(Lx))
-  Lx = 1; // export
+  Lx = 1;
 EndIf
 
 If (!Exists(Ly))
-  Ly = 1; // export
+  Ly = 1;
 EndIf
 
-If (!Exists(s)) 
-  s = 0.03; 
+If (!Exists(s))
+  s = 0.03;
 EndIf
 
 // Define domain

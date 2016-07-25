@@ -6,5 +6,4 @@ PROBLEM = problem.pde
 # Flags
 ELECTRO = 1
 ADAPT = 1
-# NS = 1
-# PLOT = 1
+PLOT = 1

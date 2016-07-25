@@ -3,7 +3,6 @@ real radius = 0.2*Lx;
 
 real x1 = 0.5*Lx + radius*1.1;
 real y1 = 0.5*Ly;
-
 func droplet1 = ((x - x1)^2 + (y - y1)^2 < radius^2 ? 1.5 : -0.5);
 
 real x2 = 0.5*Lx - radius*1.1;
