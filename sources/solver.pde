@@ -262,18 +262,15 @@ if (adapt)
     #endif
   #endif
   #if DIMENSION == 3
-  system("cp output/mesh.msh output/mesh-init-0.msh");
+  system("cp output/mesh.msh output/mesh/mesh-init-0.msh");
   for(int i = 0; i < 3; i++)
   {
-      {
-        Vh metricField;
-        metricField[] = mshmet(Th, phi, aniso = 0, hmin = hmin, hmax = hmax, nbregul = 1);
-        ofstream bgm("output/mesh/mshmet-init-"+i+".msh");
-        writeHeader(bgm); write1dData(bgm, "Size field", i*dt, i, metricField);
-      }
-      system("./bin/msh2pos output/mesh-init-"+i+".msh output/mshmet-init-"+i+".msh");
-      system("gmsh -v 0 " + xstr(GEOMETRY) + " -3 -bgm 'output/mshmet-init-"+i+".pos' -o 'output/mesh-init-" + (i + 1) + ".msh'");
-      Th = gmshload3("output/mesh-init-" + (i + 1) + ".msh");
+      Vh metricField;
+      metricField[] = mshmet(Th, phi, aniso = 0, hmin = hmin, hmax = hmax, nbregul = 1);
+      Th=tetgreconstruction(Th,switch="raAQ",sizeofvolume=metricField*metricField*metricField/6.);
+      [phi, mu] = [phi0, mu0];
+      medit("Phi", Th, phi, wait = false);
+
       [phi, mu] = [phi0, mu0];
 
       if(plotSol)
@@ -649,15 +646,9 @@ for(int i = 0; i <= nIter; i++)
 
     #if DIMENSION == 3
     {
-      {
-        Vh metricField;
-        metricField[] = mshmet(Th, phi, aniso = 0, hmin = hmin, hmax = hmax, nbregul = 1);
-        ofstream bgm("output/mesh/mshmet-" + i + ".msh");
-        writeHeader(bgm); write1dData(bgm, "Size field", i*dt, i, metricField);
-      }
-      system("./bin/msh2pos output/mesh-"+i+".msh output/mshmet-"+i+".msh");
-      system("gmsh -v 0 " + xstr(GEOMETRY) + " -3 -bgm 'output/mshmet-"+i+".pos' -o 'output/mesh-" + (i + 1) + ".msh'");
-      Th = gmshload3("output/mesh-" + (i + 1) + ".msh");
+      Vh metricField;
+      metricField[] = mshmet(Th, phi, aniso = 0, hmin = hmin, hmax = hmax, nbregul = 1);
+      Th=tetgreconstruction(Th,switch="raAQ",sizeofvolume=metricField*metricField*metricField/6.);
     }
     #endif
     [phi, mu] = [phi, mu];

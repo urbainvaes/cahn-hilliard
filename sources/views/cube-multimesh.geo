@@ -1,5 +1,5 @@
 // Generate list of files to be included
-System "ls -v output/phase-*.pos | sed '1d' > includes.geo";
+System "ls -v output/phi/phase-*.pos | sed '1d' > includes.geo";
 System 'sed -i "s/^\(.\+\)$/Merge \"\1\";/" includes.geo';
 
 
