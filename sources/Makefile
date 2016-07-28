@@ -22,6 +22,10 @@ ifdef ELECTRO
 	cpp_flags += -DELECTRO
 endif
 
+ifdef HEAT
+	cpp_flags += -DHEAT
+endif
+
 ifdef GRAVITY
 	cpp_flags += -DGRAVITY
 endif

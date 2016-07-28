@@ -22,7 +22,7 @@ load "tetgen"
 #endif
 
 // Create output directories
-system("mkdir -p output/interface output/phi output/mu output/velocity output/pressure output/iso output/mesh output/potential");
+system("mkdir -p output/interface output/phi output/mu output/velocity output/pressure output/iso output/mesh output/potential output/temperature");
 
 //}}}
 // Process input parameters {{{
@@ -41,6 +41,7 @@ int plotSol = getARGV("-plot",0);
 #endif
 
 MESH Th; Th = GMSHLOAD("output/mesh.msh");
+MESH ThUniform; ThUniform = GMSHLOAD("output/mesh.msh");
 MESH ThOut; ThOut = GMSHLOAD("output/mesh.msh");
 //}}}
 // Define functional spaces {{{
@@ -54,6 +55,7 @@ fespace Vh(Th,P1), V2h(Th,[P1,P1]);
 
 // Mesh on which to project solution for visualization
 fespace VhOut(ThOut,P1);
+fespace VhUniform(ThUniform,P2);
 
 // Phase field
 V2h [phi, mu];
@@ -67,6 +69,11 @@ Vh adaptField;
 Vh u = 0, v = 0, w = 0, p = 0, q = 0;
 Vh uOld, vOld, wOld;
 VhOut uOut, vOut, wOut;
+#endif
+
+#ifdef HEAT
+VhUniform TOld;
+VhUniform T;
 #endif
 
 #ifdef ELECTRO
@@ -100,6 +107,12 @@ real epsilonR1 = 1;
 real epsilonR2 = 2;
 #endif
 
+// Heat parameters
+#ifdef HEAT
+real kappa1 = 100;
+real kappa2 = 1000;
+#endif
+
 // Time parameters
 real dt = 8.0*eps^4/M;
 real nIter = 300;
@@ -108,8 +121,8 @@ real nIter = 300;
 real meshError = 1.e-2;
 
 #if DIMENSION == 2
-real hmax = 0.1;
-real hmin = hmax/20;
+real hmax = 0.01;
+real hmin = 0.005;
 #endif
 
 #if DIMENSION == 3
@@ -239,6 +252,24 @@ varf varPotential(theta,test) =
   ;
 #endif
 //}}}
+// Heat equation {{{
+#ifdef HEAT
+varf varHeat(T,test) =
+  INTEGRAL(DIMENSION)(Th)(
+    T*test/dt +
+    0.5*(kappa1*(1 - phi) + kappa2*(1 + phi)) * Grad(T)'*Grad(test)
+    )
+  ;
+varf varHeatRhs(T,test) =
+  INTEGRAL(DIMENSION)(Th)(
+    #ifdef NS
+    (convect([UOLDVEC],-dt,TOld)/dt)*test
+    #else
+    TOld*test/dt
+    #endif
+    );
+#endif
+//}}}
 //}}}
 // Create output file for the mesh {{{
 // This is only useful if P2 or higher elements are used.
@@ -259,6 +290,9 @@ if (adapt)
     #if DIMENSION == 3
     w = w;
     #endif
+    #endif
+    #ifdef HEAT
+    /* T = T; */
     #endif
   #endif
   #if DIMENSION == 3
@@ -327,6 +361,9 @@ for(int i = 0; i <= nIter; i++)
 #if DIMENSION == 3
   wOld = w;
 #endif
+#endif
+#ifdef HEAT
+  TOld = T;
 #endif
   //}}}
 
@@ -403,6 +440,9 @@ for(int i = 0; i <= nIter; i++)
 #ifdef ELECTRO
     savevtk("output/potential/potential."+i+".vtk",Th,theta, dataname="Potential");
 #endif
+#ifdef HEAT
+    savevtk("output/temperature/temperature."+i+".vtk", ThUniform, T,  dataname="Temperature");
+#endif
 
 #endif
 
@@ -440,7 +480,9 @@ for(int i = 0; i <= nIter; i++)
     file << i*dt           << "    "
          << freeEnergy     << "    "
          << massPhi        << "    "
-         << dt*dissipation << "    " << endl;
+         << dt*dissipation << "    "
+         << Tchip          << "    "
+         << Tglobal        << endl;
 
     // Print variables at current iteration
     cout << endl
@@ -459,7 +501,8 @@ for(int i = 0; i <= nIter; i++)
     if (plotSol)
     {
       #if DIMENSION == 2
-      plot(phi, fill=true);
+      plot(T, fill=true, value=1, WindowIndex=0);
+      plot(phi, fill=true, value=1, WindowIndex=1);
       #endif
 
       #if DIMENSION == 3
@@ -485,6 +528,21 @@ for(int i = 0; i <= nIter; i++)
   real[int] rhsPotential = varBoundaryPotential(0, Vh);
   set(matPotential,solver=sparsesolver);
   theta[] = matPotential^-1*rhsPotential;
+#endif
+  //}}}
+  // Heat equation {{{
+#ifdef HEAT
+  Tchip = int1d(Th,1) (T);
+  Tglobal = int2d(Th) (T);
+  cout << "Temperature sur le bord: " << Tchip << endl;
+  matrix matHeatBulk = varHeat(VhUniform, VhUniform);
+  matrix matHeatBoundary = varHeatBoundary(VhUniform, VhUniform);
+  matrix matHeat = matHeatBulk + matHeatBoundary;
+  real[int] rhsHeatBulk = varHeatRhs(0, VhUniform);
+  real[int] rhsHeatBoundary = varHeatBoundary(0, VhUniform);
+  real[int] rhsHeat = rhsHeatBulk + rhsHeatBoundary;
+  set(matHeat,solver=sparsesolver);
+  T[] = matHeat^-1*rhsHeat;
 #endif
   //}}}
   // Calculate the matrix {{{
@@ -674,6 +732,10 @@ for(int i = 0; i <= nIter; i++)
 
     #ifdef ELECTRO
     theta = theta;
+    #endif
+
+    #ifdef HEAT
+    /* T = T; */
     #endif
 
     #ifdef MPI
