@@ -3,8 +3,8 @@ s  = 0.05;
 
 // Dimensions of the cube
 Lx = 1;    // export
-Ly = 0.65*Lx;    // export
-Lz = 0.35*Lx;  // export
+Ly = 0.6*Lx;    // export
+Lz = 0.6*Lx;  // export
 
 Include "geometries/macros-gmsh/square.geo";
 Include "geometries/macros-gmsh/circle.geo";
