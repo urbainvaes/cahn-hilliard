@@ -7,6 +7,9 @@ cd ${HOME}/cahn-hilliard
 
 make clean
 make link problem=${problem}
-make remote-mesh host="urbain@155.198.212.223" problem=${problem}
+make remote-mesh host="urbain@155.198.212.221" problem=${problem}
+sleep 120
 make run problem=${problem}
-make remote-video host="urbain@155.198.212.223" problem=${problem}
+sleep 120
+make remote-video host="urbain@155.198.212.221" problem=${problem}
+sleep 120
