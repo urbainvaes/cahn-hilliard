@@ -9,8 +9,8 @@ link :
 	echo $(problem) > .problem;
 
 install :
-	@ echo Choose problem from: $$(ls inputs); \
-		echo -n "Enter problem: " && read problem; \
+	@ echo Choose problem from:; \
+		select problem in $$(ls inputs); do break; done; \
 		make link problem=$${problem}
 
 uninstall :

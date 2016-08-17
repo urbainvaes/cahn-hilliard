@@ -139,16 +139,16 @@ int processRegion = 1000 + mpirank + 1;
 
 #if DIMENSION == 2
 macro Grad(u) [dx(u), dy(u)] //EOM
-macro Div(u,v) dx(u) + dy(v) //EOM
-#define UVEC u, v
-#define UOLDVEC uOld, vOld
+macro Div(u,v) (dx(u) + dy(v)) //EOM
+#define UVEC u,v
+#define UOLDVEC uOld,vOld
 #endif
 
 #if DIMENSION == 3
 macro Grad(u) [dx(u), dy(u), dz(u)] //EOM
-macro Div(u,v,w) dx(u) + dy(v) + dz(w) //EOM
-#define UVEC u, v, w
-#define UOLDVEC uOld, vOld, wOld
+macro Div(u,v,w) (dx(u) + dy(v) + dz(w)) //EOM
+#define UVEC u,v,w
+#define UOLDVEC uOld,vOld,wOld
 #endif
 
 #define AUX_INTEGRAL(dim) int ## dim ## d
