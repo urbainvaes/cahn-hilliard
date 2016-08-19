@@ -1,5 +1,3 @@
-/* TODO: Add boundary condition for pressure correction (urbain, Fri 17 Jun 2016 12:08:06 PM BST) */
-
 // Include auxiliary files and load modules {{{
 include "freefem/write-mesh.pde"
 include "freefem/getargs.pde"
@@ -22,8 +20,17 @@ load "tetgen"
 #endif
 
 // Create output directories
-system("mkdir -p output/interface output/phi output/mu output/velocity output/pressure output/iso output/mesh output/potential");
-
+system("mkdir -p" + " output/phi"
+                  + " output/mu"
+                  + " output/velocity"
+                  + " output/pressure"
+                  + " output/iso"
+                  + " output/interface "
+                  + " output/mesh"
+                  #ifdef ELECTRO
+                  + " output/potential"
+                  #endif
+                 );
 //}}}
 // Process input parameters {{{
 int adapt = getARGV("-adapt",0);
@@ -64,7 +71,7 @@ VhOut phiOut, muOut;
 Vh adaptField;
 
 #ifdef NS
-Vh u = 0, v = 0, w = 0, p = 0, q = 0;
+Vh u = 0, v = 0, w = 0, p = 0;
 Vh uOld, vOld, wOld;
 VhOut uOut, vOut, wOut;
 #endif
@@ -109,7 +116,7 @@ real meshError = 1.e-2;
 
 #if DIMENSION == 2
 real hmax = 0.1;
-real hmin = hmax/20;
+real hmin = hmax/10;
 #endif
 
 #if DIMENSION == 3
@@ -125,6 +132,7 @@ real hmin = hmax/20;
 // Calculate dependent parameters {{{
 real eps2 = eps*eps;
 real invEps2 = 1./eps2;
+real Ch = eps2;
 
 #ifdef GRAVITY
 Vh rho = 0.5*(rho1*(1 - phi) + rho2*(1 + phi));
@@ -166,9 +174,9 @@ varf varCH([phi1,mu1], [phi2,mu2]) =
     phi1*phi2/dt
     + M*(Grad(mu1)'*Grad(phi2))
     - mu1*mu2
-    + lambda*(Grad(phi1)'*Grad(mu2))
-    + lambda*invEps2*0.5*3*phiOld*phiOld*phi1*mu2
-    - lambda*invEps2*0.5*phi1*mu2
+    + Ch*(Grad(phi1)'*Grad(mu2))
+    + 0.5*3*phiOld*phiOld*phi1*mu2
+    - 0.5*phi1*mu2
     )
 ;
 
@@ -179,8 +187,8 @@ varf varCHrhs([phi1,mu1], [phi2,mu2]) =
     #else
     phiOld*phi2/dt
     #endif
-    + lambda*invEps2*0.5*phiOld*phiOld*phiOld*mu2
-    + lambda*invEps2*0.5*phiOld*mu2
+    + 0.5*phiOld*phiOld*phiOld*mu2
+    + 0.5*phiOld*mu2
     #ifdef ELECTRO
     + 0.25 * (epsilonR2 - epsilonR1) * (Grad(theta)'*Grad(theta)) * mu2
     #endif
@@ -195,7 +203,7 @@ varf varU(u,test) =
     );
 varf varUrhs(u,test) =
   INTEGRAL(DIMENSION)(Th)(
-    (convect([UOLDVEC],-dt,uOld)/dt-dx(p))*test
+    (convect([UOLDVEC],-dt,uOld)/dt)*test
     + (1/Ca)*mu*dx(phi)*test
     #ifdef GRAVITY
     + gx*phi*test
@@ -207,26 +215,32 @@ varf varV(v,test) =
     );
 varf varVrhs(v,test) =
   INTEGRAL(DIMENSION)(Th)(
-    (convect([UOLDVEC],-dt,vOld)/dt-dy(p))*test
+    (convect([UOLDVEC],-dt,vOld)/dt)*test
     + (1/Ca)*mu*dy(phi)*test
     #ifdef GRAVITY
     + gy*phi*test
     #endif
     );
 #if DIMENSION == 3
-varf varW(w,test) =
-  INTEGRAL(DIMENSION)(Th)(
+varf varW(w,test) = INTEGRAL(DIMENSION)(Th)(
     w*test/dt +(1/Re)*(Grad(w)'*Grad(test))
     );
 varf varWrhs(w,test) =
   INTEGRAL(DIMENSION)(Th)(
-    (convect([UOLDVEC],-dt,wOld)/dt-dz(p))*test
+    (convect([UOLDVEC],-dt,wOld)/dt)*test
     + (1/Ca)*mu*dz(phi)*test
     #ifdef GRAVITY
     + gz*phi*test
     #endif
     );
 #endif
+varf varP(p,test) = INTEGRAL(DIMENSION)(Th)( Grad(p)'*Grad(test) );
+varf varPrhs(p,test) = INTEGRAL(DIMENSION)(Th)( -Div(UVEC)*test/dt );
+/* 	 - Div(UVEC)*test/dt */
+/* varf varPrhs(p,test) = */
+/*   INTEGRAL(DIMENSION)(Th)( */
+/* 	 - Div(UVEC)*test/dt */
+/*     ); */
 #endif
 //}}}
 // Poisson for electric potential {{{
@@ -249,13 +263,12 @@ varf varPotential(theta,test) =
 if (adapt)
 {
   #if DIMENSION == 2
-  Th = adaptmesh(Th, phi, mu, err = meshError, hmax = hmax, hmin = hmin);
+  Th = adaptmesh(Th, phi, hmax = hmax, hmin = hmin, nbvx = 1e6);
   [phi, mu] = [phi0, mu0];
     #ifdef NS
     u = u;
     v = v;
     p = p;
-    q = q;
     #if DIMENSION == 3
     w = w;
     #endif
@@ -268,9 +281,6 @@ if (adapt)
       Vh metricField;
       metricField[] = mshmet(Th, phi, aniso = 0, hmin = hmin, hmax = hmax, nbregul = 1);
       Th=tetgreconstruction(Th,switch="raAQ",sizeofvolume=metricField*metricField*metricField/6.);
-      [phi, mu] = [phi0, mu0];
-      medit("Phi", Th, phi, wait = false);
-
       [phi, mu] = [phi0, mu0];
 
       if(plotSol)
@@ -430,7 +440,7 @@ for(int i = 0; i <= nIter; i++)
       writeHeader(data); write1dData(data, "Cahn-Hilliard", i*dt, i, phiOld);
     }
     }
-      system("./bin/msh2pos output/mesh-" + i + ".msh output/phase-" + i + ".msh");
+      system("./bin/msh2pos output/mesh/mesh-" + i + ".msh output/phi/phase-" + i + ".msh");
     // ! phi[]
 #endif
 
@@ -456,7 +466,9 @@ for(int i = 0; i <= nIter; i++)
     if (plotSol)
     {
       #if DIMENSION == 2
-      plot(phi, fill=true);
+      plot(phi, fill=true, WindowIndex = 0);
+      plot(u, fill=true, WindowIndex = 1);
+      plot(p, fill=true, WindowIndex = 2);
       #endif
 
       #if DIMENSION == 3
@@ -579,56 +591,47 @@ for(int i = 0; i <= nIter; i++)
   real vol = INTEGRAL(DIMENSION)(Th)(1.);
 
   matrix matUBulk = varU(Vh, Vh);
-  matrix matUBoundary = varBoundaryU(Vh, Vh);
+  matrix matUBoundary = varUBoundary(Vh, Vh);
   matrix matU = matUBulk + matUBoundary;
   real[int] rhsUBulk = varUrhs(0, Vh);
-  real[int] rhsUBoundary = varBoundaryU(0, Vh);
+  real[int] rhsUBoundary = varUBoundary(0, Vh);
   real[int] rhsU = rhsUBulk + rhsUBoundary;
   set(matU,solver=sparsesolver);
   u[] = matU^-1*rhsU;
 
   matrix matVBulk = varV(Vh, Vh);
-  matrix matVBoundary = varBoundaryV(Vh, Vh);
+  matrix matVBoundary = varVBoundary(Vh, Vh);
   matrix matV = matVBulk + matVBoundary;
   real[int] rhsVBulk = varVrhs(0, Vh);
-  real[int] rhsVBoundary = varBoundaryV(0, Vh);
+  real[int] rhsVBoundary = varVBoundary(0, Vh);
   real[int] rhsV = rhsVBulk + rhsVBoundary;
   set(matV,solver=sparsesolver);
   v[] = matV^-1*rhsV;
 
   #if DIMENSION == 3
   matrix matWBulk = varW(Vh, Vh);
-  matrix matWBoundary = varBoundaryW(Vh, Vh);
+  matrix matWBoundary = varWBoundary(Vh, Vh);
   matrix matW = matWBulk + matWBoundary;
   real[int] rhsWBulk = varWrhs(0, Vh);
-  real[int] rhsWBoundary = varBoundaryW(0, Vh);
+  real[int] rhsWBoundary = varWBoundary(0, Vh);
   real[int] rhsW = rhsWBulk + rhsWBoundary;
   set(matW,solver=sparsesolver);
   w[] = matW^-1*rhsW;
   #endif
-  real meandiv = INTEGRAL(DIMENSION)(Th)(Div(UVEC))/vol;
-  varf varP(q,test) =
-    INTEGRAL(DIMENSION)(Th)(
-        Grad(q)'*Grad(test)
-        )
-    + on(5, q = 0);
-  varf varPrhs(q,test) =
-    INTEGRAL(DIMENSION)(Th)(
-        (Div(UVEC)-meandiv)*test/dt
-        )
-    + on(5, q = 0);
-  matrix matP = varP(Vh, Vh);
-  real[int] rhsP = varPrhs(0, Vh);
+
+  matrix matPBulk = varP(Vh, Vh);
+  matrix matPBoundary = varPBoundary(Vh, Vh);
+  matrix matP = matPBulk + matPBoundary;
+  real[int] rhsPBulk = varPrhs(0, Vh);
+  real[int] rhsPBoundary = varPBoundary(0, Vh);
+  real[int] rhsP = rhsPBulk + rhsPBoundary;
   set(matP,solver=sparsesolver);
-  q[] = matP^-1*rhsP;
-  // solve pb4p(q,test,solver=LU)= int2d(Th)(Grad(q)'*Grad(test))
-  //     - INTEGRAL(DIMENSION)(Th)((Div(UVEC)-meandiv)*test/dt);
-  real meanpq = INTEGRAL(DIMENSION)(Th)(pold - q)/vol;
-  p = pold-q-meanpq;
-  u = u + dx(q)*dt;
-  v = v + dy(q)*dt;
+  p[] = matP^-1*rhsP;
+
+  u = u - dx(p)*dt;
+  v = v - dy(p)*dt;
   #if DIMENSION == 3
-  w = w + dz(q)*dt;
+  w = w - dz(p)*dt;
   #endif
   #endif
   //}}}
@@ -640,7 +643,7 @@ for(int i = 0; i <= nIter; i++)
     #endif
     #if DIMENSION == 2
     {
-      Th = adaptmesh(Th, phi, mu, err = meshError, hmax = hmax, hmin = hmin);
+      Th = adaptmesh(Th, phi, hmax = hmax, hmin = hmin, nbvx = 1e6);
     }
     #endif
 
@@ -657,7 +660,6 @@ for(int i = 0; i <= nIter; i++)
     u = u;
     v = v;
     p = p;
-    q = q;
     #if DIMENSION == 3
     w = w;
     #endif
