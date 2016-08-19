@@ -9,11 +9,11 @@ varf varBoundary([phi1,mu1], [phi2,mu2]) =
 ;
 
 // Interface thickness
-eps = 0.05;
+eps = 0.01;
 
 // Time step
-/* dt = 8.0*eps^4/M; */
-dt = 1e-6;
+dt = 8.0*eps^4/M;
+/* dt = 1e-6; */
 
 // Number of iterations
 nIter = 2000;

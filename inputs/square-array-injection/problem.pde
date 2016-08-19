@@ -14,7 +14,7 @@ varf varBoundary([phi1,mu1], [phi2,mu2]) =
 nIter = 5000;
 
 // Width of the interface
-eps = 0.1;
+eps = 0.01;
 
 // Time step
 dt = eps^4/M;
