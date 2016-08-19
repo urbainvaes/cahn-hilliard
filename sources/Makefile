@@ -26,10 +26,6 @@ ifdef GRAVITY
 	cpp_flags += -DGRAVITY
 endif
 
-ifdef NP
-	cpp_flags += -DMPI
-endif
-
 ifdef ADAPT
 	ff_flags += -adapt 1
 endif
