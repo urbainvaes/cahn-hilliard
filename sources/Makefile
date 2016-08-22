@@ -40,12 +40,7 @@ endif
 mesh : output/mesh.msh
 
 output/mesh.msh : $(GEOMETRY) config.mk
-ifdef NP
-	gmsh $< -$(DIMENSION) -part $(NP) -o tmp.msh | tee logs/gmsh.log
-	bin/parseMetisMesh tmp.msh $@
-else
 	gmsh $< -$(DIMENSION) -o $@ | tee logs/gmsh.log
-endif
 
 ###################
 #  Run FreeFem++  #
@@ -59,11 +54,7 @@ processed_solver.pde : solver.pde $(PROBLEM) config.mk
 	cpp -w $(cpp_flags) $< | sed '/^\#/d' | sed 's#^\(macro.\+\)$$#\1 //EOM#' | sed '/^$$/d' > $@
 
 output/thermodynamics.txt : processed_solver.pde $(PROBLEM) output/mesh.msh geometry.pde
-ifdef NP
-	mpirun -np $(NP) FreeFem++-mpi $< $(ff_flags) | tee logs/freefem.log
-else
 	FreeFem++ $< $(ff_flags) | tee logs/freefem.log
-endif
 
 ##############
 #  Graphics  #
