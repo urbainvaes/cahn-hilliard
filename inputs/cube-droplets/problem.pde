@@ -18,7 +18,7 @@ func mu0 = 0;
 [phi, mu] = [phi0, mu0];
 
 // Boundary conditions
-varf varBoundary([phi1,mu1], [phi2,mu2]) =
+varf varPhiBoundary([phi1,mu1], [phi2,mu2]) =
   /* int2d(Th,1) (-20*mu2) + int2d(Th,2) (-20*mu2) + int2d(Th,3) (-20*mu2) + int2d(Th,4) (-20*mu2) */
   int2d(Th,1) (-0*mu2)
 ;

@@ -14,7 +14,7 @@ func mu0 = 0;
 [phi, mu] = [phi0, mu0];
 
 // Boundary conditions (Hydrophobic boundaries)
-varf varBoundary([phi1,mu1], [phi2,mu2]) =
+varf varPhiBoundary([phi1,mu1], [phi2,mu2]) =
   int2d(Th,1,2,3,4) (-5*mu2)
 ;
 

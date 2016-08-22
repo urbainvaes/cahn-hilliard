@@ -14,6 +14,6 @@ eps = 0.03;
 dt = 1e-6;
 
 // Boundary conditions
-varf varBoundary([phi1,mu1], [phi2,mu2]) =
+varf varPhiBoundary([phi1,mu1], [phi2,mu2]) =
   int2d(Th,1) (10*mu2)
 ;

@@ -111,9 +111,6 @@ real epsilonR2 = 2;
 real dt = 8.0*Pe*Ch^2;
 real nIter = 300;
 
-// Mesh parameters
-real meshError = 1.e-2;
-
 #if DIMENSION == 2
 real hmax = 0.1;
 real hmin = hmax/10;
@@ -158,7 +155,7 @@ macro Div(u,v,w) (dx(u) + dy(v) + dz(w)) //EOM
 #define INTEGRAL(dim) AUX_INTEGRAL(dim)
 //}}}
 // Cahn-Hilliard {{{
-varf varCH([phi1,mu1], [phi2,mu2]) =
+varf varPhi([phi1,mu1], [phi2,mu2]) =
   INTEGRAL(DIMENSION)(Th)(
     phi1*phi2/dt
     + (1/Pe)*(Grad(mu1)'*Grad(phi2))
@@ -451,33 +448,16 @@ for(int i = 0; i <= nIter; i++)
   theta[] = matPotential^-1*rhsPotential;
 #endif
   //}}}
-  // Calculate the matrix {{{
-  matrix matBulk = varCH(V2h, V2h);
-  timeMatrixBulk = tic();
-
-  matrix matBoundary = varBoundary(V2h, V2h);
-  timeMatrixBc = tic();
-
-  matrix matCH = matBulk + matBoundary;
-  timeMatrix = timeMatrixBulk + timeMatrixBc + tic();
-
-  set(matCH,solver=sparsesolver);
-  timeFactorization = tic();
-  //}}}
-  // Calculate the right-hand side {{{
-
-  real[int] rhsBulk = varCHrhs(0, V2h);
-  timeRhsBulk = tic();
-
-  real[int] rhsBoundary = varBoundary(0, V2h);
-  timeRhsBc  = tic();
-
+  // Cahn-Hilliard equation {{{
+  matrix matPhiBulk = varPhi(V2h, V2h); timeMatrixBulk = tic();
+  matrix matPhiBoundary = varPhiBoundary(V2h, V2h); timeMatrixBc = tic();
+  matrix matCH = matPhiBulk + matPhiBoundary; timeMatrix = timeMatrixBulk + timeMatrixBc + tic();
+  real[int] rhsBulk = varCHrhs(0, V2h); timeRhsBulk = tic();
+  real[int] rhsBoundary = varPhiBoundary(0, V2h); timeRhsBc  = tic();
   real[int] rhsCH = rhsBulk + rhsBoundary;
   timeRhs = timeRhsBulk + timeRhsBc + tic();
-  //}}}
-  // Solve the linear system {{{
-  phi[] = matCH^-1*rhsCH;
-  timeSolution = tic();
+  set(matCH,solver=sparsesolver); timeFactorization = tic();
+  phi[] = matCH^-1*rhsCH; timeSolution = tic();
   //}}}
   // Navier stokes {{{
   #ifdef NS

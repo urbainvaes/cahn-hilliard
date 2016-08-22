@@ -11,6 +11,6 @@ func mu0 = 0;
 [phi, mu] = [phi0, mu0];
 
 // Boundary conditions
-varf varBoundary([phi1,mu1], [phi2,mu2]) =
+varf varPhiBoundary([phi1,mu1], [phi2,mu2]) =
   on(1,phi1=-1) + on(2,phi1=-1) + on(3, phi1=-1) + on(4,phi1 = -1)
 ;

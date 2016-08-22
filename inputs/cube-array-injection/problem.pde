@@ -4,7 +4,7 @@ func mu0 = 0;
 [phi, mu] = [phi0, mu0];
 
 // Boundary conditions
-varf varBoundary([phi1,mu1], [phi2,mu2]) =
+varf varPhiBoundary([phi1,mu1], [phi2,mu2]) =
   on(11,phi1=1) + on(11,mu1=50)
   + int2d(Th,21) (0*mu2)
 ;
