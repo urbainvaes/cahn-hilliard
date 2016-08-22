@@ -83,13 +83,13 @@ Vh theta;
 // Declare default parameters {{{
 
 // Cahn-Hilliard parameters
-real M       = 1;
-real lambda  = 1;
-real eps     = 0.01;
+real Pe = 1;
+real Ch = 0.01^2;
 
 // Navier-Stokes parameters
 #ifdef NS
-real Re = 0.1;
+real Re1 = 1;
+real Re2 = 1;
 real Ca = 100;
 #endif
 
@@ -108,7 +108,7 @@ real epsilonR2 = 2;
 #endif
 
 // Time parameters
-real dt = 8.0*eps^4/M;
+real dt = 8.0*Pe*Ch^2;
 real nIter = 300;
 
 // Mesh parameters
@@ -130,10 +130,9 @@ real hmin = hmax/20;
 #include xstr(PROBLEM)
 //}}}
 // Calculate dependent parameters {{{
-real eps2 = eps*eps;
-real invEps2 = 1./eps2;
-real Ch = eps2;
-
+#ifdef NS
+Vh Re = 0.5*(Re1*(1 - phi) + Re2*(1 + phi));
+#endif
 #ifdef GRAVITY
 Vh rho = 0.5*(rho1*(1 - phi) + rho2*(1 + phi));
 #endif
@@ -162,7 +161,7 @@ macro Div(u,v,w) (dx(u) + dy(v) + dz(w)) //EOM
 varf varCH([phi1,mu1], [phi2,mu2]) =
   INTEGRAL(DIMENSION)(Th)(
     phi1*phi2/dt
-    + M*(Grad(mu1)'*Grad(phi2))
+    + (1/Pe)*(Grad(mu1)'*Grad(phi2))
     - mu1*mu2
     + Ch*(Grad(phi1)'*Grad(mu2))
     + 0.5*3*phiOld*phiOld*phi1*mu2
@@ -334,14 +333,14 @@ for(int i = 0; i <= nIter; i++)
   // Calculate macroscopic variables {{{
 
   freeEnergy  = INTEGRAL(DIMENSION)(Th) (
-      0.5*lambda*(Grad(phi)'*Grad(phi))
-      + 0.25*lambda*invEps2*(phi^2 - 1)^2
+      0.5*(Grad(phi)'*Grad(phi))
+      + 0.25*(1/Ch)*(phi^2 - 1)^2
 #ifdef ELECTRO
       - 0.25 * (epsilonR1*(1 - phi) + epsilonR2*(1 + phi)) * Grad(theta)'*Grad(theta)
 #endif
       );
   massPhi     = INTEGRAL(DIMENSION)(Th) (phi);
-  dissipation = INTEGRAL(DIMENSION)(Th) (M*(Grad(mu)'*Grad(mu)));
+  dissipation = INTEGRAL(DIMENSION)(Th) ((1/Pe)*(Grad(mu)'*Grad(mu)));
 
   timeMacro = tic();
   //}}}
@@ -426,8 +425,10 @@ for(int i = 0; i <= nIter; i++)
   {
 #if DIMENSION == 2
       plot(phi, fill=true, WindowIndex = 0);
+      #ifdef NS
       plot(u, fill=true, WindowIndex = 1);
       plot(p, fill=true, WindowIndex = 2);
+      #endif
 #endif
 
 #if DIMENSION == 3
