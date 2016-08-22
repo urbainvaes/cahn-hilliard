@@ -66,7 +66,7 @@ VIDEO = pictures/video.ogv
 endif
 video : $(VIDEO)
 
-$(VIDEO) : $(VIEW) output/thermodynamics.txt
+$(VIDEO) : $(VIEW)
 ifeq ($(DIMENSION), 3)
 	gmsh -display :0 $(GEOMETRY) $< -setnumber video 1
 	mencoder "mf://output/iso/*.jpg" -mf fps=10 -o $(VIDEO) -ovc lavc -lavcopts vcodec=mpeg4:vhq
@@ -74,7 +74,7 @@ else
 	DISPLAY=:0 pvpython $< --input phi --range -1,1 --video $(VIDEO)
 endif
 
-visualization : $(VIEW) output/thermodynamics.txt
+visualization : $(VIEW)
 ifeq ($(DIMENSION), 3)
 	gmsh -display :0 $(GEOMETRY) $<
 else
