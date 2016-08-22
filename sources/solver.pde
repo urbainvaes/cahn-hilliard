@@ -292,13 +292,13 @@ for(int i = 0; i <= nIter; i++)
 {
   // Update previous solution {{{
   phiOld = phi;
-#ifdef NS
+  #ifdef NS
   uOld = u;
   vOld = v;
-#if DIMENSION == 3
+  #if DIMENSION == 3
   wOld = w;
-#endif
-#endif
+  #endif
+  #endif
   //}}}
 
   ofstream interface("output/interface/interface."+ i +".xyz");
@@ -321,9 +321,9 @@ for(int i = 0; i <= nIter; i++)
   freeEnergy  = INTEGRAL(DIMENSION)(Th) (
       0.5*(Grad(phi)'*Grad(phi))
       + 0.25*(1/Ch)*(phi^2 - 1)^2
-#ifdef ELECTRO
+      #ifdef ELECTRO
       - 0.25 * (epsilonR1*(1 - phi) + epsilonR2*(1 + phi)) * Grad(theta)'*Grad(theta)
-#endif
+      #endif
       );
   massPhi     = INTEGRAL(DIMENSION)(Th) (phi);
   dissipation = INTEGRAL(DIMENSION)(Th) ((1/Pe)*(Grad(mu)'*Grad(mu)));
@@ -349,18 +349,17 @@ for(int i = 0; i <= nIter; i++)
       }
   }
 
-#ifdef NS
+  #ifdef NS
   savevtk("output/velocity/velocity."+i+".vtk", Th, [u,v,0], dataname="Velocity");
   savevtk("output/velocity/pressure."+i+".vtk", Th, p, dataname="Pressure");
-#endif
+  #endif
 
-#ifdef ELECTRO
+  #ifdef ELECTRO
   savevtk("output/potential/potential."+i+".vtk",Th,theta, dataname="Potential");
-#endif
+  #endif
+  #endif
 
-#endif
-
-#if DIMENSION == 3
+  #if DIMENSION == 3
   {
       ofstream currentMesh("output/mesh/mesh-" + i + ".msh");
       ofstream data("output/phi/phase-" + i + ".msh");
@@ -369,11 +368,11 @@ for(int i = 0; i <= nIter; i++)
       {
           phiOut = phi;
           muOut  = mu;
-#ifdef NS
+          #ifdef NS
           uOut = u;
           vOut = v;
           wOut = w;
-#endif
+          #endif
           writeHeader(currentMesh);
           writeNodes(currentMesh, Vh);
           writeElements(currentMesh, Vh, Th);
@@ -389,7 +388,7 @@ for(int i = 0; i <= nIter; i++)
   }
   system("./bin/msh2pos output/mesh/mesh-" + i + ".msh output/phi/phase-" + i + ".msh");
   // ! phi[]
-#endif
+  #endif
 
   file << i*dt           << "    "
       << freeEnergy     << "    "
@@ -407,17 +406,17 @@ for(int i = 0; i <= nIter; i++)
   // Visualize solution at current time step {{{
   if (plotSol)
   {
-#if DIMENSION == 2
+      #if DIMENSION == 2
       plot(phi, fill=true, WindowIndex = 0);
       #ifdef NS
       plot(u, fill=true, WindowIndex = 1);
       plot(p, fill=true, WindowIndex = 2);
       #endif
-#endif
+       #endif
 
-#if DIMENSION == 3
+      #if DIMENSION == 3
       medit("Phi",Th,phi,wait = false);
-#endif
+      #endif
   }
   //}}}
   // Exit if required {{{
@@ -426,14 +425,14 @@ for(int i = 0; i <= nIter; i++)
   tic();
   //}}}
   // Poisson for electric potential {{{
-#ifdef ELECTRO
+  #ifdef ELECTRO
   matrix matPotentialBulk = varPotential(Vh, Vh);
   matrix matPotentialBoundary = varBoundaryPotential(Vh, Vh);
   matrix matPotential = matPotentialBulk + matPotentialBoundary;
   real[int] rhsPotential = varBoundaryPotential(0, Vh);
   set(matPotential,solver=sparsesolver);
   theta[] = matPotential^-1*rhsPotential;
-#endif
+  #endif
   //}}}
   // Cahn-Hilliard equation {{{
   matrix matPhiBulk = varPhi(V2h, V2h);
@@ -451,8 +450,6 @@ for(int i = 0; i <= nIter; i++)
   #if DIMENSION == 3
   Vh wOld = w;
   #endif
-  real vol = INTEGRAL(DIMENSION)(Th)(1.);
-
   matrix matUBulk = varU(Vh, Vh);
   matrix matUBoundary = varUBoundary(Vh, Vh);
   matrix matU = matUBulk + matUBoundary;
