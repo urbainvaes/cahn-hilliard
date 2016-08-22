@@ -14,23 +14,23 @@ VIEW      ?= view.geo
 cpp_flags = -DDIMENSION=$(DIMENSION) -DPROBLEM=$(PROBLEM) -DGEOMETRY=$(GEOMETRY)
 ff_flags = -ne -v 0
 
-ifdef NS
+ifeq ($(NS), 1)
 	cpp_flags += -DNS
 endif
 
-ifdef ELECTRO
+ifeq ($(ELECTR), 1)
 	cpp_flags += -DELECTRO
 endif
 
-ifdef GRAVITY
+ifeq ($(GRAVITY), 1)
 	cpp_flags += -DGRAVITY
 endif
 
-ifdef ADAPT
+ifeq ($(ADAPT), 1)
 	ff_flags += -adapt 1
 endif
 
-ifdef PLOT
+ifeq ($(PLOT), 1)
 	ff_flags += -plot 1
 endif
 
