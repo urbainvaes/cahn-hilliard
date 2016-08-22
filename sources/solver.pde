@@ -287,21 +287,10 @@ real freeEnergy,
      massPhi,
      dissipation;
 
-real timeStart,
-     timeMacro,
-     timeMatrixBulk,
-     timeMatrixBc,
-     timeMatrix,
-     timeRhsBulk,
-     timeRhsBc,
-     timeRhs,
-     timeFactorization,
-     timeSolution;
 //}}}
 for(int i = 0; i <= nIter; i++)
 {
   // Update previous solution {{{
-  timeStart = clock(); tic();
   phiOld = phi;
 #ifdef NS
   uOld = u;
@@ -338,8 +327,6 @@ for(int i = 0; i <= nIter; i++)
       );
   massPhi     = INTEGRAL(DIMENSION)(Th) (phi);
   dissipation = INTEGRAL(DIMENSION)(Th) ((1/Pe)*(Grad(mu)'*Grad(mu)));
-
-  timeMacro = tic();
   //}}}
   // Save data to files and stdout {{{
   #if DIMENSION == 2
@@ -449,15 +436,14 @@ for(int i = 0; i <= nIter; i++)
 #endif
   //}}}
   // Cahn-Hilliard equation {{{
-  matrix matPhiBulk = varPhi(V2h, V2h); timeMatrixBulk = tic();
-  matrix matPhiBoundary = varPhiBoundary(V2h, V2h); timeMatrixBc = tic();
-  matrix matCH = matPhiBulk + matPhiBoundary; timeMatrix = timeMatrixBulk + timeMatrixBc + tic();
-  real[int] rhsBulk = varCHrhs(0, V2h); timeRhsBulk = tic();
-  real[int] rhsBoundary = varPhiBoundary(0, V2h); timeRhsBc  = tic();
+  matrix matPhiBulk = varPhi(V2h, V2h);
+  matrix matPhiBoundary = varPhiBoundary(V2h, V2h);
+  matrix matCH = matPhiBulk + matPhiBoundary;
+  real[int] rhsBulk = varCHrhs(0, V2h);
+  real[int] rhsBoundary = varPhiBoundary(0, V2h);
   real[int] rhsCH = rhsBulk + rhsBoundary;
-  timeRhs = timeRhsBulk + timeRhsBc + tic();
-  set(matCH,solver=sparsesolver); timeFactorization = tic();
-  phi[] = matCH^-1*rhsCH; timeSolution = tic();
+  set(matCH,solver=sparsesolver);
+  phi[] = matCH^-1*rhsCH;
   //}}}
   // Navier stokes {{{
   #ifdef NS
@@ -539,22 +525,6 @@ for(int i = 0; i <= nIter; i++)
     theta = theta;
     #endif
   }
-  //}}}
-  // Print the times to stdout {{{
-  cout << endl
-      << "** TIME OF COMPUTATIONS **    " << endl
-      << "Matrix: assembly (master)     " << timeMatrix          << endl
-      << "Matrix: volume terms          " << timeMatrixBulk      << endl
-      << "Matrix: boundary conditions   " << timeMatrixBc        << endl
-      << "Matrix: factorization         " << timeFactorization   << endl;
-
-  cout << endl
-      << "Rhs: assembly (master)       " << timeRhs             << endl
-      << "Rhs: volume terms            " << timeRhsBulk         << endl
-      << "Rhs: boundary conditions     " << timeRhsBc           << endl;
-  cout << endl
-      << "Solution  of the linear system       " << timeSolution        << endl
-      << "Total time spent in process 0        " << clock() - timeStart << endl;
   //}}}
 }
 //}}}
