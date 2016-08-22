@@ -13,7 +13,11 @@ If (!Exists(cx1))
 EndIf
 
 If (!Exists(cx2))
-  cx2 = 0.15*Lx;
+  cx2 = 0.2*Lx;
+EndIf
+
+If (!Exists(cy))
+  cy = -0.5*Ly;
 EndIf
 
 If (!Exists(s))
@@ -21,8 +25,8 @@ If (!Exists(s))
 EndIf
 
 // Channel
-cy1 = -0.5*Ly;
-cy2 = -0.5*Ly;
+cy1 = cy;
+cy2 = cy;
 
 // Define domain
 Point(1) = {0   , 0   , 0 , s};
