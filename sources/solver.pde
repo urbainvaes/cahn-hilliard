@@ -113,7 +113,7 @@ real nIter = 300;
 
 #if DIMENSION == 2
 real hmax = 0.1;
-real hmin = hmax/10;
+real hmin = hmax/20;
 #endif
 
 #if DIMENSION == 3
@@ -281,13 +281,7 @@ if (adapt)
 
 // Open output file
 ofstream file("output/thermodynamics.txt");
-
-// Declare extensive physical variables {{{
-real freeEnergy,
-     massPhi,
-     dissipation;
-
-//}}}
+real freeEnergy, massPhi, dissipation;
 for(int i = 0; i <= nIter; i++)
 {
   // Update previous solution {{{
@@ -301,6 +295,7 @@ for(int i = 0; i <= nIter; i++)
   #endif
   //}}}
 
+  // Calculate position of the interface {{{
   ofstream interface("output/interface/interface."+ i +".xyz");
   for (int j = 0; j<Th.nv ;j++)
   {
@@ -315,7 +310,7 @@ for(int i = 0; i <= nIter; i++)
           #endif
       }
   }
-
+  // }}}
   // Calculate macroscopic variables {{{
 
   freeEnergy  = INTEGRAL(DIMENSION)(Th) (
