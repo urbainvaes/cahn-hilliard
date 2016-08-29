@@ -154,6 +154,16 @@ macro Div(u,v,w) (dx(u) + dy(v) + dz(w)) //EOM
 #define AUX_INTEGRAL(dim) int ## dim ## d
 #define INTEGRAL(dim) AUX_INTEGRAL(dim)
 //}}}
+// Poisson for electric potential {{{
+#ifdef ELECTRO
+varf varPotential(theta,test) =
+  INTEGRAL(DIMENSION)(Th)(
+    0.5*(epsilonR1*(1 - phi) + epsilonR2*(1 + phi))
+    * Grad(theta)'*Grad(test)
+    )
+  ;
+#endif
+//}}}
 // Cahn-Hilliard {{{
 varf varPhi([phi1,mu1], [phi2,mu2]) =
   INTEGRAL(DIMENSION)(Th)(
@@ -227,16 +237,6 @@ varf varPrhs(p,test) = INTEGRAL(DIMENSION)(Th)( -Div(UVEC)*test/dt );
 /*   INTEGRAL(DIMENSION)(Th)( */
 /* 	 - Div(UVEC)*test/dt */
 /*     ); */
-#endif
-//}}}
-// Poisson for electric potential {{{
-#ifdef ELECTRO
-varf varPotential(theta,test) =
-  INTEGRAL(DIMENSION)(Th)(
-    0.5*(epsilonR1*(1 - phi) + epsilonR2*(1 + phi))
-    * Grad(theta)'*Grad(test)
-    )
-  ;
 #endif
 //}}}
 //}}}
