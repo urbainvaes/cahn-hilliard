@@ -84,7 +84,7 @@ Vh theta;
 
 // Cahn-Hilliard parameters
 real Pe = 1;
-real Ch = 0.01^2;
+real eps = 0.01;
 
 // Navier-Stokes parameters
 #ifdef NS
@@ -108,12 +108,12 @@ real epsilonR2 = 2;
 #endif
 
 // Time parameters
-real dt = 8.0*Pe*Ch^2;
+real dt = 8.0*Pe*eps^4;
 real nIter = 300;
 
 #if DIMENSION == 2
 real hmax = 0.1;
-real hmin = hmax/20;
+real hmin = hmax/40;
 #endif
 
 #if DIMENSION == 3
@@ -170,9 +170,9 @@ varf varPhi([phi1,mu1], [phi2,mu2]) =
     phi1*phi2/dt
     + (1/Pe)*(Grad(mu1)'*Grad(phi2))
     - mu1*mu2
-    + Ch*(Grad(phi1)'*Grad(mu2))
-    + 0.5*3*phiOld*phiOld*phi1*mu2
-    - 0.5*phi1*mu2
+    + eps*(Grad(phi1)'*Grad(mu2))
+    + (1/eps)*0.5*3*phiOld*phiOld*phi1*mu2
+    - (1/eps)*0.5*phi1*mu2
     )
 ;
 
@@ -183,8 +183,8 @@ varf varCHrhs([phi1,mu1], [phi2,mu2]) =
     #else
     phiOld*phi2/dt
     #endif
-    + 0.5*phiOld*phiOld*phiOld*mu2
-    + 0.5*phiOld*mu2
+    + (1/eps)*0.5*phiOld*phiOld*phiOld*mu2
+    + (1/eps)*0.5*phiOld*mu2
     #ifdef ELECTRO
     + 0.25 * (epsilonR2 - epsilonR1) * (Grad(theta)'*Grad(theta)) * mu2
     #endif
@@ -294,7 +294,6 @@ for(int i = 0; i <= nIter; i++)
   #endif
   #endif
   //}}}
-
   // Calculate position of the interface {{{
   ofstream interface("output/interface/interface."+ i +".xyz");
   for (int j = 0; j<Th.nv ;j++)
@@ -315,7 +314,7 @@ for(int i = 0; i <= nIter; i++)
 
   freeEnergy  = INTEGRAL(DIMENSION)(Th) (
       0.5*(Grad(phi)'*Grad(phi))
-      + 0.25*(1/Ch)*(phi^2 - 1)^2
+      + 0.25*(1/eps^2)*(phi^2 - 1)^2
       #ifdef ELECTRO
       - 0.25 * (epsilonR1*(1 - phi) + epsilonR2*(1 + phi)) * Grad(theta)'*Grad(theta)
       #endif
@@ -429,7 +428,7 @@ for(int i = 0; i <= nIter; i++)
   theta[] = matPotential^-1*rhsPotential;
   #endif
   //}}}
-  // Cahn-Hilliard equation {{{
+  // Cahn-Hilliard {{{
   matrix matPhiBulk = varPhi(V2h, V2h);
   matrix matPhiBoundary = varPhiBoundary(V2h, V2h);
   matrix matCH = matPhiBulk + matPhiBoundary;
