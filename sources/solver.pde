@@ -201,6 +201,7 @@ varf varUrhs(u,test) =
   INTEGRAL(DIMENSION)(Th)(
     (convect([UOLDVEC],-dt,uOld)/dt)*test
     + (1/Ca)*mu*dx(phi)*test
+    // + (1/Ca)*phi*dx(mu)*test // Changes a lot!
     #ifdef GRAVITY
     + gx*phi*test
     #endif
