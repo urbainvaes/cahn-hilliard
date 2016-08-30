@@ -4,4 +4,3 @@ cx1 = 1.0;
 cx2 = 1.1;
 
 Include "geometries/channel.geo";
-

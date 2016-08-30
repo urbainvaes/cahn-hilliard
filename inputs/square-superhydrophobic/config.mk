@@ -1,5 +1,5 @@
 DIMENSION = 2
-GEOMETRY = electro.geo
+GEOMETRY = rough.geo
 VIEW = views/view-2d.py
 PROBLEM = problem.pde
 

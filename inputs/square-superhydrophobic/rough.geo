@@ -6,11 +6,11 @@ Ly = 0.4; // export
 s = 0.01;
 
 // Number of divisions
-n = 10;
+n = 20;
 dx = Lx/(2*n + 1);
 
 // Height
-yd = Ly/10; // export
+yd = 0; //export
 
 // Dimensions of the bar
 tx = Lx/30;
