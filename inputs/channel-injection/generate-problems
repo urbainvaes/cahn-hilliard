@@ -1,0 +1,17 @@
+#!/usr/bin/env bash
+values="0.2  1  5"
+Ch_values="1e-4  1e-3  1e-2"
+for Re in ${values}; do
+    for Pe in ${values}; do
+        for Ca in ${values}; do
+            for Ch in ${Ch_values}; do
+                directory="Re=${Re}/Pe=${Pe}/Ca=${Ca}/Ch=${Ch}"
+                mkdir -p ${directory}
+                ln -sf ${PWD}/channel.geo ${directory}/channel.geo
+                ln -sf ${PWD}/problem.pde ${directory}/problem.pde
+                ln -sf ${PWD}/config.mk   ${directory}/config.mk
+                echo -e "Re=${Re};\nPe=${Pe};\nCa=${Ca};\nCh=${Ch};" > ${directory}/parameters.pde
+            done
+        done
+    done
+done
