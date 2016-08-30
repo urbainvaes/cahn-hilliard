@@ -88,8 +88,7 @@ real Ch = 0.01^2;
 
 // Navier-Stokes parameters
 #ifdef NS
-real Re1 = 1;
-real Re2 = 1;
+real Re = 1;
 real Ca = 100;
 #endif
 
@@ -127,9 +126,11 @@ real hmin = hmax/20;
 #include xstr(PROBLEM)
 //}}}
 // Calculate dependent parameters {{{
-#ifdef NS
-Vh Re = 0.5*(Re1*(1 - phi) + Re2*(1 + phi));
-#endif
+// real Re1 = 1;
+// real Re2 = 1;
+// #ifdef NS
+// Vh Re = 0.5*(Re1*(1 - phi) + Re2*(1 + phi));
+// #endif
 #ifdef GRAVITY
 Vh rho = 0.5*(rho1*(1 - phi) + rho2*(1 + phi));
 #endif
