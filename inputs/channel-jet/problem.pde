@@ -9,7 +9,7 @@ varf varPhiBoundary([phi1,mu1], [phi2,mu2]) =
 
 varf varUBoundary(u, unused) = on(2,4,5,7, u = 0);
 varf varVBoundary(v, unused) = on(2,4,5,7, v = 0);
-varf varPBoundary(p, unused) = on(1, p = 30) + on(3, p = 0) + on(6, p = 200);
+varf varPBoundary(p, unused) = on(6, p = 200) + on(1, p = 30) + on(3, p = 0);
 
 // Time step
 dt = 1e-2;
