@@ -4,7 +4,7 @@ problem ?= $(shell cat .problem)
 
 link :
 	mkdir -p $(addprefix tests/$(problem)/, output pictures logs);
-	cp -alft  tests/$(problem) sources/* inputs/$(problem)/*;
+	cp -alft  tests/$(problem) sources/* $$(realpath inputs/$(problem)/*);
 	rm -f problem && ln -sf inputs/$(problem) problem;
 	echo $(problem) > .problem;
 
