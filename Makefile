@@ -9,8 +9,16 @@ link :
 	echo $(problem) > .problem;
 
 install :
-	@ echo Choose problem from:; \
-		select problem in $$(ls inputs); do break; done; \
+	@ gitroot=$$(pwd); \
+		echo Git root: $${gitroot}; \
+		echo Choose problem from:; \
+		cd inputs; subdirs=$$(find * -maxdepth 0 -type d); \
+		while [[ $${subdirs} != ""  ]]; do \
+			select subdir in $${subdirs}; do break; done; cd $${subdir}; \
+			if [[ $${problem} != "" ]]; then problem=$${problem}/; fi; \
+			problem=$${problem}$${subdir}; \
+			subdirs=$$(find * -maxdepth 0 -type d); done; \
+		cd $${gitroot}; \
 		make link problem=$${problem}
 
 uninstall :
