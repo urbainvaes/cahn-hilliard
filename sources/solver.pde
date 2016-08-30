@@ -90,6 +90,7 @@ real Ch = 0.01^2;
 #ifdef NS
 real Re = 1;
 real Ca = 100;
+real muGradPhi = 1;
 #endif
 
 #ifdef GRAVITY
@@ -110,6 +111,7 @@ real epsilonR2 = 2;
 real dt = 8.0*Pe*Ch^2;
 real nIter = 300;
 
+// Mesh parameters
 #if DIMENSION == 2
 real hmax = 0.1;
 real hmin = hmax/20;
@@ -194,27 +196,22 @@ varf varCHrhs([phi1,mu1], [phi2,mu2]) =
 //}}}
 // Navier-Stokes {{{
 #ifdef NS
-varf varU(u,test) =
-  INTEGRAL(DIMENSION)(Th)(
-    u*test/dt + (1/Re)*(Grad(u)'*Grad(test))
-    );
+varf varU(u,test) = INTEGRAL(DIMENSION)(Th)( u*test/dt + (1/Re)*(Grad(u)'*Grad(test)) );
 varf varUrhs(u,test) =
   INTEGRAL(DIMENSION)(Th)(
     (convect([UOLDVEC],-dt,uOld)/dt)*test
-    + (1/Ca)*mu*dx(phi)*test
-    // + (1/Ca)*phi*dx(mu)*test // Changes a lot!
+    + muGradPhi     * (1/Ca)*mu*dx(phi)*test
+    + (1-muGradPhi) * (1/Ca)*phi*dx(mu)*test
     #ifdef GRAVITY
     + gx*phi*test
     #endif
     );
-varf varV(v,test) =
-  INTEGRAL(DIMENSION)(Th)(
-    v*test/dt + (1/Re)*(Grad(v)'*Grad(test))
-    );
+varf varV(v,test) = INTEGRAL(DIMENSION)(Th)( v*test/dt + (1/Re)*(Grad(v)'*Grad(test)) );
 varf varVrhs(v,test) =
   INTEGRAL(DIMENSION)(Th)(
     (convect([UOLDVEC],-dt,vOld)/dt)*test
-    + (1/Ca)*mu*dy(phi)*test
+    + muGradPhi     * (1/Ca)*mu*dy(phi)*test
+    + (1-muGradPhi) * (1/Ca)*phi*dy(mu)*test
     #ifdef GRAVITY
     + gy*phi*test
     #endif
@@ -226,7 +223,8 @@ varf varW(w,test) = INTEGRAL(DIMENSION)(Th)(
 varf varWrhs(w,test) =
   INTEGRAL(DIMENSION)(Th)(
     (convect([UOLDVEC],-dt,wOld)/dt)*test
-    + (1/Ca)*mu*dz(phi)*test
+    + muGradPhi     * (1/Ca)*mu*dz(phi)*test
+    + (1-muGradPhi) * (1/Ca)*mu*dz(phi)*test
     #ifdef GRAVITY
     + gz*phi*test
     #endif
