@@ -346,7 +346,7 @@ for(int i = 0; i <= nIter; i++)
 
   #ifdef NS
   savevtk("output/velocity/velocity."+i+".vtk", Th, [u,v,0], dataname="Velocity");
-  savevtk("output/velocity/pressure."+i+".vtk", Th, p, dataname="Pressure");
+  savevtk("output/pressure/pressure."+i+".vtk", Th, p, dataname="Pressure");
   #endif
 
   #ifdef ELECTRO
