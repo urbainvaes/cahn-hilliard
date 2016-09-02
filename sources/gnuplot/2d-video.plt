@@ -1,10 +1,10 @@
 # Number of time steps
 n = system("ls output/phi/phi.*.vtk | wc -l") - 1
 
-set term pdf
+set term pdf size 12cm,3cm
 
 system("mkdir -p pictures/gnuplot")
-do for [i=1:n:1] {
+do for [i=0:n:10] {
 
   outfile = sprintf('pictures/gnuplot/phase.%04.0f.pdf',i)
   set output outfile
@@ -13,23 +13,21 @@ do for [i=1:n:1] {
   splot "output/phi/phi.".i.".gnuplot"
   unset table
 
-  unset key
-  set size ratio -1
-  unset colorbox
   set cbrange [-1.5:1.5]
-  set title "Phase field at iteration ".i
-  set palette rgb 33,13,10;
-  # set palette defined ( 0 "gray", 1 "gray" )
-  # set pm3d
-  # set view map
-  # set dgrid3d # Comment to see mesh
+  set palette defined ( -1 "light-gray", 1 "light-blue" )
+
+  unset key
+  unset tics
+  unset border
+  unset colorbox
+
+  set size ratio -1
+  set lmargin at screen 0.05
+  set rmargin at screen 0.95
+  set bmargin at screen 0.05
+  set tmargin at screen 0.95
   plot "geometry.dat" with lines palette, \
        "output/iso/contactLine".i.".dat" with lines
-
-  # set multiplot
-  # unset multiplot
-  # set yrange [GPVAL_Y_MIN:GPVAL_Y_MAX]
-  # set xrange [GPVAL_X_MIN:GPVAL_X_MAX]
 
   print "Producing picture for iteration ".i."."
 }
