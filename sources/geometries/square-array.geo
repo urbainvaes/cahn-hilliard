@@ -1,6 +1,10 @@
 // Number of cubes in each dimension
-nx = 3;
-ny = 3;
+nx = 5;
+ny = 5;
+
+// Label of pores
+lpores = 10;
+Physical Line(lpores) = {};
 
 // Dimensions of small squares
 lx = 0.2;
@@ -65,10 +69,10 @@ Macro Square
   l4 = newl; Line(l4) = {p4, p1};
 
   // FreeFem ++ requires label
-  Physical Line(newl) = {l1};
-  Physical Line(newl) = {l2};
-  Physical Line(newl) = {l3};
-  Physical Line(newl) = {l4};
+  Physical Line(lpores) += {l1};
+  Physical Line(lpores) += {l2};
+  Physical Line(lpores) += {l3};
+  Physical Line(lpores) += {l4};
 
   loops[counter] = newl; Line Loop(loops[counter]) = {l1, l2, l3, l4};
   normaldomainlimits[counter] = loops[counter];
