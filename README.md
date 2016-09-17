@@ -229,10 +229,33 @@ Since these two folders will both be copied to the simulation directory (*tests/
 they can be used for the simulation.
 For example, instead of rewriting a *.geo* for a square, one could use the readily available file *sources/geometries/square.geo*,
 and refer to it from the configuration file.
-The path to the file must be relative to the execution directory, i.e. we have to write 
+The path to the file must be relative to the execution directory, i.e. we have to write
 ```
 GEOMETRY = geometries/square.geo.
 ```
+
+## Modules of the code
+Several modules can be activated to simulate more complicated models.
+To activate a module, add a line "MODULE = 1" in *config.mk*.
+Each of the modules is described below
+
+### Module *NS*
+This modules adds Navier-Stokes equations to the simulation.
+To use this module, boundary conditions for the pressure and velocity fields have to be specified in the problem file.
+```
+varf varUBoundary(u, test) = ...;
+varf varVBoundary(v, test) = ...;
+varf varPBoundary(p, test) = ...;
+```
+Physical parameters can also be defined if one does not want to use the default values.
+The different parameters, with default values, are defined below:
+
+- `Re` is the Reynolds number of the flow,
+  which is assumed to take a constant value over the two phases.
+- `Ca` is the capillary number.
+- `muGradPhi` is a parameter prescribing the discretization used for the capillary term.
+  Its value must be 1, to use the discretization `mu*grad(phi)`, or 0, to use `phi*grad(mu)`.
+###
 
 ## Authors
 Benjamin Aymard started the project in October 2015, and Urbain Vaes joined in March 2016.
