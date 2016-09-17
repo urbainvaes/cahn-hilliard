@@ -20,11 +20,11 @@ dt = 0.5e-2;
 // Number of iterations
 nIter = 2000;
 
-muGradPhi = 1;
+// Capillary term
+muGradPhi = 0;
 
 // Dimensionless numbers
-Re = 5;
-Pe = 5;
-Ca = 10;
+Re = 1;
+Pe = 1;
+Ca = 1;
 Ch = 1e-4;
-muGradPhi = 1;

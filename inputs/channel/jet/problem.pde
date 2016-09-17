@@ -19,7 +19,8 @@ nIter = 2000;
 
 // Dimensionless numbers
 Pe  = 5;
-Re1 = 5;
-Re2 = 5;
+/* Re1 = 5; */
+/* Re2 = 5; */
+Re = 5;
 Ch  = 1e-4;
 Ca  = .1;
