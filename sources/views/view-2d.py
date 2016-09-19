@@ -38,8 +38,14 @@ animationScene.UpdateAnimationUsingDataTimeSteps()
 renderView = GetActiveViewOrCreate('RenderView')
 display = Show(scalarField, renderView)
 
+# Apply filter
+cellDatatoPointData = CellDatatoPointData(Input=scalarField)
+SetActiveSource(cellDatatoPointData)
+display = Show(cellDatatoPointData, renderView)
+
 # Set field to color
-ColorBy(display, ('CELLS', data_name))
+# ColorBy(display, ('CELLS', data_name))
+ColorBy(display, ('POINTS', data_name))
 
 # show color bar/color legend
 display.SetScalarBarVisibility(renderView, True)
@@ -51,6 +57,28 @@ else:
     bounds = options.range.split(',')
     scalarLUT = GetColorTransferFunction(data_name)
     scalarLUT.RescaleTransferFunction(float(bounds[0]), float(bounds[1]))
+
+# Axes properties
+renderView.Background = [1.0, 1.0, 1.0]
+renderView.AxesGrid.Visibility = 1
+renderView.AxesGrid.XTitleColor = [0.0, 0.0, 0.0]
+renderView.AxesGrid.YTitleColor = [0.0, 0.0, 0.0]
+renderView.AxesGrid.GridColor = [0.0, 0.0, 0.0]
+renderView.AxesGrid.XLabelColor = [0.0, 0.0, 0.0]
+renderView.AxesGrid.YLabelColor = [0.0, 0.0, 0.0]
+renderView.AxesGrid.XTitle = 'X'
+renderView.AxesGrid.YTitle = 'Y'
+
+# Colors
+scalarLUT = GetColorTransferFunction(data_name)
+color1 = [0.99 , 1.0 , 1.0];
+colorI = [0    , 0   , 1.0];
+color2 = [0.2  , 0.9 , 1.0];
+scalarLUT.RGBPoints = [-1.0] + color1 + [-0.3] + color1 + [-0.3] + colorI + [0.3] + colorI + [0.3] + color2 + [1.0] + color2
+
+scalarLUTColorBar = GetScalarBar(scalarLUT, renderView)
+scalarLUTColorBar.TitleColor = [0.0, 0.0, 0.0]
+scalarLUTColorBar.LabelColor = [0.0, 0.0, 0.0]
 
 # reset view to fit data
 renderView.ResetCamera()
