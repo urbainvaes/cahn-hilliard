@@ -239,23 +239,61 @@ Several modules can be activated to simulate more complicated models.
 To activate a module, add a line "MODULE = 1" in *config.mk*.
 Each of the modules is described below
 
+### Module *adapt*
+The use of this module activates mesh-adaptation.
+
+In 2D, the *FreeFem++* built-in function `adaptmesh` is use,
+with parameters `hmax = 0.1` and `hmin = hmax/64`.
+
+In 3D, the metric field used for the adaptation is used using `mshmet`,
+with parameters `hmax = 0.1` and `hmin = hmax/20`, 
+after which the adaptation is accomplished by *Tetgen* through the *FreeFem++* function `tetgreconstruction`.
+
+In both cases,
+the default values of `hmin` and `hmax` have been chosen based on a number of examples
+and usually provide good results,
+but they can be changed if desired in the problem configuration file.
+
+### Module *PLOT*
+When activated, the solver will display a plot of the solution at each time step.
+Note that this slows down the simulation.
+
 ### Module *NS*
-This modules adds Navier-Stokes equations to the simulation.
+This modules adds Navier-Stokes equations to the sytem of equations of the simulation.
 To use this module, boundary conditions for the pressure and velocity fields have to be specified in the problem file.
 ```
 varf varUBoundary(u, test) = ...;
 varf varVBoundary(v, test) = ...;
 varf varPBoundary(p, test) = ...;
 ```
-Physical parameters can also be defined if one does not want to use the default values.
+Physical parameters can also be defined, and will take default values if not.
 The different parameters, with default values, are defined below:
 
-- `Re` is the Reynolds number of the flow,
-  which is assumed to take a constant value over the two phases.
-- `Ca` is the capillary number.
-- `muGradPhi` is a parameter prescribing the discretization used for the capillary term.
+- `Re` (default: 1) is the Reynolds number of the flow,
+  which is assumed to take a constant value across the two phases.
+- `Ca` (default: 1) is the capillary number.
+- `muGradPhi` (default: 1) is a parameter prescribing the discretization used for the capillary term.
   Its value must be 1, to use the discretization `mu*grad(phi)`, or 0, to use `phi*grad(mu)`.
-###
+
+### Module *ELECTRO* (unstable)
+Using this requires the definition of
+
+- epsilonR1: relative permittivity in phase *phi = -1*.
+- epsilonR2: relative permittivity in phase *phi = 1*.
+
+When enabled, the system will be coupled to the Poisson equation for the electric potential,
+through the addition of an additional term in the free energy.
+
+### Module *GRAVITY* (unstable)
+Using this requires the definition of
+
+- `rho1`: specific mass of phase *phi = -1*.
+- `rho2`: specific mass of phase *phi = 1*.
+- `gx`: x-component of the gravity vector.
+- `gy`: y-component of the gravity vector.
+- `gz`: In 3D, z-component of the gravity vector.
+
+When enabled, gravity will be added to the simulation.
 
 ## Authors
 Benjamin Aymard started the project in October 2015, and Urbain Vaes joined in March 2016.
