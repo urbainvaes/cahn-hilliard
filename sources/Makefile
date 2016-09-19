@@ -18,7 +18,7 @@ ifeq ($(NS), 1)
 	cpp_flags += -DNS
 endif
 
-ifeq ($(ELECTR), 1)
+ifeq ($(ELECTRO), 1)
 	cpp_flags += -DELECTRO
 endif
 
@@ -79,7 +79,6 @@ ifeq ($(DIMENSION), 3)
 	gmsh -display :0 $(GEOMETRY) $<
 else
 	DISPLAY=:0 pvpython $< --input phi --range -1,1
-	DISPLAY=:0 pvpython $< --input mu
 endif
 
 view : $(VIDEO)
