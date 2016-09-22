@@ -114,7 +114,7 @@ real nIter = 300;
 // Mesh parameters
 #if DIMENSION == 2
 real hmax = 0.1;
-real hmin = hmax/20;
+real hmin = hmax/64;
 #endif
 
 #if DIMENSION == 3
@@ -173,9 +173,9 @@ varf varPhi([phi1,mu1], [phi2,mu2]) =
     phi1*phi2/dt
     + (1/Pe)*(Grad(mu1)'*Grad(phi2))
     - mu1*mu2
-    + Ch*(Grad(phi1)'*Grad(mu2))
-    + 0.5*3*phiOld*phiOld*phi1*mu2
-    - 0.5*phi1*mu2
+    + sqrt(Ch)   * (Grad(phi1)'*Grad(mu2))
+    + 1/sqrt(Ch) * 0.5*3*phiOld*phiOld*phi1*mu2
+    - 1/sqrt(Ch) * 0.5*phi1*mu2
     )
 ;
 
@@ -186,8 +186,8 @@ varf varCHrhs([phi1,mu1], [phi2,mu2]) =
     #else
     phiOld*phi2/dt
     #endif
-    + 0.5*phiOld*phiOld*phiOld*mu2
-    + 0.5*phiOld*mu2
+    + 1/sqrt(Ch) * 0.5*phiOld*phiOld*phiOld*mu2
+    + 1/sqrt(Ch) * 0.5*phiOld*mu2
     #ifdef ELECTRO
     + 0.25 * (epsilonR2 - epsilonR1) * (Grad(theta)'*Grad(theta)) * mu2
     #endif
