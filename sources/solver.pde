@@ -114,7 +114,7 @@ real nIter = 300;
 // Mesh parameters
 #if DIMENSION == 2
 real hmax = 0.1;
-real hmin = hmax/20;
+real hmin = hmax/64;
 #endif
 
 #if DIMENSION == 3
@@ -180,7 +180,7 @@ varf varPhi([phi1,mu1], [phi2,mu2]) =
     )
 ;
 
-varf varCHrhs([phi1,mu1], [phi2,mu2]) =
+varf varPhiRhs([phi1,mu1], [phi2,mu2]) =
   INTEGRAL(DIMENSION)(Th)(
     #ifdef NS
     convect([UOLDVEC],-dt,phiOld)/dt*phi2
@@ -295,7 +295,6 @@ for(int i = 0; i <= nIter; i++)
   #endif
   #endif
   //}}}
-
   // Calculate position of the interface {{{
   ofstream interface("output/interface/interface."+ i +".xyz");
   for (int j = 0; j<Th.nv ;j++)
@@ -433,12 +432,12 @@ for(int i = 0; i <= nIter; i++)
   // Cahn-Hilliard equation {{{
   matrix matPhiBulk = varPhi(V2h, V2h);
   matrix matPhiBoundary = varPhiBoundary(V2h, V2h);
-  matrix matCH = matPhiBulk + matPhiBoundary;
-  real[int] rhsBulk = varCHrhs(0, V2h);
-  real[int] rhsBoundary = varPhiBoundary(0, V2h);
-  real[int] rhsCH = rhsBulk + rhsBoundary;
-  set(matCH,solver=sparsesolver);
-  phi[] = matCH^-1*rhsCH;
+  matrix matPhi = matPhiBulk + matPhiBoundary;
+  real[int] rhsPhiBulk = varPhiRhs(0, V2h);
+  real[int] rhsPhiBoundary = varPhiBoundary(0, V2h);
+  real[int] rhsPhi = rhsPhiBulk + rhsPhiBoundary;
+  set(matPhi,solver=sparsesolver);
+  phi[] = matPhi^-1*rhsPhi;
   //}}}
   // Navier stokes {{{
   #ifdef NS
