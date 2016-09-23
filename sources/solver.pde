@@ -84,7 +84,7 @@ Vh theta;
 
 // Cahn-Hilliard parameters
 real Pe = 1;
-real Ch = 0.01^2;
+real Cn = 0.01;
 
 // Navier-Stokes parameters
 #ifdef NS
@@ -108,7 +108,7 @@ real epsilonR2 = 2;
 #endif
 
 // Time parameters
-real dt = 8.0*Pe*Ch^2;
+real dt = 8.0*Pe*Cn^4;
 real nIter = 300;
 
 // Mesh parameters
@@ -123,7 +123,7 @@ real hmin = hmax/20;
 #endif
 //}}}
 // Define macros {{{
-macro wetting(angle) (sqrt(Ch)*(sqrt(2.)/2.)*cos(angle)) // EOM
+macro wetting(angle) (Cn*(sqrt(2.)/2.)*cos(angle)) // EOM
 
 #if DIMENSION == 2
 macro Grad(u) [dx(u), dy(u)] //EOM
@@ -174,7 +174,7 @@ varf varPhi([phi1,mu1], [phi2,mu2]) =
     phi1*phi2/dt
     + (1/Pe)*(Grad(mu1)'*Grad(phi2))
     - mu1*mu2
-    + Ch*(Grad(phi1)'*Grad(mu2))
+    + Cn^2*(Grad(phi1)'*Grad(mu2))
     + 0.5*3*phiOld*phiOld*phi1*mu2
     - 0.5*phi1*mu2
     )
@@ -315,7 +315,7 @@ for(int i = 0; i <= nIter; i++)
 
   freeEnergy  = INTEGRAL(DIMENSION)(Th) (
       0.5*(Grad(phi)'*Grad(phi))
-      + 0.25*(1/Ch)*(phi^2 - 1)^2
+      + 0.25*(1/Cn^2)*(phi^2 - 1)^2
       #ifdef ELECTRO
       - 0.25 * (epsilonR1*(1 - phi) + epsilonR2*(1 + phi)) * Grad(theta)'*Grad(theta)
       #endif
