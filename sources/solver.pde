@@ -122,24 +122,9 @@ real hmax = 0.1;
 real hmin = hmax/20;
 #endif
 //}}}
-// Include problem file {{{
-#define xstr(s) str(s)
-#define str(s) #s
-#include xstr(PROBLEM)
-//}}}
-// Calculate dependent parameters {{{
-// real Re1 = 1;
-// real Re2 = 1;
-// #ifdef NS
-// Vh Re = 0.5*(Re1*(1 - phi) + Re2*(1 + phi));
-// #endif
-#ifdef GRAVITY
-Vh rho = 0.5*(rho1*(1 - phi) + rho2*(1 + phi));
-#endif
-//}}}
-// Define variational formulations {{{
+// Define macros {{{
+macro wetting(angle) (sqrt(Ch)*(sqrt(2.)/2.)*cos(angle)) // EOM
 
-// Macros {{{
 #if DIMENSION == 2
 macro Grad(u) [dx(u), dy(u)] //EOM
 macro Div(u,v) (dx(u) + dy(v)) //EOM
@@ -157,6 +142,22 @@ macro Div(u,v,w) (dx(u) + dy(v) + dz(w)) //EOM
 #define AUX_INTEGRAL(dim) int ## dim ## d
 #define INTEGRAL(dim) AUX_INTEGRAL(dim)
 //}}}
+// Include problem file {{{
+#define xstr(s) str(s)
+#define str(s) #s
+#include xstr(PROBLEM)
+//}}}
+// Calculate dependent parameters {{{
+// real Re1 = 1;
+// real Re2 = 1;
+// #ifdef NS
+// Vh Re = 0.5*(Re1*(1 - phi) + Re2*(1 + phi));
+// #endif
+#ifdef GRAVITY
+Vh rho = 0.5*(rho1*(1 - phi) + rho2*(1 + phi));
+#endif
+//}}}
+// Define variational formulations {{{
 // Poisson for electric potential {{{
 #ifdef ELECTRO
 varf varPotential(theta,test) =
