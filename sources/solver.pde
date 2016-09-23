@@ -280,6 +280,12 @@ if (adapt)
 //}}}
 // Loop in time {{{
 
+// Rescale time step to recover the sharp interface limit
+if (sharpScaling == 1)
+{
+    dt = dt / (100 * Cn);
+}
+
 // Open output file
 ofstream file("output/thermodynamics.txt");
 real freeEnergy, massPhi, dissipation;
