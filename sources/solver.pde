@@ -82,6 +82,9 @@ Vh theta;
 //}}}
 // Declare default parameters {{{
 
+// Sharp interface limit
+int sharpScaling = 0;
+
 // Cahn-Hilliard parameters
 real Pe = 1;
 real Cn = 0.01;
