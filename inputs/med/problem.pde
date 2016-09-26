@@ -1,27 +1,28 @@
-func phi0 = (y < 0.2 ? 1 : -1);
+func phi0 = (y < 0.1 ? 1 : -1);
 func mu0  = 0;
 [phi, mu] = [phi0, mu0];
 
 // Define boundary conditions
 varf varPhiBoundary([phi1,mu1], [phi2,mu2]) =
-  on (1, phi1 = 1) + on (3, phi1 = -1)
+  on (1, phi1 = 1)
+  + int1d(Th, 10) (0*mu2)
 ;
 
-varf varUBoundary(u, test) = on(2,4, u = 0);
-varf varVBoundary(v, test) = int1d(Th,1,3) (0*test);
-varf varPBoundary(p, test) = on(1, p = 0.1) + on(3, p = 0);
+varf varUBoundary(u, test) = on(2,4,10, u = 0);
+varf varVBoundary(v, test) = on(10, v = 0);
+varf varPBoundary(p, test) = on(1, p = 1) + on(3, p = 0);
 
 // Time step
-dt = 0.5e-2;
+dt = 1e-2;
 
 // Number of iterations
-nIter = 2000;
+nIter = 5000;
 
 // Capillary term
 muGradPhi = 1;
 
 // Dimensionless numbers
-Re = 5;
-Pe = 1;
+Re = 1;
+Pe = 10;
 Ca = 10;
-Ch = 1e-4;
+Cn = 1e-2;
