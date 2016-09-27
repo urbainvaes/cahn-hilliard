@@ -17,7 +17,7 @@ system("mkdir -p ".outDir)
 # Number of time steps
 n = system("ls ".sourceDir."/".source.".*.vtk | wc -l") - 1
 
-do for [i=0:n:1] {
+do for [i=0:n:10] {
 
   # set term pdf
   # set term epslatex
@@ -39,7 +39,7 @@ do for [i=0:n:1] {
 
   if(source eq 'phi') {
       set title "Phase field ($\\phi$)"
-      set cbrange [-1:1]
+      # set cbrange [-1:1]
       set palette defined ( -1 "light-green", 1 "light-blue" )
   }
 
@@ -48,13 +48,11 @@ do for [i=0:n:1] {
   }
 
   if(source eq 'pressure') {
-      set cbrange [0:16]
       set title "Pressure field"
   }
 
   if(source eq 'velocity') {
-      set cbrange [0:16]
-      set title "Pressure field"
+      set title "Velocity field"
   }
 
   if(styl eq 'filledcurves') {
@@ -65,10 +63,15 @@ do for [i=0:n:1] {
 
   if(styl eq 'mesh') {
       plot "output/".source."/".source.".".i.".gnuplot" with lines palette, \
-          "edges.dat" with lines lt rgb "brown" lw 1, \
-          "output/iso/contactLine".i.".dat" with lines lt rgb "black" lw 1.5
+           "edges.dat" with lines lt rgb "brown" lw 1, \
+           "output/iso/contactLine".i.".dat" with lines lt rgb "black" lw 1.5
   }
 
+  if(styl eq 'vectors') {
+      plot "output/".source."/".source.".".i.".gnuplot" using 1:2:(.1*$3) with filledcurves palette, \
+           "edges.dat" with lines lt rgb "brown" lw 1, \
+           "output/iso/contactLine".i.".dat" with lines lt rgb "black" lw 1.5
+  }
 
   x_min = GPVAL_DATA_X_MIN - .05
   x_max = GPVAL_DATA_X_MAX + .05
