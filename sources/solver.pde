@@ -116,8 +116,8 @@ real nIter = 300;
 
 // Mesh parameters
 #if DIMENSION == 2
-real hmax = 0.1;
-real hmin = hmax/64;
+real hmax = 0.05;
+real hmin = hmax/32;
 #endif
 
 #if DIMENSION == 3
