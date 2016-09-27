@@ -1,5 +1,6 @@
 # Simulations
 - Contact angle
+  * Find precise error with varf
 - Scaling
 - Tests:
   * Fuel cell: different p, theta, Co
@@ -11,5 +12,5 @@
 - Derivation of boundary condition
 - Fuel cell
 
-# Math 
+# Math
 - Preuve Tierra-Gonzalez
