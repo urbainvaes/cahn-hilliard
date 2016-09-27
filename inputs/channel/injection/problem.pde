@@ -27,4 +27,4 @@ muGradPhi = 0;
 Re = 1;
 Pe = 1;
 Ca = 1;
-Ch = 1e-4;
+Cn = 1e-2;
