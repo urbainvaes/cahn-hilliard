@@ -5,12 +5,12 @@ func mu0  = 0;
 // Define boundary conditions
 varf varPhiBoundary([phi1,mu1], [phi2,mu2]) =
   on (1, phi1 = 1)
-  + int1d(Th, 10) (0*mu2)
+  + int1d(Th, 10) (wetting(3*pi/4)*mu2)
 ;
 
 varf varUBoundary(u, test) = on(2,4,10, u = 0);
 varf varVBoundary(v, test) = on(10, v = 0);
-varf varPBoundary(p, test) = on(1, p = 3) + on(3, p = 0);
+varf varPBoundary(p, test) = on(1, p = 15) + on(3, p = 0);
 
 // Time step
 dt = 5e-3;
@@ -25,4 +25,4 @@ muGradPhi = 1;
 Re = 1;
 Pe = 10;
 Ca = 10;
-Cn = 1e-2;
+Cn = 1e-2; // Decrease
