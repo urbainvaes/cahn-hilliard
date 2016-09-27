@@ -3,26 +3,28 @@
 # Default argument
 if (! exists("source")) {
     source = 'phi'
-    sink = 'phi/filledcurves'
+    styl = 'filledcurves'
 }
-
-# Number of time steps
-n = system("ls output/".source."/".source.".*.vtk | wc -l") - 1
 
 # Extract boundary
 system("./bin/extractBoundary.py")
 
-outputDir = "pictures/gnuplot/".sink
-system("mkdir -p ".outputDir)
+# Directories
+sourceDir = "output/".source
+outDir = "pictures/gnuplot/".source."/".styl
+system("mkdir -p ".outDir)
 
-do for [i=0:n:10] {
+# Number of time steps
+n = system("ls ".sourceDir."/".source.".*.vtk | wc -l") - 1
+
+do for [i=0:n:1] {
 
   # set term pdf
-  set term epslatex
-  # set term wxt
+  # set term epslatex
+  set term wxt
 
   print "Producing picture for iteration ".i."."
-  set output sprintf(outputDir.'/'.source.'.%04.0f.tex',i)
+  set output sprintf(outDir.'/'.source.'.'.styl.'.%04.0f.tex',i)
 
   unset key
   set border
@@ -39,19 +41,34 @@ do for [i=0:n:10] {
       set title "Phase field ($\\phi$)"
       set cbrange [-1:1]
       set palette defined ( -1 "light-green", 1 "light-blue" )
-
-      if(sink eq 'phi/filledcurves') {
-          plot "output/phi/phi.".i.".gnuplot" with filledcurves palette, \
-               "edges.dat" with lines lt rgb "brown" lw 1, \
-               "output/iso/contactLine".i.".dat" with lines lt rgb "black" lw 1.5
-      }
-
-      if(sink eq 'phi/mesh') {
-          plot "output/phi/phi.".i.".gnuplot" with lines palette, \
-               "edges.dat" with lines lt rgb "brown" lw 1, \
-               "output/iso/contactLine".i.".dat" with lines lt rgb "black" lw 1.5
-      }
   }
+
+  if(source eq 'mu') {
+      set title "Chemical potential"
+  }
+
+  if(source eq 'pressure') {
+      set cbrange [0:16]
+      set title "Pressure field"
+  }
+
+  if(source eq 'velocity') {
+      set cbrange [0:16]
+      set title "Pressure field"
+  }
+
+  if(styl eq 'filledcurves') {
+      plot "output/".source."/".source.".".i.".gnuplot" with filledcurves palette, \
+           "edges.dat" with lines lt rgb "brown" lw 1, \
+           "output/iso/contactLine".i.".dat" with lines lt rgb "black" lw 1.5
+  }
+
+  if(styl eq 'mesh') {
+      plot "output/".source."/".source.".".i.".gnuplot" with lines palette, \
+          "edges.dat" with lines lt rgb "brown" lw 1, \
+          "output/iso/contactLine".i.".dat" with lines lt rgb "black" lw 1.5
+  }
+
 
   x_min = GPVAL_DATA_X_MIN - .05
   x_max = GPVAL_DATA_X_MAX + .05
