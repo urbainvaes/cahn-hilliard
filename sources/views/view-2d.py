@@ -71,10 +71,11 @@ renderView.AxesGrid.YTitle = 'Y'
 
 # Colors
 scalarLUT = GetColorTransferFunction(data_name)
-color1 = [0.99 , 1.0 , 1.0];
-colorI = [0    , 0   , 1.0];
-color2 = [0.2  , 0.9 , 1.0];
-scalarLUT.RGBPoints = [-1.0] + color1 + [-0.3] + color1 + [-0.3] + colorI + [0.3] + colorI + [0.3] + color2 + [1.0] + color2
+threshold = 0.1;
+color1 = [1.0, 0.0, 0.5];
+colorI = [0.0, 0.0, 1.0];
+color2 = [0.2, 0.9, 1.0];
+scalarLUT.RGBPoints = [-1.0] + color1 + [-threshold] + color1 + [-threshold] + colorI + [threshold] + colorI + [threshold] + color2 + [1.0] + color2
 
 scalarLUTColorBar = GetScalarBar(scalarLUT, renderView)
 scalarLUTColorBar.TitleColor = [0.0, 0.0, 0.0]
