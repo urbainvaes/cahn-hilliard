@@ -24,6 +24,11 @@ install :
 uninstall :
 	rm -f .problem problem
 
+all-% :
+	@ find inputs -type d -links 2 -printf '%P\n' | while read line; \
+		do make $* problem=$${line}; \
+		done;
+
 clean-all : uninstall
 	rm -rf tests
 
