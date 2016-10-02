@@ -20,13 +20,3 @@ pbs-% : script-%
 
 live-% :
 	ssh $(remoteHost) "cd $(remoteRoot)/tests/$(problem); make $*"
-
-#############################
-#  Targets for convenience  #
-#############################
-run-live :
-	ssh uv113@macomp01.ma.ic.ac.uk 'cd cahn-hilliard; \
-		make clean; \
-		make remote-mesh host="urbain@155.198.212.221"; \
-		make run; \
-		make remote-video host="urbain@155.198.212.221";'
