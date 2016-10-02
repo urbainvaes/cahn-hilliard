@@ -2,12 +2,10 @@
 #  Install and uninstall a test  #
 ##################################
 install :
-	@problems=$$(find inputs -type d -links 2 -printf '%P\n'); \
-		select problem in $${problems}; do echo $${problem} >> .problems; break; done;
+	find inputs -type d -links 2 -printf '%P\n' | fzf -m --bind=ctrl-t:toggle >> .problems;
 
 uninstall :
-	@problems=$$(cat .problems); \
-		select problem in $${problems}; do sed -i "\#$${problem}#d" .problems; break; done;
+	cat .problems | fzf -m --bind=ctrl-t:toggle | while read p; do sed -i "\#$${p}#d" .problems; done;
 
 problem ?= $(shell cat .problems | tail -1)
 #################################
