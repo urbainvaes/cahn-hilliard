@@ -1,36 +1,36 @@
-include ssh.mk
-
-problem ?= $(shell cat .problem)
-
-link :
-	mkdir -p $(addprefix tests/$(problem)/, output pictures logs);
-	cp -alft  tests/$(problem) sources/* $$(realpath inputs/$(problem)/*);
-	rm -f problem && ln -sf inputs/$(problem) problem;
-	echo $(problem) > .problem;
-
+##################################
+#  Install and uninstall a test  #
+##################################
 install :
-	@ gitroot=$$(pwd); \
-		echo Git root: $${gitroot}; \
-		echo Choose problem from:; \
-		cd inputs; subdirs=$$(find * -maxdepth 0 -type d); \
-		while [[ $${subdirs} != ""  ]]; do \
-			select subdir in $${subdirs}; do break; done; cd $${subdir}; \
-			if [[ $${problem} != "" ]]; then problem=$${problem}/; fi; \
-			problem=$${problem}$${subdir}; \
-			subdirs=$$(find * -maxdepth 0 -type d); done; \
-		cd $${gitroot}; \
-		make link problem=$${problem}
+	@problems=$$(find inputs -type d -links 2 -printf '%P\n'); \
+		select problem in $${problems}; do echo $${problem} >> .problems; break; done;
 
 uninstall :
-	rm -f .problem problem
+	@problems=$$(cat .problems); \
+		select problem in $${problems}; do sed -i "\#$${problem}#d" .problems; break; done;
 
+problem ?= $(shell cat .problems | tail -1)
+#################################
+#  Set up environment for test  #
+#################################
+link :
+	mkdir -p $(addprefix tests/$(problem)/, output pictures logs);
+	cp -alft tests/$(problem) sources/* $$(realpath inputs/$(problem)/*);
+
+unlink :
+	rm -rf tests/$(problem)
+
+################################
+#  Act on all installed tests  #
+################################
 all-% :
-	@ find inputs -type d -links 2 -printf '%P\n' | while read line; \
-		do make $* problem=$${line}; \
-		done;
+	for p in $$(cat .problems); do make $* problem=$${p}; done
 
-clean-all : uninstall
+clean-all :
 	rm -rf tests
 
+#################################
+#  Acts on last installed test  #
+#################################
 .DEFAULT :
 	$(MAKE) -C tests/$(problem) $@
