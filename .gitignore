@@ -3,7 +3,7 @@
 /videos
 /config.mk
 
-.mpi_hosts
+.problems
 .problem
 *.backup
 !*.gitkeep
