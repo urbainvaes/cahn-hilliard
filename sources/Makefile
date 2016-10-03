@@ -90,7 +90,7 @@ view : $(VIDEO)
 	DISPLAY=:0 vlc -f $(VIDEO)
 
 plots :
-	gnuplot gnuplot/thermo.plt
+	gnuplot gnuplot/make-plots.plt
 
 ###################
 #  Clean outputs  #
