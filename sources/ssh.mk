@@ -3,8 +3,8 @@
 ###########################
 gitRoot = $(shell git rev-parse --show-toplevel)
 problem = $(shell realpath -s --relative-to $(gitRoot)/tests $(CURDIR))
-remoteHost ?= localhost
-remoteRoot ?= ${HOME}/cahn-hilliard
+remoteHost ?= uv113@macomp01.ma.ic.ac.uk
+remoteRoot ?= /home/calculus/home/urbain/cahn-hilliard
 
 script-% :
 	echo "#!/bin/bash"                       >  $@
