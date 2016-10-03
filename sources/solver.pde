@@ -23,6 +23,9 @@ load "tetgen"
 system("mkdir -p" + " output/phi"
                   + " output/mu"
                   + " output/velocity"
+                  + " output/u"
+                  + " output/v"
+                  + " output/w"
                   + " output/pressure"
                   + " output/iso"
                   + " output/interface "
@@ -361,13 +364,13 @@ for(int i = 0; i <= nIter; i++)
 
       #ifdef NS
       ofstream fpressure("output/pressure/pressure."+i+".gnuplot");
-      ofstream fu("output/velocity/u."+i+".gnuplot");
-      ofstream fv("output/velocity/v."+i+".gnuplot");
+      ofstream fu("output/u/u."+i+".gnuplot");
+      ofstream fv("output/v/v."+i+".gnuplot");
       for (int ielem=0; ielem<Th.nt; ielem++) {
           for (int j=0; j <3; j++) {
               fpressure << Th[ielem][j].x << " " << Th[ielem][j].y << " " << p[][Vh(ielem,j)] << endl;
-              fu        << Th[ielem][j].x << " " << Th[ielem][j].y << " " << p[][Vh(ielem,j)] << endl;
-              fv        << Th[ielem][j].x << " " << Th[ielem][j].y << " " << p[][Vh(ielem,j)] << endl;
+              fu        << Th[ielem][j].x << " " << Th[ielem][j].y << " " << u[][Vh(ielem,j)] << endl;
+              fv        << Th[ielem][j].x << " " << Th[ielem][j].y << " " << v[][Vh(ielem,j)] << endl;
           }
           fpressure << Th[ielem][0].x << " " << Th[ielem][0].y << " " << p[][Vh(ielem,0)] << "\n\n\n";
           fu        << Th[ielem][0].x << " " << Th[ielem][0].y << " " << u[][Vh(ielem,0)] << "\n\n\n";
