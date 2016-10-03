@@ -92,6 +92,16 @@ view : $(VIDEO)
 plots :
 	gnuplot gnuplot/make-plots.plt
 
+############
+#  Status  #
+############
+problem = $(shell realpath -s --relative-to $(gitRoot)/tests $(CURDIR))
+
+status :
+	@echo "Problem $(problem) reporting for duty"; \
+	echo "  Number of iterations calculated: $$(ls output/phi/phi.*.vtk | wc -l)"; \
+	echo ""
+
 ###################
 #  Clean outputs  #
 ###################
