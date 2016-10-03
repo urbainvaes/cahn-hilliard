@@ -64,7 +64,7 @@ fespace VhOut(ThOut,P1);
 
 // Phase field
 V2h [phi, mu];
-Vh phiOld;
+Vh phiOld, muOld;
 VhOut phiOut, muOut;
 
 // Adaptation
@@ -292,6 +292,7 @@ if (sharpScaling == 1)
 // Open output file
 ofstream file("output/thermodynamics.txt");
 real freeEnergy, massPhi, dissipation;
+
 for(int i = 0; i <= nIter; i++)
 {
   // Update previous solution {{{
@@ -342,11 +343,7 @@ for(int i = 0; i <= nIter; i++)
 
   // Export to gnuplot
   {
-      muOut = mu;
-      phiOut = phi;
-      uOut = u;
-      vOut = v;
-      pOut = p;
+      muOld = mu;
 
       ofstream fphi("output/phi/phi."+i+".gnuplot");
       for (int ielem=0; ielem<Th.nt; ielem++) {
@@ -356,35 +353,35 @@ for(int i = 0; i <= nIter; i++)
       }
 
       ofstream fmu("output/mu/mu."+i+".gnuplot");
-      for (int ielem=0; ielem<ThOut.nt; ielem++) {
+      for (int ielem=0; ielem<Th.nt; ielem++) {
           for (int j=0; j <3; j++)
-              fmu << ThOut[ielem][j].x << " " << ThOut[ielem][j].y << " " << muOut[][VhOut(ielem,j)] << endl;
-          fmu << ThOut[ielem][0].x << " " << ThOut[ielem][0].y << " " << muOut[][VhOut(ielem,0)] << "\n\n\n";
+              fmu << Th[ielem][j].x << " " << Th[ielem][j].y << " " << muOld[][Vh(ielem,j)] << endl;
+          fmu << Th[ielem][0].x << " " << Th[ielem][0].y << " " << muOld[][Vh(ielem,0)] << "\n\n\n";
       }
 
       #ifdef NS
       ofstream fpressure("output/pressure/pressure."+i+".gnuplot");
       ofstream fu("output/velocity/u."+i+".gnuplot");
       ofstream fv("output/velocity/v."+i+".gnuplot");
-      for (int ielem=0; ielem<ThOut.nt; ielem++) {
+      for (int ielem=0; ielem<Th.nt; ielem++) {
           for (int j=0; j <3; j++) {
-              fpressure << ThOut[ielem][j].x << " " << ThOut[ielem][j].y << " " << pOut[][VhOut(ielem,j)] << endl;
-              fu        << ThOut[ielem][j].x << " " << ThOut[ielem][j].y << " " << pOut[][VhOut(ielem,j)] << endl;
-              fv        << ThOut[ielem][j].x << " " << ThOut[ielem][j].y << " " << pOut[][VhOut(ielem,j)] << endl;
+              fpressure << Th[ielem][j].x << " " << Th[ielem][j].y << " " << p[][Vh(ielem,j)] << endl;
+              fu        << Th[ielem][j].x << " " << Th[ielem][j].y << " " << p[][Vh(ielem,j)] << endl;
+              fv        << Th[ielem][j].x << " " << Th[ielem][j].y << " " << p[][Vh(ielem,j)] << endl;
           }
-          fpressure << ThOut[ielem][0].x << " " << ThOut[ielem][0].y << " " << pOut[][VhOut(ielem,0)] << "\n\n\n";
-          fu        << ThOut[ielem][0].x << " " << ThOut[ielem][0].y << " " << uOut[][VhOut(ielem,0)] << "\n\n\n";
-          fv        << ThOut[ielem][0].x << " " << ThOut[ielem][0].y << " " << vOut[][VhOut(ielem,0)] << "\n\n\n";
+          fpressure << Th[ielem][0].x << " " << Th[ielem][0].y << " " << p[][Vh(ielem,0)] << "\n\n\n";
+          fu        << Th[ielem][0].x << " " << Th[ielem][0].y << " " << u[][Vh(ielem,0)] << "\n\n\n";
+          fv        << Th[ielem][0].x << " " << Th[ielem][0].y << " " << v[][Vh(ielem,0)] << "\n\n\n";
       }
 
-      VhOut[int] xh(2); xh[0] = x; xh[1] = y;
+      Vh[int] xh(2); xh[0] = x; xh[1] = y;
       ofstream fvelocity("output/velocity/velocity."+i+".gnuplot");
-      for (int inode = 0; inode < VhOut.ndof; inode++) {
+      for (int inode = 0; inode < Vh.ndof; inode++) {
           fvelocity << xh[0][][inode] << " "
                     << xh[1][][inode] << " "
-                    << uOut[][inode]  << " "
-                    << vOut[][inode]  << " "
-                    << sqrt(uOut[][inode]^2 + vOut[][inode]^2) << endl;
+                    << u[][inode]  << " "
+                    << v[][inode]  << " "
+                    << sqrt(u[][inode]^2 + v[][inode]^2) << endl;
       }
       #endif
   }
