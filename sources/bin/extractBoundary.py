@@ -3,7 +3,7 @@
 import mesh
 
 myMesh = mesh.mesh(filename="output/mesh.msh")
-f = open('edges.dat', 'w')
+f = open('output/edges.dat', 'w')
 for entity in myMesh.entities:
     if entity.dimension == 1:
         for element in entity.elements:
