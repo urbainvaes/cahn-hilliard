@@ -2,7 +2,9 @@
 #  Install and uninstall a test  #
 ##################################
 install :
-	find inputs -type d -links 2 -printf '%P\n' | fzf -m --bind=ctrl-t:toggle >> .problems;
+	find inputs -type d -printf '%P\n' | \
+		while read l; do [[ $$(find inputs/$$l/* -type d) = "" ]] && echo $$l; done | \
+		fzf -m --bind=ctrl-t:toggle >> .problems;
 
 uninstall :
 	cat .problems | fzf -m --bind=ctrl-t:toggle | while read p; do sed -i "\#$${p}#d" .problems; done;
