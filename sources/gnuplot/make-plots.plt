@@ -9,8 +9,8 @@ if (n_files > n_plots) {
     step = 1
 }
 
-do for [i=0:n_plots-1:1] {
-    system("output_file=pictures/phi/phi.mesh.".i*step.".pdf gnuplot gnuplot/plot.plt;")
-    system("output_file=pictures/mu/mu.mesh.".i*step.".pdf gnuplot gnuplot/plot.plt;")
-    system("output_file=pictures/pressure/pressure.filledcurves.".i*step.".pdf gnuplot gnuplot/plot.plt;")
+do for [i=0:n_files:step] {
+    system("output_file=pictures/phi/phi.mesh.".i.".pdf gnuplot gnuplot/plot.plt;")
+    system("output_file=pictures/mu/mu.mesh.".i.".pdf gnuplot gnuplot/plot.plt;")
+    system("output_file=pictures/pressure/pressure.filledcurves.".i.".pdf gnuplot gnuplot/plot.plt;")
 }
