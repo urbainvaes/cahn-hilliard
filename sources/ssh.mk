@@ -12,11 +12,11 @@ script-% :
 	echo "#PBS -q standard"                  >> $@
 	echo "#PBS -N $(problem)-$*"             >> $@
 	echo "cd $(remoteRoot)/tests/$(problem)" >> $@
-	echo "make $*"                           >> $@
+	echo "make $(subst _, ,$*)"          >> $@
 	chmod +x $@
 
 pbs-% : script-%
 	ssh $(remoteHost) "cd $(remoteRoot)/tests/$(problem); qsub $^"
 
 live-% :
-	ssh $(remoteHost) "cd $(remoteRoot)/tests/$(problem); make $*"
+	ssh $(remoteHost) "cd $(remoteRoot)/tests/$(problem); make $(subst _, ,$*)"
