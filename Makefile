@@ -23,6 +23,13 @@ unlink :
 ################################
 #  Act on all installed tests  #
 ################################
+
+# make all command='rm -rf pictures/*'
+command ?= echo "Problem $$(pwd) reporting"
+all :
+	for p in $$(cat .problems); do cd tests/$${p}; $(command); cd $(CURDIR); done
+
+# Shortcut for make all command='make %'
 all-% :
 	for p in $$(cat .problems); do make $* problem=$${p}; done
 
