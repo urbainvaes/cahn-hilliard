@@ -102,6 +102,13 @@ status :
 	echo "  Number of iterations calculated: $$(ls output/phi/phi.*.vtk | wc -l)"; \
 	echo ""
 
+############
+#  Report  #
+############
+report :
+	find pictures -mindepth 1 -type d -printf '%P\n' | while read l; \
+		do pdfunite $$(ls -v pictures/$${l}/*.pdf) report-$${l}.pdf; done
+
 ###################
 #  Clean outputs  #
 ###################
