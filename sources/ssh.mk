@@ -8,7 +8,7 @@ remoteRoot ?= /home/calculus/home/urbain/cahn-hilliard
 
 script-% :
 	echo "#!/bin/bash"                       >  $@
-	echo "#PBS -m abe"                       >> $@
+	echo "#PBS -m ae"                        >> $@
 	echo "#PBS -q standard"                  >> $@
 	echo "#PBS -N $(problem)-$*"             >> $@
 	echo "cd $(remoteRoot)/tests/$(problem)" >> $@
