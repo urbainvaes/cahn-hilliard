@@ -10,7 +10,7 @@ script-% :
 	echo "#!/bin/bash"                       >  $@
 	echo "#PBS -m abe"                       >> $@
 	echo "#PBS -q standard"                  >> $@
-	echo "#PBS -N $(problem)"                >> $@
+	echo "#PBS -N $(problem)-$*"             >> $@
 	echo "cd $(remoteRoot)/tests/$(problem)" >> $@
 	echo "make $*"                           >> $@
 	chmod +x $@
