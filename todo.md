@@ -1,7 +1,4 @@
 # Simulations
-- Contact angle
-  * Find precise error with varf
-- Scaling
 - Tests:
   * Fuel cell: different p, theta, Co
   * Porous medium: No obstacles, philic, phobic, neutral, square, circle
