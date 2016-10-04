@@ -92,9 +92,9 @@ view : $(VIDEO)
 plots :
 	gnuplot gnuplot/make-plots.plt
 
-############
-#  Status  #
-############
+################
+#  Run status  #
+################
 problem = $(shell realpath -s --relative-to $(gitRoot)/tests $(CURDIR))
 
 status :
