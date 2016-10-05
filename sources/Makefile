@@ -19,6 +19,10 @@ VIEW      ?= view.geo
 cpp_flags = -DDIMENSION=$(DIMENSION) -DPROBLEM=$(PROBLEM) -DGEOMETRY=$(GEOMETRY)
 ff_flags = -ne -v 0
 
+ifdef CUSTOMSPACES
+	cpp_flags += -DCUSTOMSPACE=$(CUSTOMSPACES)
+endif
+
 ifeq ($(NS), 1)
 	cpp_flags += -DNS
 endif
@@ -55,7 +59,7 @@ run : output/thermodynamics.txt
 geometry.pde : $(GEOMETRY)
 	grep -h 'export' $^ | sed 's/^/real /' > $@;
 
-processed_solver.pde : solver.pde $(PROBLEM) config.mk
+processed_solver.pde : solver.pde $(PROBLEM) config.mk $(CUSTOMSPACES)
 	cpp -w $(cpp_flags) $< | sed '/^\#/d' | sed 's#^\(macro.\+\)$$#\1 //EOM#' | sed '/^$$/d' > $@
 
 output/thermodynamics.txt : processed_solver.pde $(PROBLEM) output/mesh.msh geometry.pde

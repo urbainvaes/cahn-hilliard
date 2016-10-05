@@ -1,3 +1,7 @@
+// Convenient functions for cpp {{{
+#define xstr(s) str(s)
+#define str(s) #s
+// }}}
 // Include auxiliary files and load modules {{{
 include "freefem/write-mesh.pde"
 include "freefem/getargs.pde"
@@ -55,7 +59,11 @@ MESH ThOut; ThOut = GMSHLOAD("output/mesh.msh");
 //}}}
 // Define functional spaces {{{
 #if DIMENSION == 2
+#ifdef CUSTOMSPACES
+#include xstr(CUSTOMSPACES)
+#else
 fespace Vh(Th,P1), V2h(Th,[P1,P1]);
+#endif
 #endif
 
 #if DIMENSION == 3
@@ -149,8 +157,6 @@ macro Div(u,v,w) (dx(u) + dy(v) + dz(w)) //EOM
 #define INTEGRAL(dim) AUX_INTEGRAL(dim)
 //}}}
 // Include problem file {{{
-#define xstr(s) str(s)
-#define str(s) #s
 #include xstr(PROBLEM)
 //}}}
 // Calculate dependent parameters {{{
