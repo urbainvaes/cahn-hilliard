@@ -59,11 +59,14 @@ MESH ThOut; ThOut = GMSHLOAD("output/mesh.msh");
 //}}}
 // Define functional spaces {{{
 #if DIMENSION == 2
-#ifdef CUSTOMSPACES
-#include xstr(CUSTOMSPACES)
+#ifdef PERIODICITY
+#include xstr(PERIODICITY)
+#define ARGPERIODIC ,periodic=periodicity
 #else
-fespace Vh(Th,P1), V2h(Th,[P1,P1]);
+#define ARGPERIODIC
 #endif
+fespace Vh(Th,P1 ARGPERIODIC);
+fespace V2h(Th,[P1,P1] ARGPERIODIC);
 #endif
 
 #if DIMENSION == 3
@@ -262,7 +265,7 @@ varf varPrhs(p,test) = INTEGRAL(DIMENSION)(Th)( -Div(UVEC)*test/dt );
 if (adapt)
 {
   #if DIMENSION == 2
-  Th = adaptmesh(Th, phi, mu, hmax = hmax, hmin = hmin, nbvx = 1e6);
+  Th = adaptmesh(Th, phi, mu, hmax = hmax, hmin = hmin, nbvx = 1e6 ARGPERIODIC);
   [phi, mu] = [phi0, mu0];
     #ifdef NS
     u = u;
