@@ -4,10 +4,13 @@
   * Porous medium: No obstacles, philic, phobic, neutral, square, circle
   * Nucleation: Square, sinus, 3 thetas
 
-
 # Writing
 - Derivation of boundary condition
 - Fuel cell
 
 # Math
 - Preuve Tierra-Gonzalez
+
+# Priority
+- Module periodique
+- 

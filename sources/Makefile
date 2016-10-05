@@ -92,9 +92,9 @@ view : $(VIDEO)
 plots :
 	gnuplot gnuplot/make-plots.plt
 
-################
-#  Run status  #
-################
+###################################
+#  Communication with programmer  #
+###################################
 problem = $(shell realpath -s --relative-to $(gitRoot)/tests $(CURDIR))
 
 status :
@@ -102,12 +102,9 @@ status :
 	echo "  Number of iterations calculated: $$(ls output/phi/phi.*.vtk | wc -l)"; \
 	echo ""
 
-############
-#  Report  #
-############
 report :
 	find pictures -mindepth 1 -type d -printf '%P\n' | while read l; \
-		do pdfunite $$(ls -v pictures/$${l}/*.pdf) report-$${l}.pdf; done
+		do pdfunite $$(ls -v pictures/$${l}/*.pdf) report-$(subst /,_,$(problem))-$${l}.pdf; done
 
 ###################
 #  Clean outputs  #

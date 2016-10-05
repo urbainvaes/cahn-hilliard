@@ -5,7 +5,7 @@ func mu0  = 0;
 // Define boundary conditions
 varf varPhiBoundary([phi1,mu1], [phi2,mu2]) =
   on (1, phi1 = 1)
-  + int1d(Th, 10) (wetting(3*pi/4)*mu2)
+  + int1d(Th, 10) (wetting(pi/4)*mu2)
 ;
 
 varf varUBoundary(u, test) = on(2,4,10, u = 0);

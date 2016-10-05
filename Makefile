@@ -10,6 +10,7 @@ uninstall :
 	cat .problems | fzf -m --bind=ctrl-t:toggle | while read p; do sed -i "\#$${p}#d" .problems; done;
 
 problem ?= $(shell cat .problems | tail -1)
+
 #################################
 #  Set up environment for test  #
 #################################
