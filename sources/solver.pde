@@ -308,22 +308,6 @@ for(int i = 0; i <= nIter; i++)
   #endif
   #endif
   //}}}
-  // Calculate position of the interface {{{
-  ofstream interface("output/interface/interface."+ i +".xyz");
-  for (int j = 0; j<Th.nv ;j++)
-  {
-      if (abs(phiOld[][j]) < 0.2)
-      {
-          #if DIMENSION == 2
-          interface << "1 " << Th(j).x << " " << Th(j).y << endl;
-          #endif
-
-          #if DIMENSION == 3
-          interface << "1 " << Th(j).x << " " << Th(j).y << " " << Th(j).z << endl;
-          #endif
-      }
-  }
-  // }}}
   // Calculate macroscopic variables {{{
 
   freeEnergy  = INTEGRAL(DIMENSION)(Th) (
