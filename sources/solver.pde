@@ -1,3 +1,7 @@
+// Convenient functions for cpp {{{
+#define xstr(s) str(s)
+#define str(s) #s
+// }}}
 // Include auxiliary files and load modules {{{
 include "freefem/write-mesh.pde"
 include "freefem/getargs.pde"
@@ -55,7 +59,14 @@ MESH ThOut; ThOut = GMSHLOAD("output/mesh.msh");
 //}}}
 // Define functional spaces {{{
 #if DIMENSION == 2
-fespace Vh(Th,P1), V2h(Th,[P1,P1]);
+#ifdef PERIODICITY
+#include xstr(PERIODICITY)
+#define ARGPERIODIC ,periodic=periodicity
+#else
+#define ARGPERIODIC
+#endif
+fespace Vh(Th,P1 ARGPERIODIC);
+fespace V2h(Th,[P1,P1] ARGPERIODIC);
 #endif
 
 #if DIMENSION == 3
@@ -149,8 +160,6 @@ macro Div(u,v,w) (dx(u) + dy(v) + dz(w)) //EOM
 #define INTEGRAL(dim) AUX_INTEGRAL(dim)
 //}}}
 // Include problem file {{{
-#define xstr(s) str(s)
-#define str(s) #s
 #include xstr(PROBLEM)
 //}}}
 // Calculate dependent parameters {{{
@@ -256,7 +265,7 @@ varf varPrhs(p,test) = INTEGRAL(DIMENSION)(Th)( -Div(UVEC)*test/dt );
 if (adapt)
 {
   #if DIMENSION == 2
-  Th = adaptmesh(Th, phi, mu, hmax = hmax, hmin = hmin, nbvx = 1e6);
+  Th = adaptmesh(Th, phi, mu, hmax = hmax, hmin = hmin, nbvx = 1e6 ARGPERIODIC);
   [phi, mu] = [phi0, mu0];
     #ifdef NS
     u = u;
@@ -308,22 +317,6 @@ for(int i = 0; i <= nIter; i++)
   #endif
   #endif
   //}}}
-  // Calculate position of the interface {{{
-  ofstream interface("output/interface/interface."+ i +".xyz");
-  for (int j = 0; j<Th.nv ;j++)
-  {
-      if (abs(phiOld[][j]) < 0.2)
-      {
-          #if DIMENSION == 2
-          interface << "1 " << Th(j).x << " " << Th(j).y << endl;
-          #endif
-
-          #if DIMENSION == 3
-          interface << "1 " << Th(j).x << " " << Th(j).y << " " << Th(j).z << endl;
-          #endif
-      }
-  }
-  // }}}
   // Calculate macroscopic variables {{{
 
   freeEnergy  = INTEGRAL(DIMENSION)(Th) (
