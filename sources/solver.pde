@@ -265,7 +265,7 @@ varf varPrhs(p,test) = INTEGRAL(DIMENSION)(Th)( -Div(UVEC)*test/dt );
 if (adapt)
 {
   #if DIMENSION == 2
-  Th = adaptmesh(Th, phi, mu, hmax = hmax, hmin = hmin, nbvx = 1e6 ARGPERIODIC);
+  Th = adaptmesh(Th, phi, hmax = hmax, hmin = hmin, nbvx = 1e6 ARGPERIODIC);
   [phi, mu] = [phi0, mu0];
     #ifdef NS
     u = u;
@@ -526,11 +526,11 @@ for(int i = 0; i <= nIter; i++)
   #endif
   #endif
   //}}}
-  // Adapt mesh {{{
+  // Adapt mesh
   if (adapt)
   {
     #if DIMENSION == 2
-    Th = adaptmesh(Th, phi, mu, hmax = hmax, hmin = hmin, nbvx = 1e6);
+    Th = adaptmesh(Th, phi, hmax = hmax, hmin = hmin, nbvx = 1e6);
     #endif
 
     #if DIMENSION == 3
@@ -553,6 +553,6 @@ for(int i = 0; i <= nIter; i++)
     theta = theta;
     #endif
   }
-  //}}}
+  //
 }
 //}}}
