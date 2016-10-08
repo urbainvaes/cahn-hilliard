@@ -39,6 +39,16 @@ if(output_format eq 'wxt') {
   set term wxt
 }
 
+plot edges_file
+
+x_min = GPVAL_DATA_X_MIN - .05
+x_max = GPVAL_DATA_X_MAX + .05
+y_min = GPVAL_DATA_Y_MIN - .05
+y_max = GPVAL_DATA_Y_MAX + .05
+
+set xrange [x_min:x_max]
+set yrange [y_min:y_max]
+
 set output output_file
 
 unset key
@@ -86,11 +96,3 @@ if(output_style eq 'vectors') {
        edges_file with lines lt rgb "brown" lw 1, \
        isoline_file with lines lt rgb "black" lw 1.5
 }
-
-x_min = GPVAL_DATA_X_MIN - .05
-x_max = GPVAL_DATA_X_MAX + .05
-y_min = GPVAL_DATA_Y_MIN - .05
-y_max = GPVAL_DATA_Y_MAX + .05
-
-set xrange [x_min:x_max]
-set yrange [y_min:y_max]
