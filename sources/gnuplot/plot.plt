@@ -39,6 +39,7 @@ if(output_format eq 'wxt') {
   set term wxt
 }
 
+set output "/dev/null"
 plot edges_file
 
 x_min = GPVAL_DATA_X_MIN - .05
