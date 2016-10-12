@@ -265,16 +265,11 @@ varf varPrhs(p,test) = INTEGRAL(DIMENSION)(Th)( -Div(UVEC)*test/dt );
 if (adapt)
 {
   #if DIMENSION == 2
-  Th = adaptmesh(Th, phi, hmax = hmax, hmin = hmin, nbvx = 1e6 ARGPERIODIC);
-  [phi, mu] = [phi0, mu0];
-    #ifdef NS
-    u = u;
-    v = v;
-    p = p;
-    #if DIMENSION == 3
-    w = w;
-    #endif
-    #endif
+  for(int i = 0; i < 3; i++)
+  {
+      Th = adaptmesh(Th, phi, hmax = hmax, hmin = hmin, nbvx = 1e6 ARGPERIODIC);
+      [phi, mu] = [phi0, mu0];
+  }
   #endif
   #if DIMENSION == 3
   system("cp output/mesh.msh output/mesh/mesh-init-0.msh");
@@ -290,6 +285,14 @@ if (adapt)
           medit("Phi", Th, phi, wait = false);
       }
   }
+  #endif
+  #ifdef NS
+  u = u;
+  v = v;
+  p = p;
+  #if DIMENSION == 3
+  w = w;
+  #endif
   #endif
 }
 //}}}
