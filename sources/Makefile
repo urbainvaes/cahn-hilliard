@@ -106,9 +106,14 @@ status :
 	echo "  Number of iterations calculated: $$(ls output/phi/phi.*.vtk | wc -l)"; \
 	echo ""
 
+# recipients = u.vaes13@imperial.ac.uk
+# subject = "[Simulation report] $(report_name)"
+report_name = $(subst /,_,$(problem))
 report :
 	find pictures -mindepth 1 -type d -printf '%P\n' | while read l; \
-		do pdfunite $$(ls -v pictures/$${l}/*.pdf) report-$(subst /,_,$(problem))-$${l}.pdf; done
+		do pdfunite $$(ls -v pictures/$${l}/*.pdf) report-$(report_name)-$${l}.pdf; \
+		done
+		# echo "$${l}" | mail -s $(subject) -a "report-$(report_name)-$${l}.pdf" $(recipients); done
 
 ###################
 #  Clean outputs  #
