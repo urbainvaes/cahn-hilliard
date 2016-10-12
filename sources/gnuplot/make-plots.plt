@@ -10,7 +10,9 @@ if (n_files > n_plots) {
 }
 
 do for [i=0:n_files:step] {
-    system("output_file=pictures/phi/phi.mesh.".i.".pdf gnuplot gnuplot/plot.plt;")
-    system("output_file=pictures/mu/mu.mesh.".i.".pdf gnuplot gnuplot/plot.plt;")
-    system("output_file=pictures/pressure/pressure.filledcurves.".i.".pdf gnuplot gnuplot/plot.plt;")
+    system("output_file=pictures/phi/phi-mesh-".i.".pdf gnuplot gnuplot/plot.plt;")
+    system("output_file=pictures/mu/mu-mesh-".i.".pdf gnuplot gnuplot/plot.plt;")
+    system("output_file=pictures/pressure/pressure-filledcurves-".i.".pdf gnuplot gnuplot/plot.plt;")
+    system("output_file=pictures/u/u-filledcurves-".i.".pdf gnuplot gnuplot/plot.plt;")
+    system("output_file=pictures/v/v-filledcurves-".i.".pdf gnuplot gnuplot/plot.plt;")
 }
