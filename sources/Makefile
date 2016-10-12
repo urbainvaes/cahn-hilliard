@@ -93,27 +93,27 @@ endif
 view : $(VIDEO)
 	DISPLAY=:0 vlc -f $(VIDEO)
 
-plots :
-	gnuplot gnuplot/make-plots.plt
-
-###################################
-#  Communication with programmer  #
-###################################
 problem = $(shell realpath -s --relative-to $(gitRoot)/tests $(CURDIR))
+label = $(subst /,_,$(problem))
+plots :
+	label=$(label) gnuplot gnuplot/make-plots.plt
 
 status :
 	@echo "Problem $(problem) reporting for duty"; \
 	echo "  Number of iterations calculated: $$(ls output/phi/phi.*.vtk | wc -l)"; \
 	echo ""
 
+###################################
+#  Communication with programmer  #
+###################################
+
 # recipients = u.vaes13@imperial.ac.uk
-# subject = "[Simulation report] $(report_name)"
-report_name = $(subst /,_,$(problem))
+# subject = "[Simulation report] $(label)"
 report :
 	find pictures -mindepth 1 -type d -printf '%P\n' | while read l; \
-		do pdfunite $$(ls -v pictures/$${l}/*.pdf) report-$(report_name)-$${l}.pdf; \
+		do pdfunite $$(ls -v pictures/$${l}/*.pdf) report-$(label)-$${l}.pdf; \
 		done
-		# echo "$${l}" | mail -s $(subject) -a "report-$(report_name)-$${l}.pdf" $(recipients); done
+		# echo "$${l}" | mail -s $(subject) -a "report-$(label)-$${l}.pdf" $(recipients); done
 
 ###################
 #  Clean outputs  #
