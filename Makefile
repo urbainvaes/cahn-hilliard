@@ -9,11 +9,11 @@ install :
 uninstall :
 	cat .problems | fzf -m --bind=ctrl-t:toggle | while read p; do sed -i "\#$${p}#d" .problems; done;
 
-problem ?= $(shell cat .problems | tail -1)
-
 #################################
 #  Set up environment for test  #
 #################################
+problem ?= $(shell cat .problems | tail -1)
+
 link :
 	mkdir -p $(addprefix tests/$(problem)/, output pictures logs);
 	cp -alft tests/$(problem) sources/* $$(realpath inputs/$(problem)/*);
@@ -21,13 +21,20 @@ link :
 unlink :
 	rm -rf tests/$(problem)
 
+#####################
+#  For convenience  #
+#####################
+fetch :
+	mkdir -p reports
+	mv tests/$(problem)/report* reports
+
 ################################
 #  Act on all installed tests  #
 ################################
 
 # Execute command for all problems in individual directories
 all :
-	for p in $$(cat .problems); do cd tests/$${p}; $(command); cd $(CURDIR); done
+	for p in $$(cat .problems); do $(command); done
 
 # Execute target for all problems in top directory
 all-% :
