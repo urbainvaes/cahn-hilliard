@@ -533,7 +533,7 @@ for(int i = 0; i <= nIter; i++)
   if (adapt)
   {
     #if DIMENSION == 2
-    Th = adaptmesh(Th, phi, hmax = hmax, hmin = hmin, nbvx = 1e6);
+    Th = adaptmesh(Th, phi, hmax = hmax, hmin = hmin, nbvx = 1e6 ARGPERIODIC);
     #endif
 
     #if DIMENSION == 3
