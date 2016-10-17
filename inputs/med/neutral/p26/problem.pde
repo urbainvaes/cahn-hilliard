@@ -13,7 +13,7 @@ varf varVBoundary(v, test) = on(10, v = 0);
 varf varPBoundary(p, test) = on(1, p = 3) + on(3, p = 0);
 
 // Time step
-dt = 1e-5;
+dt = 1e-3;
 
 // Number of iterations
 nIter = 1e4;

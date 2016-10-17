@@ -1,6 +1,8 @@
 /problem
 /tests
 /videos
+/reports
+/.vifm*
 /config.mk
 
 .problems
