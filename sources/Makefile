@@ -93,7 +93,7 @@ endif
 view : $(VIDEO)
 	DISPLAY=:0 vlc -f $(VIDEO)
 
-problem = $(shell realpath -s --relative-to $(gitRoot)/tests $(CURDIR))
+problem = $(CURDIR:$(gitRoot)/tests/%=%)
 label = $(subst /,_,$(problem))
 plots :
 	label=$(label) gnuplot gnuplot/make-plots.plt
