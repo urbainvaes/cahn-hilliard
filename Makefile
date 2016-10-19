@@ -1,18 +1,20 @@
+problems_file ?= .problems
+
 ##################################
 #  Install and uninstall a test  #
 ##################################
 install :
 	find inputs -type d -printf '%P\n' | \
 		while read l; do [[ $$(find inputs/$$l/* -type d) = "" ]] && echo $$l; done | \
-		fzf -m --bind=ctrl-t:toggle >> .problems;
+		fzf -m --bind=ctrl-t:toggle >> $(problems_file);
 
 uninstall :
-	cat .problems | fzf -m --bind=ctrl-t:toggle | while read p; do sed -i "\#$${p}#d" .problems; done;
+	cat $(problems_file) | fzf -m --bind=ctrl-t:toggle | while read p; do sed -i "\#$${p}#d" $(problems_file); done;
 
 #################################
 #  Set up environment for test  #
 #################################
-problem ?= $(shell cat .problems | tail -1)
+problem ?= $(shell cat $(problems_file) | tail -1)
 
 link :
 	mkdir -p $(addprefix tests/$(problem)/, output pictures logs);
@@ -34,11 +36,11 @@ fetch :
 
 # Execute command for all problems in individual directories
 all :
-	for p in $$(cat .problems); do $(command); done
+	for p in $$(cat $(problems_file)); do $(command); done
 
 # Execute target for all problems in top directory
 all-% :
-	for p in $$(cat .problems); do make $* problem=$${p}; done
+	for p in $$(cat $(problems_file)); do make $* problem=$${p}; done
 
 clean-all :
 	rm -rf tests
