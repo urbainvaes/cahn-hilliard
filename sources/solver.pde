@@ -96,9 +96,6 @@ Vh theta;
 //}}}
 // Declare default parameters {{{
 
-// Sharp interface limit
-int sharpScaling = 0;
-
 // Cahn-Hilliard parameters
 real Pe = 1;
 real Cn = 0.01;
@@ -297,12 +294,6 @@ if (adapt)
 }
 //}}}
 // Loop in time {{{
-
-// Rescale time step to recover the sharp interface limit
-if (sharpScaling == 1)
-{
-    dt = dt / (100 * Cn);
-}
 
 // Open output file
 ofstream file("output/thermodynamics.txt");
