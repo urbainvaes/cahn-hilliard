@@ -2,14 +2,13 @@
 # Problem = the current test
 
 live     = .bunches/.installed
-bunch   ?= $(shell test -s $(live) && cat $(live) || echo .bunches/default)
+bunch   ?= $(shell test -s $(live) && cat $(live) || echo default)
 problem ?= $(shell cat .bunches/$(bunch) | tail -1)
 
 ###################
 #  Install bunch  #
 ###################
 bunch :
-	mkdir -p .bunches;
 	find .bunches/* -printf "%f\n" | fzf --print-query | tail -1 > $(live);
 
 #######################################################

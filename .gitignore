@@ -4,7 +4,7 @@
 /reports
 
 /.vifm*
-/.bunches
+/.bunches/*
 
 *.backup
 !*.gitkeep
