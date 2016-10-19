@@ -1,21 +1,29 @@
-problems_file ?= .problems
+# Bunch = file with a list of tests
+# Problem = the current test
 
-##################################
-#  Install and uninstall a test  #
-##################################
+bunch   ?= $(shell test -s .bunch && cat .bunch || echo .bunches/default)
+problem ?= $(shell cat .bunches/$(bunch) | tail -1)
+
+###################
+#  Install bunch  #
+###################
+bunch :
+	find .bunches/* -printf "%f\n" | fzf --print-query | tail -1 > .bunch;
+
+#######################################################
+#  Install and uninstall a test to the current bunch  #
+#######################################################
 install :
 	find inputs -type d -printf '%P\n' | \
 		while read l; do [[ $$(find inputs/$$l/* -type d) = "" ]] && echo $$l; done | \
-		fzf -m --bind=ctrl-t:toggle >> $(problems_file);
+		fzf -m --bind=ctrl-t:toggle >> .bunches/$(bunch);
 
 uninstall :
-	cat $(problems_file) | fzf -m --bind=ctrl-t:toggle | while read p; do sed -i "\#$${p}#d" $(problems_file); done;
+	cat .bunches/$(bunch) | fzf -m --bind=ctrl-t:toggle | while read p; do sed -i "\#$${p}#d" .bunches/$(bunch); done;
 
 #################################
 #  Set up environment for test  #
 #################################
-problem ?= $(shell cat $(problems_file) | tail -1)
-
 link :
 	mkdir -p $(addprefix tests/$(problem)/, output pictures logs);
 	cp -alft tests/$(problem) sources/* $$(realpath inputs/$(problem)/*);
@@ -36,11 +44,11 @@ fetch :
 
 # Execute command for all problems in individual directories
 all :
-	for p in $$(cat $(problems_file)); do $(command); done
+	for p in $$(cat .bunches/$(bunch)); do $(command); done
 
 # Execute target for all problems in top directory
 all-% :
-	for p in $$(cat $(problems_file)); do make $* problem=$${p}; done
+	for p in $$(cat .bunches/$(bunch)); do make $* problem=$${p}; done
 
 clean-all :
 	rm -rf tests
