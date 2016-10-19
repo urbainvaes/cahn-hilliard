@@ -1,14 +1,16 @@
 # Bunch = file with a list of tests
 # Problem = the current test
 
-bunch   ?= $(shell test -s .bunch && cat .bunch || echo .bunches/default)
+live     = .bunches/.installed
+bunch   ?= $(shell test -s $(live) && cat $(live) || echo .bunches/default)
 problem ?= $(shell cat .bunches/$(bunch) | tail -1)
 
 ###################
 #  Install bunch  #
 ###################
 bunch :
-	find .bunches/* -printf "%f\n" | fzf --print-query | tail -1 > .bunch;
+	mkdir -p .bunches;
+	find .bunches/* -printf "%f\n" | fzf --print-query | tail -1 > $(live);
 
 #######################################################
 #  Install and uninstall a test to the current bunch  #

@@ -2,11 +2,10 @@
 /tests
 /videos
 /reports
-/.vifm*
-/config.mk
 
-.problems
-.problem
+/.vifm*
+/.bunches
+
 *.backup
 !*.gitkeep
 
