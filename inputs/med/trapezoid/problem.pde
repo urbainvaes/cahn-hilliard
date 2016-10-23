@@ -10,12 +10,12 @@ varf varPhiBoundary([phi1,mu1], [phi2,mu2]) =
 
 // Dimensionless numbers
 Re = 1;
-Pe = 1e2;
+Pe = 1;
 Ca = 1e-2;
-Cn = 1e-2;
+Cn = 5e-3;
 
-real radius = 0.03 + Cn;
-real DP = (2*sqrt(2)/3) * (1/R) * (Cn/Ca);
+real radius = 0.5 * (Lx/nPores - topWidth);
+real DP = (2*sqrt(2)/3) * (1/radius) * (Cn/Ca);
 cout << "Pressure difference: " << DP << endl;
 
 varf varUBoundary(u, test) = on(2,4, u = 0) + on(10, u = 0);
@@ -23,7 +23,7 @@ varf varVBoundary(v, test) = on(10, v = 0);
 varf varPBoundary(p, test) = on(1, p = DP) + on(3, p = 0);
 
 // Time step
-dt = .5e-2;
+dt = 1e-3;
 
 // Number of iterations
 nIter = 1e4;

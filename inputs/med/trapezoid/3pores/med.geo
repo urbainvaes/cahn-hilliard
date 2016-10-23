@@ -64,16 +64,21 @@ Macro Obstacle
 Return
 
 // Number of obstacles
-n = 7;
-d = Lx/n;
+nPores = 3; // export
 
-lx = Lx/12;
+// "Characteristic width and height
+lx = Lx/5; // export
 ly = Ly/7;
+
+// Top width of an obstacle
+topWidth = 1.2 * lx; // export
+
+d = Lx/nPores;
 
 x0 = d/2;
 y0 = Ly/2.;
 
-For i In {0:n-1}
+For i In {0:nPores-1}
   x = x0 + i*d;
   y = y0;
 

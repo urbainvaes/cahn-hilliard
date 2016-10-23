@@ -1,6 +1,6 @@
 // Dimensions of square
-Lx = 1; // export
-Ly = 0.5; // export
+Lx = 2; // export
+Ly = 1; // export
 
 s = 0.03;
 

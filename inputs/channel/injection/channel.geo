@@ -1,7 +1,6 @@
-Ly = 1; // export
-Lx = 7*Ly;   // export
-cx1 = 1.0;
-cx2 = 1.1;
+Lx = 1; // export
+Ly = Lx/7; // export
+cx1 = Ly;
+cx2 = 1.1*Ly;
 
 Include "geometries/channel.geo";
-/* Print Sprintf("test.jpg"); */

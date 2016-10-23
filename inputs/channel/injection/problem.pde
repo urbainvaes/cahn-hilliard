@@ -12,16 +12,13 @@ varf varPhiBoundary([phi1,mu1], [phi2,mu2]) =
 
 varf varUBoundary(u, unused) = on(1,3,5,7, u = 0);
 varf varVBoundary(v, unused) = on(1,3,5,7, v = 0);
-varf varPBoundary(p, unused) = on(6, p = 200) + on(4, p = 40) + on(2, p = 0);
+varf varPBoundary(p, unused) = on(6, p = 10) + on(4, p = 40) + on(2, p = 0);
 
 // Time step
-dt = 0.5e-2;
+dt = 1e-2;
 
 // Number of iterations
 nIter = 2000;
-
-// Capillary term
-muGradPhi = 0;
 
 // Dimensionless numbers
 Re = 1;
