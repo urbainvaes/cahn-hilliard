@@ -17,7 +17,7 @@ If (!Exists(cx2))
 EndIf
 
 If (!Exists(cy))
-  cy = -0.5*Ly;
+  cy = Ly;
 EndIf
 
 If (!Exists(s))
@@ -35,8 +35,8 @@ Point(3) = {cx1 , cy1 , 0 , s};
 Point(4) = {cx2 , cy2 , 0 , s};
 Point(5) = {cx2 , 0   , 0 , s};
 Point(6) = {Lx  , 0   , 0 , s};
-Point(7) = {Lx  , Ly  , 0 , s};
-Point(8) = {0   , Ly  , 0 , s};
+Point(7) = {Lx  , -Ly  , 0 , s};
+Point(8) = {0   , -Ly  , 0 , s};
 
 Line(1) = {1,2};
 Line(2) = {2,3};
