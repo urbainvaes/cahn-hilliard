@@ -3,6 +3,11 @@
 //      - r, L : dimensions of the cylinder
 //      - index : starting index for points and lines
 Macro Cylinder
+
+  If (!Exists(surf))
+    surf = 1;
+  EndIf
+
   cp[0] = newp; Point(cp[0]) = {x    , y    , z - 0.5*L, s}; // Center
   cp[1] = newp; Point(cp[1]) = {x - r, y - r, z - 0.5*L, s};
   cp[2] = newp; Point(cp[2]) = {x + r, y - r, z - 0.5*L, s};
@@ -33,15 +38,21 @@ Macro Cylinder
   lineloops[1] = newreg; Line Loop(lineloops[1]) = {cl[1], cl[2], cl[3], cl[4]};
   lineloops[2] = newreg; Line Loop(lineloops[2]) = {cl[5], cl[6], cl[7], cl[8]};
 
-  surfaces[1] = news; Plane Surface(surfaces[1]) = {lineloops[1]};
-  surfaces[2] = news; Plane Surface(surfaces[2]) = {lineloops[2]};
+  If (surf == 1)
+    surfaces[1] = news; Plane Surface(surfaces[1]) = {lineloops[1]};
+    surfaces[2] = news; Plane Surface(surfaces[2]) = {lineloops[2]};
+  EndIf
 
-  For i In {1:4}
-    lineloops[2 + i] = newreg; Line Loop(lineloops[2 + i]) = {cl[i], cl[9 + i%4], -cl[4 + i], -cl[8 + i]};
-    surfaces[2 + i] = news; Ruled Surface(surfaces[2 + i]) = {lineloops[2 + i]};
+  For i_macro In {1:4}
+    lineloops[2 + i_macro] = newreg; Line Loop(lineloops[2 + i_macro]) = {cl[i_macro], cl[9 + i_macro%4], -cl[4 + i_macro], -cl[8 + i_macro]};
+    If (surf == 1)
+      surfaces[2 + i_macro] = news; Ruled Surface(surfaces[2 + i_macro]) = {lineloops[2 + i_macro]};
+    EndIf
   EndFor
 
-  surfaceloopindex = newreg;
-  surfaceloop = {surfaces[1], surfaces[3], surfaces[4], surfaces[5], surfaces[6], surfaces[2]};
-  Surface Loop(surfaceloopindex) = {surfaceloop[]};
+  If (surf)
+    surfaceloopindex = newreg;
+    surfaceloop = {surfaces[1], surfaces[3], surfaces[4], surfaces[5], surfaces[6], surfaces[2]};
+    Surface Loop(surfaceloopindex) = {surfaceloop[]};
+  EndIf
 Return
