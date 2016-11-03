@@ -378,14 +378,9 @@ for(int i = 0; i <= nIter; i++)
   #if DIMENSION == 3
   {
       ofstream currentMesh("output/mesh/mesh-" + i + ".msh");
-      ofstream data("output/phi/phase-" + i + ".msh");
+      ofstream data("output/phi/phi-" + i + ".msh");
 
       #ifdef ADAPT
-          #ifdef NS
-          uOut = u;
-          vOut = v;
-          wOut = w;
-          #endif
           writeHeader(currentMesh);
           writeNodes(currentMesh, Vh);
           writeElements(currentMesh, Vh, Th);
@@ -396,7 +391,7 @@ for(int i = 0; i <= nIter; i++)
           writeHeader(data); write1dData(data, "Cahn-Hilliard", i*dt, i, phiOld);
       #endif
   }
-  system("./bin/msh2pos output/mesh/mesh-" + i + ".msh output/phi/phase-" + i + ".msh");
+  system("./bin/msh2pos output/mesh/mesh-" + i + ".msh output/phi/phi-" + i + ".msh");
   // ! phi[]
   #endif
 
