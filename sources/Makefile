@@ -36,11 +36,11 @@ ifeq ($(GRAVITY), 1)
 endif
 
 ifeq ($(ADAPT), 1)
-	ff_flags += -adapt 1
+	cpp_flags += -DADAPT
 endif
 
 ifeq ($(PLOT), 1)
-	ff_flags += -plot 1
+	cpp_flags += -DPLOT
 endif
 
 ###############################

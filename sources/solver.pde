@@ -39,10 +39,6 @@ system("mkdir -p" + " output/phi"
                   #endif
                  );
 //}}}
-// Process input parameters {{{
-int adapt = getARGV("-adapt",0);
-int plotSol = getARGV("-plot",0);
-//}}}
 // Import the mesh {{{
 #if DIMENSION == 2
 #define MESH mesh
@@ -245,11 +241,6 @@ varf varWrhs(w,test) =
 #endif
 varf varP(p,test) = INTEGRAL(DIMENSION)(Th)( Grad(p)'*Grad(test) );
 varf varPrhs(p,test) = INTEGRAL(DIMENSION)(Th)( -Div(UVEC)*test/dt );
-/* 	 - Div(UVEC)*test/dt */
-/* varf varPrhs(p,test) = */
-/*   INTEGRAL(DIMENSION)(Th)( */
-/* 	 - Div(UVEC)*test/dt */
-/*     ); */
 #endif
 //}}}
 //}}}
@@ -259,8 +250,7 @@ varf varPrhs(p,test) = INTEGRAL(DIMENSION)(Th)( -Div(UVEC)*test/dt );
 #endif
 //}}}
 // Adapt mesh before starting computation {{{
-if (adapt)
-{
+#ifdef ADAPT
   #if DIMENSION == 2
   for(int i = 0; i < 3; i++)
   {
@@ -277,10 +267,9 @@ if (adapt)
       Th=tetgreconstruction(Th,switch="raAQ",sizeofvolume=metricField*metricField*metricField/6.);
       [phi, mu] = [phi0, mu0];
 
-      if(plotSol)
-      {
+      #ifdef PLOT
           medit("Phi", Th, phi, wait = false);
-      }
+      #endif
   }
   #endif
   #ifdef NS
@@ -291,7 +280,7 @@ if (adapt)
   w = w;
   #endif
   #endif
-}
+#endif
 //}}}
 // Loop in time {{{
 
@@ -391,8 +380,7 @@ for(int i = 0; i <= nIter; i++)
       ofstream currentMesh("output/mesh/mesh-" + i + ".msh");
       ofstream data("output/phi/phase-" + i + ".msh");
 
-      if(adapt)
-      {
+      #ifdef ADAPT
           #ifdef NS
           uOut = u;
           vOut = v;
@@ -404,12 +392,9 @@ for(int i = 0; i <= nIter; i++)
 
           writeHeader(data);
           write1dData(data, "Cahn-Hilliard", i*dt, i, phiOld);
-
-      }
-      else
-      {
+      #else
           writeHeader(data); write1dData(data, "Cahn-Hilliard", i*dt, i, phiOld);
-      }
+      #endif
   }
   system("./bin/msh2pos output/mesh/mesh-" + i + ".msh output/phi/phase-" + i + ".msh");
   // ! phi[]
@@ -429,8 +414,7 @@ for(int i = 0; i <= nIter; i++)
       << "Free energy bulk = "  << freeEnergy    << endl;
   //}}}
   // Visualize solution at current time step {{{
-  if (plotSol)
-  {
+  #ifdef PLOT
       #if DIMENSION == 2
       plot(phi, fill=true, WindowIndex = 0);
       #ifdef NS
@@ -442,7 +426,7 @@ for(int i = 0; i <= nIter; i++)
       #if DIMENSION == 3
       medit("Phi",Th,phi,wait = false);
       #endif
-  }
+  #endif
   //}}}
   // Exit if required {{{
   if (i == nIter) break;
@@ -520,9 +504,8 @@ for(int i = 0; i <= nIter; i++)
   #endif
   #endif
   //}}}
-  // Adapt mesh
-  if (adapt)
-  {
+  // Adapt mesh {{{
+  #ifdef ADAPT
     #if DIMENSION == 2
     Th = adaptmesh(Th, phi, hmax = hmax, hmin = hmin, nbvx = 1e6 ARGPERIODIC);
     #endif
@@ -546,7 +529,7 @@ for(int i = 0; i <= nIter; i++)
     #ifdef ELECTRO
     theta = theta;
     #endif
-  }
-  //
+  #endif
+  /// }}}
 }
 //}}}
