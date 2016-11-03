@@ -22,8 +22,12 @@ nIter = 1e4;
 // Capillary term
 muGradPhi = 1;
 
+// Parameters for adaptation
+hmin = 0.04;
+hmax = 0.2;
+
 // Dimensionless numbers
 Re = 1;
 Pe = 10;
 Ca = 10;
-Cn = 1e-1; // Decrease
+Cn = 4e-2; // Decrease
