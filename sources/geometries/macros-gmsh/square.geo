@@ -9,5 +9,6 @@ Macro Square
   lines[3] = newl; Line(lines[3]) = {points[3],points[4]};
   lines[4] = newl; Line(lines[4]) = {points[4],points[1]};
 
-  lloop = newreg; Line Loop(lloop) = {lines[1],lines[2],lines[3],lines[4]};
+  lloop = newreg;
+  Line Loop(lloop) = {lines[1],lines[2],lines[3],lines[4]};
 Return

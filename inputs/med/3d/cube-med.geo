@@ -1,31 +1,40 @@
-Merge "../output/mesh.msh";
+Merge "output/mesh.msh";
 
 // Generate list of files to be included
 System "ls -v output/phi/phase-*.msh | sed '$d'  > includes.geo";
 System 'sed -i "s/^\(.\+\)$/Merge \"\1\";/" includes.geo';
 
 // Include output files
-Include "../includes.geo";
+Include "includes.geo";
 
 // Clean generated list
 System 'rm includes.geo';
 
-// Use Euler angles instead of quaternion
-General.Trackball = 0;
+Hide {
+  Surface {
+    Physical Surface{1},
+    Physical Surface{2},
+    Physical Surface{3}
+  };
+}
 
-// Upside down
-General.RotationX = 110;
-General.RotationY = 0;
-General.RotationZ = 30;
+General.Trackball = 0;
+General.RotationX = 300.7256005599669;
+General.RotationY = 1.020846997272915;
+General.RotationZ = 318.5479184306434;
 
 Mesh.ColorCarousel   = 2;
 Mesh.SurfaceEdges    = 0;
 Mesh.VolumeEdges     = 0;
 
-Geometry.Lines       = 0;
-Geometry.Surfaces    = 0;
-Geometry.Points      = 0;
-Geometry.SurfaceType = 0;
+Mesh.ColorCarousel      = 2;
+Mesh.SurfaceEdges       = 0;
+Mesh.SurfaceFaces       = 1;
+Mesh.VolumeEdges        = 0;
+Geometry.Lines          = 0;
+Geometry.Surfaces       = 0;
+Geometry.Points         = 0;
+Geometry.SurfaceType    = 0;
 Geometry.SurfaceNumbers = 0;
 
 // Number of cutting planes
@@ -34,26 +43,23 @@ nplanes = 3;
 Plugin(CutPlane).A = 1;
 Plugin(CutPlane).B = 0;
 Plugin(CutPlane).C = 0;
-Plugin(CutPlane).D = - 0.5*Lx;
+Plugin(CutPlane).D = 0;
 Plugin(CutPlane).View = 0;
 Plugin(CutPlane).Run;
-View[1].OffsetX = - 0.5*Lx;
 
 Plugin(CutPlane).A = 0;
 Plugin(CutPlane).B = 1;
 Plugin(CutPlane).C = 0;
-Plugin(CutPlane).D = - 0.5*Ly;
+Plugin(CutPlane).D = - Ly;
 Plugin(CutPlane).View = 0;
 Plugin(CutPlane).Run;
-View[2].OffsetY = - 0.5*Ly;
 
 Plugin(CutPlane).A = 0;
 Plugin(CutPlane).B = 0;
 Plugin(CutPlane).C = 1;
-Plugin(CutPlane).D = - 0.5*Lz;
+Plugin(CutPlane).D = 0;
 Plugin(CutPlane).View = 0;
 Plugin(CutPlane).Run;
-View[3].OffsetZ = 0.5*Lz;
 
 Plugin(Isosurface).Value = 0;
 Plugin(Isosurface).View = 0;
@@ -76,7 +82,7 @@ For i In {nplanes+1:PostProcessing.NbViews-2}
   Draw;
   If(Exists(video))
     System "mkdir -p output/iso";
-    Print Sprintf("../output/iso/isosurface-%04g.jpg", i);
+    Print Sprintf("output/iso/isosurface-%04g.jpg", i);
   EndIf
   If(!Exists(video))
     Sleep 0.1;
