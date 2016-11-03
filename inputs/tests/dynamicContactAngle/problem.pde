@@ -10,11 +10,12 @@ func mu0 = 0;
 
 // Define boundary conditions
 real theta = CONTACTANGLE;
+real Dw = 1;
 varf varPhiBoundary([phi1,mu1], [phi2,mu2]) =
   int1d(Th,1) (wetting(theta) * mu2)
   + int1d(Th,1) (wetting(theta) * phi1 * phiOld * mu2)
-  + int1d(Th,1) (Cn*phi1*phi2/dt)
-  + int1d(Th,1) (Cn*phiOld*phi2/dt)
+  + int1d(Th,1) (Cn/Dw*phi1*phi2/dt)
+  + int1d(Th,1) (Cn/Dw*phiOld*phi2/dt)
 ;
 
 varf varUBoundary(u, unused) = on(1,2,3,4, u = 0);
