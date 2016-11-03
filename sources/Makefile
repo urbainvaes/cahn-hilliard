@@ -113,13 +113,10 @@ status :
 #  Communication with programmer  #
 ###################################
 
-# recipients = u.vaes13@imperial.ac.uk
-# subject = "[Simulation report] $(label)"
 report :
 	find pictures -mindepth 1 -type d -printf '%P\n' | while read l; \
 		do pdfunite $$(ls -v pictures/$${l}/*.pdf) report-$(label)-$${l}.pdf; \
 		done
-		# echo "$${l}" | mail -s $(subject) -a "report-$(label)-$${l}.pdf" $(recipients); done
 
 ###################
 #  Clean outputs  #
