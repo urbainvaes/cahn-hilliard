@@ -30,4 +30,4 @@ hmax = 0.2;
 Re = 1;
 Pe = 10;
 Ca = 10;
-Cn = 4e-2; // Decrease
+Cn = 2e-2; // Decrease

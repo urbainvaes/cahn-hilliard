@@ -91,9 +91,10 @@ surface_loop += cylinder_lateral_surfaces[];
 
 Physical Surface(1) = bottom_surfaces[0];
 Physical Surface(2) = top_surfaces[5];
-Physical Surface(3) = {bottom_lateral_surfaces[], top_lateral_surfaces[] };
-Physical Surface(4) = {bottom_surfaces[5], top_surfaces[0]};
-Physical Surface(5) = {cylinder_lateral_surfaces[]};
+Physical Surface(3) = {bottom_lateral_surfaces[]};
+Physical Surface(4) = {top_lateral_surfaces[]};
+Physical Surface(5) = {bottom_surfaces[5],top_surfaces[0]};
+Physical Surface(6) = {cylinder_lateral_surfaces[]};
 
 surface_loop_index = newreg;
 Surface Loop(surface_loop_index) = surface_loop[];
@@ -108,7 +109,8 @@ Geometry.SurfaceNumbers = 2;
 Color Gray
 {
   Surface {
+    Physical Surface{3},
     Physical Surface{5},
-    Physical Surface{4}
+    Physical Surface{6}
   };
 }
