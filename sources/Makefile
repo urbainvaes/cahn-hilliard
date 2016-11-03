@@ -79,7 +79,10 @@ VIDEO = pictures/video.mpg
 else
 VIDEO = pictures/video.ogv
 endif
-video : $(VIDEO)
+video :
+	find pictures -mindepth 1 -type d -printf '%P\n' | while read l; \
+		do mencoder "mf://pictures/$${l}/*.jpg" -mf fps=10 -o pictures/$${l}.ogv \
+		-ovc lavc -lavcopts vcodec=mpeg4:vhq; done
 
 $(VIDEO) : $(VIEW)
 ifeq ($(DIMENSION), 3)
