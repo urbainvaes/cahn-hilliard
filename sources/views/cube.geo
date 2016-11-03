@@ -1,7 +1,7 @@
 Merge "../output/mesh.msh";
 
 // Generate list of files to be included
-System "ls -v output/phase-*.msh | sed '$d'  > includes.geo";
+System "ls -v output/phi/phase-*.msh | sed '$d'  > includes.geo";
 System 'sed -i "s/^\(.\+\)$/Merge \"\1\";/" includes.geo';
 
 // Include output files
