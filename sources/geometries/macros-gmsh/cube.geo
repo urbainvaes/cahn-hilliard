@@ -25,20 +25,25 @@ Macro Cube
     lines[8 + index] = newl; Line(lines[8 + index]) = {points[index], points[index+4]};
   EndFor
 
-  lineloops[1] = newreg; Line Loop(lineloops[1]) = {lines[1] ,  lines[2] ,  lines[3] ,   lines[4] };
-  lineloops[2] = newreg; Line Loop(lineloops[2]) = {lines[1] , lines[10] , -lines[5] ,  -lines[9] };
-  lineloops[3] = newreg; Line Loop(lineloops[3]) = {lines[2] , lines[11] , -lines[6] , -lines[10] };
-  lineloops[4] = newreg; Line Loop(lineloops[4]) = {lines[3] , lines[12] , -lines[7] , -lines[11] };
-  lineloops[5] = newreg; Line Loop(lineloops[5]) = {lines[4] ,  lines[9] , -lines[8] , -lines[12] };
-  lineloops[6] = newreg; Line Loop(lineloops[6]) = {lines[5] ,  lines[6] ,  lines[7] ,   lines[8] };
+  theloops = { lines[1] ,  lines[2] ,  lines[3] ,   lines[4] ,
+               lines[1] , lines[10] , -lines[5] ,  -lines[9] ,
+               lines[2] , lines[11] , -lines[6] , -lines[10] ,
+               lines[3] , lines[12] , -lines[7] , -lines[11] ,
+               lines[4] ,  lines[9] , -lines[8] , -lines[12] ,
+               lines[5] ,  lines[6] ,  lines[7] ,   lines[8] };
+
+  For i In {1:6}
+   lineloops[i] = newreg; 
+   Line Loop(lineloops[i]) = { theloops[4*(i-1)+0] ,
+                               theloops[4*(i-1)+1] ,
+                               theloops[4*(i-1)+2] ,
+                               theloops[4*(i-1)+3] };
+  EndFor
 
   If (surf == 1)
-    surfaces[1] = news; Plane Surface(surfaces[1]) = {lineloops[1]};
-    surfaces[2] = news; Plane Surface(surfaces[2]) = {lineloops[2]};
-    surfaces[3] = news; Plane Surface(surfaces[3]) = {lineloops[3]};
-    surfaces[4] = news; Plane Surface(surfaces[4]) = {lineloops[4]};
-    surfaces[5] = news; Plane Surface(surfaces[5]) = {lineloops[5]};
-    surfaces[6] = news; Plane Surface(surfaces[6]) = {lineloops[6]};
+    For i In {1:6}
+      surfaces[i] = news; Plane Surface(surfaces[i]) = {lineloops[i]};
+    EndFor
 
     surfaceloopindex = newreg;
     surfaceloop = {surfaces[1], surfaces[2], surfaces[3], surfaces[4], surfaces[5], surfaces[6]};
