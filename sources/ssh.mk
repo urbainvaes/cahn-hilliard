@@ -2,7 +2,7 @@
 #  Run on remote machine  #
 ###########################
 remoteHost ?= uv113@macomp01.ma.ic.ac.uk
-remoteRoot ?= /home/ma/u/uv113/cahn-hilliard
+remoteRoot ?= cahn-hilliard
 
 script-% :
 	echo "#!/bin/bash"                       >  $@
