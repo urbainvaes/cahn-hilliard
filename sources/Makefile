@@ -1,3 +1,9 @@
+######################
+#  Useful variables  #
+######################
+gitRoot = $(shell git rev-parse --show-toplevel)
+problem = $(shell realpath -s --relative-to $(gitRoot)/tests $(CURDIR))
+
 #########################
 #  Include ssh targets  #
 #########################
