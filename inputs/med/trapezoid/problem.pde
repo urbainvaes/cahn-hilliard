@@ -15,6 +15,8 @@ Ca = 1e-2;
 Cn = 5e-3;
 
 real radius = 0.5 * (Lx/nPores - topWidth);
+
+// !! Check formula!
 real DP = (2*sqrt(2)/3) * (1/radius) * (Cn/Ca);
 cout << "Pressure difference: " << DP << endl;
 
