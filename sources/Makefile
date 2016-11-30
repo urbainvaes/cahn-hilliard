@@ -105,7 +105,11 @@ view : $(VIDEO)
 problem = $(CURDIR:$(gitRoot)/tests/%=%)
 label = $(subst /,_,$(problem))
 plots :
+ifeq ($(DIMENSION), 3)
+	gmsh -display :0 $(GEOMETRY) $(VIEW) -setnumber video 1
+else
 	label=$(label) gnuplot gnuplot/make-plots.plt
+endif
 
 status :
 	@echo "Problem $(problem) reporting for duty"; \

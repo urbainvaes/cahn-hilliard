@@ -1,87 +1,175 @@
-// Generate list of files to be included
-System "ls -v output/phi/phase-*.pos | sed '1d' > includes.geo";
-System 'sed -i "s/^\(.\+\)$/Merge \"\1\";/" includes.geo';
+Merge "../output/mesh.msh";
 
-
-// Use Euler angles instead of quaternion
-General.Trackball = 0;
+Hide {
+  Surface {
+    Physical Surface{3},
+    Physical Surface{4},
+    Physical Surface{5}
+  };
+}
 
 // Not upside down
-General.RotationX = 300.7256005599669;
-General.RotationY = 1.020846997272915;
-General.RotationZ = 318.5479184306434;
+General.Trackball = 0;
+General.RotationX = -80;
+General.RotationY = 0;
+General.RotationZ = 0;
 
-Mesh.ColorCarousel   = 2;
-Mesh.SurfaceEdges    = 0;
-Mesh.VolumeEdges     = 0;
-
-Geometry.Lines       = 0;
-Geometry.Surfaces    = 0;
-Geometry.Points      = 0;
-Geometry.SurfaceType = 0;
-Geometry.SurfaceNumbers = 0;
+General.ScaleX = 1.5;
+General.ScaleY = 1.5;
+General.ScaleZ = 1.5;
+General.SmallAxes = 0;
 
 View.Visible = 0;
 View.ShowScale = 0;
 View.RangeType = 2;
 View.CustomMin = -1.3;
 View.CustomMax = 1.3;
+View.SmoothNormals = 1;
+View.ColormapAlpha = 1;
+View.ColorTable = {
+{0, 1, 255, 255}, {0, 2, 255, 255}, {0, 3, 255, 255}, {0, 5, 255, 255},
+{0, 6, 255, 255}, {0, 8, 255, 255}, {0, 9, 255, 255}, {0, 11, 255, 255},
+{0, 12, 255, 255}, {0, 14, 255, 255}, {0, 15, 255, 255}, {0, 17, 255, 255},
+{0, 18, 255, 255}, {0, 20, 255, 255}, {0, 21, 255, 255}, {0, 22, 255, 255},
+{0, 24, 255, 255}, {0, 25, 255, 255}, {0, 26, 255, 255}, {0, 28, 255, 255},
+{0, 29, 255, 255}, {0, 30, 255, 255}, {0, 32, 255, 255}, {0, 33, 255, 255},
+{0, 34, 255, 255}, {0, 35, 255, 255}, {0, 37, 255, 255}, {0, 38, 255, 255},
+{0, 39, 255, 255}, {0, 40, 255, 255}, {0, 42, 255, 255}, {0, 43, 255, 255},
+{0, 44, 255, 255}, {0, 45, 255, 255}, {0, 47, 255, 255}, {0, 48, 255, 255},
+{0, 49, 255, 255}, {0, 50, 255, 255}, {0, 52, 255, 255}, {0, 53, 255, 255},
+{0, 54, 255, 255}, {0, 55, 255, 255}, {0, 57, 255, 255}, {0, 58, 255, 255},
+{0, 59, 255, 255}, {0, 60, 255, 255}, {0, 61, 255, 255}, {0, 62, 255, 255},
+{0, 64, 255, 255}, {0, 65, 255, 255}, {0, 66, 255, 255}, {0, 67, 255, 255},
+{0, 68, 255, 255}, {0, 69, 255, 255}, {0, 71, 255, 255}, {0, 72, 255, 255},
+{0, 73, 255, 255}, {0, 74, 255, 255}, {0, 75, 255, 255}, {0, 76, 255, 255},
+{0, 77, 255, 255}, {0, 78, 255, 255}, {0, 80, 255, 255}, {0, 81, 255, 255},
+{0, 82, 255, 255}, {0, 83, 255, 255}, {0, 84, 255, 255}, {0, 85, 255, 255},
+{0, 86, 255, 255}, {0, 87, 255, 255}, {0, 88, 255, 255}, {0, 89, 255, 255},
+{0, 90, 255, 255}, {0, 91, 255, 255}, {0, 92, 255, 255}, {0, 93, 255, 255},
+{0, 94, 255, 255}, {0, 95, 255, 255}, {0, 96, 255, 255}, {0, 97, 255, 255},
+{0, 98, 255, 255}, {0, 99, 255, 255}, {0, 100, 255, 255}, {0, 101, 255, 255},
+{0, 102, 255, 255}, {0, 103, 255, 255}, {0, 104, 255, 255}, {0, 105, 255, 255},
+{0, 106, 255, 255}, {0, 107, 255, 255}, {0, 108, 255, 255}, {0, 109, 255, 255},
+{0, 110, 255, 255}, {0, 111, 255, 255}, {0, 112, 255, 255}, {0, 113, 255, 255},
+{0, 114, 255, 255}, {0, 115, 255, 255}, {0, 116, 255, 255}, {0, 117, 255, 255},
+{0, 118, 255, 255}, {0, 119, 255, 255}, {0, 120, 255, 255}, {0, 121, 255, 255},
+{0, 122, 255, 255}, {0, 122, 255, 255}, {0, 123, 255, 255}, {0, 124, 255, 255},
+{0, 125, 255, 255}, {0, 126, 255, 255}, {0, 127, 255, 255}, {0, 128, 255, 255},
+{0, 129, 255, 255}, {0, 130, 255, 255}, {0, 131, 255, 255}, {0, 132, 255, 255},
+{0, 133, 255, 255}, {0, 134, 255, 255}, {0, 135, 255, 255}, {0, 136, 255, 255},
+{0, 137, 255, 255}, {0, 137, 255, 255}, {0, 138, 255, 255}, {0, 139, 255, 255},
+{0, 140, 255, 255}, {0, 141, 255, 255}, {0, 142, 255, 255}, {0, 143, 255, 255},
+{0, 144, 255, 255}, {0, 145, 255, 255}, {0, 146, 255, 255}, {0, 147, 255, 255},
+{0, 148, 255, 255}, {0, 149, 255, 255}, {0, 150, 255, 255}, {0, 151, 255, 255},
+{0, 152, 255, 255}, {0, 153, 255, 255}, {0, 153, 255, 255}, {0, 154, 255, 255},
+{0, 155, 255, 255}, {0, 156, 255, 255}, {0, 157, 255, 255}, {0, 158, 255, 255},
+{0, 159, 255, 255}, {0, 160, 255, 255}, {0, 161, 255, 255}, {0, 162, 255, 255},
+{0, 163, 255, 255}, {0, 164, 255, 255}, {0, 165, 255, 255}, {0, 166, 255, 255},
+{0, 167, 255, 255}, {0, 167, 255, 255}, {0, 168, 255, 255}, {0, 169, 255, 255},
+{0, 170, 255, 255}, {0, 171, 255, 255}, {0, 172, 255, 255}, {0, 173, 255, 255},
+{0, 174, 255, 255}, {0, 175, 255, 255}, {0, 176, 255, 255}, {0, 177, 255, 255},
+{0, 177, 255, 255}, {0, 178, 255, 255}, {0, 179, 255, 255}, {0, 180, 255, 255},
+{0, 181, 255, 255}, {0, 182, 255, 255}, {0, 183, 255, 255}, {0, 184, 255, 255},
+{0, 185, 255, 255}, {0, 185, 255, 255}, {0, 186, 255, 255}, {0, 187, 255, 255},
+{0, 188, 255, 255}, {0, 189, 255, 255}, {0, 190, 255, 255}, {0, 190, 255, 255},
+{0, 191, 255, 255}, {0, 192, 255, 255}, {0, 193, 255, 255}, {0, 194, 255, 255},
+{0, 194, 255, 255}, {0, 195, 255, 255}, {0, 196, 255, 255}, {0, 197, 255, 255},
+{0, 198, 255, 255}, {0, 198, 255, 255}, {0, 199, 255, 255}, {0, 200, 255, 255},
+{0, 201, 255, 255}, {0, 201, 255, 255}, {0, 202, 255, 255}, {0, 203, 255, 255},
+{0, 204, 255, 255}, {0, 204, 255, 255}, {0, 205, 255, 255}, {0, 206, 255, 255},
+{0, 206, 255, 255}, {0, 207, 255, 255}, {0, 208, 255, 255}, {0, 208, 255, 255},
+{0, 209, 255, 255}, {0, 210, 255, 255}, {0, 210, 255, 255}, {0, 211, 255, 255},
+{0, 211, 255, 255}, {0, 212, 255, 255}, {0, 213, 255, 255}, {0, 213, 255, 255},
+{0, 214, 255, 255}, {0, 214, 255, 255}, {0, 215, 255, 255}, {0, 215, 255, 255},
+{0, 216, 255, 255}, {0, 216, 255, 255}, {0, 217, 255, 255}, {0, 217, 255, 255},
+{0, 218, 255, 255}, {0, 218, 255, 255}, {0, 219, 255, 255}, {0, 219, 255, 255},
+{0, 220, 255, 255}, {0, 220, 255, 255}, {0, 221, 255, 255}, {0, 221, 255, 255},
+{0, 221, 255, 255}, {0, 222, 255, 255}, {0, 222, 255, 255}, {0, 223, 255, 255},
+{0, 223, 255, 255}, {0, 223, 255, 255}, {0, 224, 255, 255}, {0, 224, 255, 255},
+{0, 224, 255, 255}, {0, 225, 255, 255}, {0, 225, 255, 255}, {0, 225, 255, 255},
+{0, 226, 255, 255}, {0, 226, 255, 255}, {0, 226, 255, 255}, {0, 227, 255, 255},
+{0, 227, 255, 255}, {0, 227, 255, 255}, {0, 228, 255, 255}, {0, 228, 255, 255},
+{0, 228, 255, 255}, {0, 229, 255, 255}, {0, 229, 255, 255}, {0, 229, 255, 255},
+{0, 230, 255, 255}, {0, 230, 255, 255}, {0, 230, 255, 255}, {0, 231, 255, 255}
+};
 
-Include "../includes.geo";
-System 'rm includes.geo';
+// Not upside down
+General.TranslationX = -0.17;
+General.TranslationY = -0.1;
 
-nSteps = PostProcessing.NbViews;
+Color Gray
+{
+  Surface {
+    Physical Surface{1},
+    Physical Surface{2}
+  };
+}
 
-For i In {0:nSteps-1}
+Mesh.ColorCarousel = 2;
+Mesh.SurfaceEdges  = 0;
+Mesh.VolumeEdges   = 0;
+Mesh.SurfaceFaces  = 1;
 
-  Plugin(CutPlane).A = 1;
-  Plugin(CutPlane).B = 0;
-  Plugin(CutPlane).C = 0;
-  Plugin(CutPlane).D = - 0.5*Lx;
-  Plugin(CutPlane).View = i;
-  Plugin(CutPlane).Run;
+Geometry.Lines          = 0;
+Geometry.Surfaces       = 0;
+Geometry.Points         = 0;
+Geometry.SurfaceType    = 0;
+Geometry.SurfaceNumbers = 0;
 
-  Plugin(CutPlane).A = 0;
-  Plugin(CutPlane).B = 1;
-  Plugin(CutPlane).C = 0;
-  Plugin(CutPlane).D = - 0.5*Ly;
-  Plugin(CutPlane).View = i;
-  Plugin(CutPlane).Run;
+viewsPerStep = 1;
+maxViews = 10000;
+startAt = 2;
 
-  Plugin(CutPlane).A = 0;
-  Plugin(CutPlane).B = 0;
-  Plugin(CutPlane).C = 1;
-  Plugin(CutPlane).D = - 0.5*Lz;
-  Plugin(CutPlane).View = i;
-  Plugin(CutPlane).Run;
+For i In {startAt:maxViews}
+  If (FileExists(Sprintf("../output/phi/phi-%g.pos", i)))
+    Merge Sprintf("../output/phi/phi-%g.pos", i);
 
-  Plugin(Isosurface).Value = 0;
-  Plugin(Isosurface).View = i;
-  Plugin(Isosurface).Run;
+    /* Plugin(CutPlane).A = 1; */
+    /* Plugin(CutPlane).B = 0; */
+    /* Plugin(CutPlane).C = 0; */
+    /* Plugin(CutPlane).D = - 0.5*Lx; */
+    /* Plugin(CutPlane).View = i*viewsPerStep; */
+    /* Plugin(CutPlane).Run; */
 
-  View[nSteps + 4*i].OffsetX = - 0.5*Lx;
-  View[nSteps + 4*i + 1].OffsetY = 0.5*Ly;
-  View[nSteps + 4*i + 2].OffsetZ = - 0.5*Lz;
+    /* Plugin(CutPlane).A = 0; */
+    /* Plugin(CutPlane).B = 1; */
+    /* Plugin(CutPlane).C = 0; */
+    /* Plugin(CutPlane).D = - 0.5*Ly; */
+    /* Plugin(CutPlane).View = i*viewsPerStep; */
+    /* Plugin(CutPlane).Run; */
 
-  View[nSteps + 4*i].Visible = 1;
-  View[nSteps + 4*i + 1].Visible = 1;
-  View[nSteps + 4*i + 2].Visible = 1;
-  View[nSteps + 4*i + 3].Visible = 1;
+    /* Plugin(CutPlane).A = 0; */
+    /* Plugin(CutPlane).B = 0; */
+    /* Plugin(CutPlane).C = 1; */
+    /* Plugin(CutPlane).D = - 0.5*Lz; */
+    /* Plugin(CutPlane).View = i*viewsPerStep; */
+    /* Plugin(CutPlane).Run; */
 
-  Draw;
-  If(Exists(video))
-    System "mkdir -p output/iso";
-    Print Sprintf("../output/iso/isosurface-%04g.jpg", i);
+    Plugin(Isosurface).Value = 0;
+    Plugin(Isosurface).View = (i-startAt)*viewsPerStep;
+    Plugin(Isosurface).Run;
+
+    Delete View[(i-startAt)*viewsPerStep];
+
+    /* View[i*viewsPerStep + 0].OffsetX = - 0.5*Lx; */
+    /* View[i*viewsPerStep + 1].OffsetY = 0.5*Ly; */
+    /* View[i*viewsPerStep + 2].OffsetZ = - 0.5*Lz; */
+
+    For j In {0:viewsPerStep-1}
+      View[(i-startAt)*viewsPerStep + j].Visible = 1;
+    EndFor
+
+    General.RotationZ += 0;
+    Draw;
+    If(Exists(video))
+      System "mkdir -p pictures/iso";
+      Print Sprintf("../pictures/iso/isosurface-%04g.jpg", i);
+    EndIf
+
+    For j In {0:viewsPerStep-1}
+      View[(i-startAt)*viewsPerStep + j].Visible = 0;
+    EndFor
+
   EndIf
-  If(!Exists(video))
-    Sleep 0.2;
-  EndIf
-
-  View[nSteps + 4*i].Visible = 0;
-  View[nSteps + 4*i + 1].Visible = 0;
-  View[nSteps + 4*i + 2].Visible = 0;
-  View[nSteps + 4*i + 3].Visible = 0;
-
 EndFor
-
-Exit;
+/* Exit; */

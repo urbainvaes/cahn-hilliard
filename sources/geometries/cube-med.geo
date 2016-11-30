@@ -12,8 +12,8 @@ s  = 0.1;
 // Create the cylinders
 surf = 0;
 
-nx = 3;
-ny = 3;
+nx = 2;
+ny = 2;
 
 L = Lz/5;
 r = Lx/15;

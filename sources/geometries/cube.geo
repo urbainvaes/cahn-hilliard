@@ -83,3 +83,11 @@ EndIf
   Geometry.LabelType = 2;
   Geometry.Surfaces = 1;
   Geometry.SurfaceNumbers = 2;
+
+Color Gray
+{
+  Surface {
+    Physical Surface{1},
+    Physical Surface{2}
+  };
+}

@@ -1,4 +1,4 @@
 VIEW = views/cube-multimesh.geo
 
-PLOT = 1
+PLOT = 0
 ADAPT = 1

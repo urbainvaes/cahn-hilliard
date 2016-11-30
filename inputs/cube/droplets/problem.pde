@@ -19,15 +19,17 @@ func mu0 = 0;
 
 // Boundary conditions
 varf varPhiBoundary([phi1,mu1], [phi2,mu2]) =
-  /* int2d(Th,1) (-20*mu2) + int2d(Th,2) (-20*mu2) + int2d(Th,3) (-20*mu2) + int2d(Th,4) (-20*mu2) */
-  int2d(Th,1) (-0*mu2)
+  int2d(Th,1) (0*mu2)
 ;
 
-// Value of epsilon
-eps = 0.02;
-
 // Time step and number of iterations
-/* dt = 8.0*eps^4/M; */
-/* dt = eps^4/M; */
-dt = 1 * 1e-7;
-nIter = 400;
+dt = 1e-3;
+nIter = 1000;
+
+// Parameters for adaptation
+hmin = 0.02;
+hmax = 0.2;
+
+// Dimensionless numbers
+Pe = 1;
+Cn = 2e-2;
