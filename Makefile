@@ -15,18 +15,18 @@ bunch :
 #  Install and uninstall a test to the current bunch  #
 #######################################################
 install :
-	find inputs -type d -printf '%P\n' | \
+	@find inputs -type d -printf '%P\n' | \
 		while read l; do [[ $$(find inputs/$$l/* -type d) = "" ]] && echo $$l; done | \
-		fzf -m --bind=ctrl-t:toggle >> .bunches/$(bunch);
+		fzf -m --bind=ctrl-t:toggle >> .bunches/$(bunch) || echo "No change";
 
 uninstall :
 	cat .bunches/$(bunch) | fzf -m --bind=ctrl-t:toggle | while read p; do sed -i "\#$${p}#d" .bunches/$(bunch); done;
 
 # Select in bunch
 select :
-	p=$$(cat .bunches/$(bunch) | fzf); \
-	  sed -i "\#$${p}#d" .bunches/$(bunch); \
-	  echo $${p} >> .bunches/$(bunch);
+	@p=$$(cat .bunches/$(bunch) | fzf); \
+	  [[ -n $${p} ]] && sed -i "\#$${p}#d" .bunches/$(bunch) && \
+	  echo $${p} >> .bunches/$(bunch) || echo "No change";
 
 #################################
 #  Set up environment for test  #
