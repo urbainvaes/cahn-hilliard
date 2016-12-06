@@ -210,7 +210,7 @@ varf varUrhs(u,test) =
   INTEGRAL(DIMENSION)(Th)(
     (convect([UOLDVEC],-dt,uOld)/dt)*test
     + muGradPhi     * (1/Ca)*mu*dx(phi)*test
-    + (1-muGradPhi) * (1/Ca)*phi*dx(mu)*test
+    - (1-muGradPhi) * (1/Ca)*phi*dx(mu)*test
     #ifdef GRAVITY
     + gx*phi*test
     #endif
@@ -220,7 +220,7 @@ varf varVrhs(v,test) =
   INTEGRAL(DIMENSION)(Th)(
     (convect([UOLDVEC],-dt,vOld)/dt)*test
     + muGradPhi     * (1/Ca)*mu*dy(phi)*test
-    + (1-muGradPhi) * (1/Ca)*phi*dy(mu)*test
+    - (1-muGradPhi) * (1/Ca)*phi*dy(mu)*test
     #ifdef GRAVITY
     + gy*phi*test
     #endif
@@ -233,7 +233,7 @@ varf varWrhs(w,test) =
   INTEGRAL(DIMENSION)(Th)(
     (convect([UOLDVEC],-dt,wOld)/dt)*test
     + muGradPhi     * (1/Ca)*mu*dz(phi)*test
-    + (1-muGradPhi) * (1/Ca)*mu*dz(phi)*test
+    - (1-muGradPhi) * (1/Ca)*mu*dz(phi)*test
     #ifdef GRAVITY
     + gz*phi*test
     #endif
