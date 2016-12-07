@@ -29,5 +29,5 @@ hmax = 0.2;
 // Dimensionless numbers
 Re = 1;
 Pe = 10;
-Ca = 10;
+We = 10;
 Cn = 2e-2;

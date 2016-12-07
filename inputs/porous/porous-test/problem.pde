@@ -23,5 +23,5 @@ muGradPhi = 1;
 // Dimensionless numbers
 Re = 1;
 Pe = 10;
-Ca = 1;
+We = 1;
 Cn = 1e-2;

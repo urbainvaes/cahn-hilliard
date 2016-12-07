@@ -99,7 +99,7 @@ real Cn = 0.01;
 // Navier-Stokes parameters
 #ifdef NS
 real Re = 1;
-real Ca = 100;
+real We = 100;
 real muGradPhi = 1;
 #endif
 
@@ -209,8 +209,8 @@ varf varU(u,test) = INTEGRAL(DIMENSION)(Th)( u*test/dt + (1/Re)*(Grad(u)'*Grad(t
 varf varUrhs(u,test) =
   INTEGRAL(DIMENSION)(Th)(
     (convect([UOLDVEC],-dt,uOld)/dt)*test
-    + muGradPhi     * (1/Ca)*mu*dx(phi)*test
-    - (1-muGradPhi) * (1/Ca)*phi*dx(mu)*test
+    + muGradPhi     * (1/We)*mu*dx(phi)*test
+    - (1-muGradPhi) * (1/We)*phi*dx(mu)*test
     #ifdef GRAVITY
     + gx*phi*test
     #endif
@@ -219,8 +219,8 @@ varf varV(v,test) = INTEGRAL(DIMENSION)(Th)( v*test/dt + (1/Re)*(Grad(v)'*Grad(t
 varf varVrhs(v,test) =
   INTEGRAL(DIMENSION)(Th)(
     (convect([UOLDVEC],-dt,vOld)/dt)*test
-    + muGradPhi     * (1/Ca)*mu*dy(phi)*test
-    - (1-muGradPhi) * (1/Ca)*phi*dy(mu)*test
+    + muGradPhi     * (1/We)*mu*dy(phi)*test
+    - (1-muGradPhi) * (1/We)*phi*dy(mu)*test
     #ifdef GRAVITY
     + gy*phi*test
     #endif
@@ -232,8 +232,8 @@ varf varW(w,test) = INTEGRAL(DIMENSION)(Th)(
 varf varWrhs(w,test) =
   INTEGRAL(DIMENSION)(Th)(
     (convect([UOLDVEC],-dt,wOld)/dt)*test
-    + muGradPhi     * (1/Ca)*mu*dz(phi)*test
-    - (1-muGradPhi) * (1/Ca)*mu*dz(phi)*test
+    + muGradPhi     * (1/We)*mu*dz(phi)*test
+    - (1-muGradPhi) * (1/We)*mu*dz(phi)*test
     #ifdef GRAVITY
     + gz*phi*test
     #endif

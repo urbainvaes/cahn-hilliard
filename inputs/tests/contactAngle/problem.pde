@@ -27,7 +27,7 @@ nIter = 3000;
 
 // Dimensionless numbers
 muGradPhi = 1;
-Ca = 1;
+We = 1;
 Re = 1;
 Pe = 1;
 Cn = 5e-3;

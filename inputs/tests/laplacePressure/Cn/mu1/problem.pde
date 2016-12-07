@@ -26,7 +26,7 @@ dt = 1e-2;
 nIter = 100;
 
 muGradPhi = 1;
-Ca = 1;
+We = 1;
 Re = 1;
 Pe = 1;
 Cn = 1e-1 * 3/(2*sqrt(2)) * 0.3/2;
