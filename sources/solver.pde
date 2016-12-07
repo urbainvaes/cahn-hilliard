@@ -133,7 +133,7 @@ real hmin = hmax/20;
 #endif
 //}}}
 // Define macros {{{
-macro wetting(angle) (Cn*(sqrt(2.)/2.)*cos(angle)) // EOM
+macro wetting(angle) ((sqrt(2.)/2.)*cos(angle)) // EOM
 
 #if DIMENSION == 2
 macro Grad(u) [dx(u), dy(u)] //EOM
@@ -182,9 +182,9 @@ varf varPhi([phi1,mu1], [phi2,mu2]) =
     phi1*phi2/dt
     + (1/Pe)*(Grad(mu1)'*Grad(phi2))
     - mu1*mu2
-    + Cn^2*(Grad(phi1)'*Grad(mu2))
-    + 0.5*3*phiOld*phiOld*phi1*mu2
-    - 0.5*phi1*mu2
+    + Cn     * (Grad(phi1)'*Grad(mu2))
+    + (1/Cn) * 0.5*3*phiOld*phiOld*phi1*mu2
+    - (1/Cn) * 0.5*phi1*mu2
     )
 ;
 
@@ -195,8 +195,8 @@ varf varPhiRhs([phi1,mu1], [phi2,mu2]) =
     #else
     phiOld*phi2/dt
     #endif
-    + 0.5*phiOld*phiOld*phiOld*mu2
-    + 0.5*phiOld*mu2
+    + (1/Cn) * 0.5*phiOld*phiOld*phiOld*mu2
+    + (1/Cn) * 0.5*phiOld*mu2
     #ifdef ELECTRO
     + 0.25 * (epsilonR2 - epsilonR1) * (Grad(theta)'*Grad(theta)) * mu2
     #endif
