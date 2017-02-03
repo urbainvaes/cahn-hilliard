@@ -4,12 +4,13 @@
 live     = .bunches/.installed
 bunch   ?= $(shell test -s $(live) && cat $(live) || echo default)
 problem ?= $(shell cat .bunches/$(bunch) | tail -1)
+fzf     ?= sources/bin/fzf-0.16.3-linux_386
 
 ###################
 #  Install bunch  #
 ###################
 bunch :
-	find .bunches/* -printf "%f\n" | fzf --print-query | tail -1 > $(live);
+	find .bunches/* -printf "%f\n" | $(fzf) --print-query | tail -1 > $(live);
 
 #######################################################
 #  Install and uninstall a test to the current bunch  #
@@ -17,14 +18,14 @@ bunch :
 install :
 	@find inputs -type d -printf '%P\n' | \
 		while read l; do [[ $$(find inputs/$$l/* -type d) = "" ]] && echo $$l; done | \
-		fzf -m --bind=ctrl-t:toggle >> .bunches/$(bunch) || echo "No change";
+		$(fzf) -m --bind=ctrl-t:toggle >> .bunches/$(bunch) || echo "No change";
 
 uninstall :
-	cat .bunches/$(bunch) | fzf -m --bind=ctrl-t:toggle | while read p; do sed -i "\#$${p}#d" .bunches/$(bunch); done;
+	cat .bunches/$(bunch) | $(fzf) -m --bind=ctrl-t:toggle | while read p; do sed -i "\#$${p}#d" .bunches/$(bunch); done;
 
 # Select in bunch
 select :
-	@p=$$(cat .bunches/$(bunch) | fzf); \
+	@p=$$(cat .bunches/$(bunch) | $(fzf)); \
 	  [[ -n $${p} ]] && sed -i "\#$${p}#d" .bunches/$(bunch) && \
 	  echo $${p} >> .bunches/$(bunch) || echo "No change";
 
