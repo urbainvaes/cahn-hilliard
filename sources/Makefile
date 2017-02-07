@@ -77,11 +77,11 @@ output/thermodynamics.txt : processed_solver.pde $(PROBLEM) output/mesh.msh geom
 ifeq ($(DIMENSION), 3)
 VIDEO = pictures/video.mpg
 else
-VIDEO = pictures/video.ogv
+VIDEO = pictures/video.avi
 endif
 video :
 	find pictures -mindepth 1 -type d -printf '%P\n' | while read l; \
-		do mencoder "mf://pictures/$${l}/*.jpg" -mf fps=10 -o pictures/$${l}.ogv \
+		do mencoder "mf://pictures/$${l}/*.jpg" -mf fps=1 -o pictures/$${l}.avi \
 		-ovc lavc -lavcopts vcodec=mpeg4:vhq; done
 
 $(VIDEO) : $(VIEW)
@@ -108,7 +108,7 @@ plots :
 ifeq ($(DIMENSION), 3)
 	gmsh -display :0 $(GEOMETRY) $(VIEW) -setnumber video 1
 else
-	label=$(label) gnuplot gnuplot/make-plots.plt
+	extension=$(extension) label=$(label) gnuplot gnuplot/make-plots.plt
 endif
 
 status :
