@@ -284,8 +284,11 @@ varf varPrhs(p,test) = INTEGRAL(DIMENSION)(Th)( -Div(UVEC)*test/dt );
 //}}}
 // Loop in time {{{
 
-// Open output file
-ofstream file("output/thermodynamics.txt");
+// CLear and create output file
+{
+    ofstream file("output/thermodynamics.txt");
+};
+
 real freeEnergy, massPhi, dissipation;
 
 for(int i = 0; i <= nIter; i++)
@@ -395,10 +398,13 @@ for(int i = 0; i <= nIter; i++)
   // ! phi[]
   #endif
 
-  file << i*dt           << "    "
-      << freeEnergy     << "    "
-      << massPhi        << "    "
-      << dt*dissipation << "    " << endl;
+  {
+      ofstream file("output/thermodynamics.txt", append);
+      file << i*dt           << "    "
+          << freeEnergy     << "    "
+          << massPhi        << "    "
+          << dt*dissipation << "    " << endl;
+  };
 
   // Print variables at current iteration
   cout << endl
