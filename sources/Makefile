@@ -49,6 +49,14 @@ ifeq ($(PLOT), 1)
 	cpp_flags += -DPLOT
 endif
 
+ifeq ($(BEFORE), 1)
+	cpp_flags += -DBEFORE
+endif
+
+ifeq ($(AFTER), 1)
+	cpp_flags += -DAFTER
+endif
+
 ###############################
 #  Create mesh from geometry  #
 ###############################

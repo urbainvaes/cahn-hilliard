@@ -293,6 +293,11 @@ real freeEnergy, massPhi, dissipation;
 
 for(int i = 0; i <= nIter; i++)
 {
+  // Before iteration {{{
+  #ifdef BEFORE
+      #include "before.pde"
+  #endif
+  // }}}
   // Update previous solution {{{
   phiOld = phi;
   #ifdef NS
@@ -530,6 +535,11 @@ for(int i = 0; i <= nIter; i++)
     #ifdef ELECTRO
     theta = theta;
     #endif
+  #endif
+  /// }}}
+  // After iteration {{{
+  #ifdef AFTER
+      #include "after.pde"
   #endif
   /// }}}
 }
