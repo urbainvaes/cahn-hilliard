@@ -101,9 +101,10 @@ else
 endif
 
 visualization : $(VIEW)
-ifeq ($(DIMENSION), 3)
+ifeq ($(suffix $(VIEW)), .geo)
 	gmsh -display :0 $(GEOMETRY) $<
-else
+endif
+ifeq ($(suffix $(VIEW)), .py)
 	DISPLAY=:0 pvpython $< --input phi --range -1,1
 endif
 
