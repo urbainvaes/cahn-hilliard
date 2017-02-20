@@ -1,74 +1,12 @@
-#!/usr/bin/env gnuplot
-
-# output_file  : output file, of the form [anything].<field>.<style>.<iteration>.<format>
-
-# Arguments
-output_file   = system("echo ${output_file}")
-output_format = system("echo ${output_file##*.}")
-output_iter   = system("basename ${output_file%.*} | tr '-' '\n' | tail -1 | head -1 | sed 's/^0*//'")
-output_style  = system("basename ${output_file%.*} | tr '-' '\n' | tail -2 | head -1")
-output_field  = system("basename ${output_file%.*} | tr '-' '\n' | tail -3 | head -1")
-
-print "Producing picture ".output_file
-
 input_file   = "output/".output_field."/".output_field.".".output_iter.".gnuplot"
-isoline_file = "output/iso/contactLine".output_iter.".dat"
-edges_file   = "output/edges.dat"
-
-# Create output directory
-system("mkdir -p $(dirname ${output_file})")
-
-# set term png
-# set output "/dev/null"
-# plot edges_file
-
-# x_min = GPVAL_DATA_X_MIN - .05
-# x_max = GPVAL_DATA_X_MAX + .05
-# y_min = GPVAL_DATA_Y_MIN - .05
-# y_max = GPVAL_DATA_Y_MAX + .05
-
-# set xrange [x_min:x_max]
-# set yrange [y_min:y_max]
-
-# Output format
-if(output_format eq 'tex') {
-    set term epslatex
-}
-
-if(output_format eq 'pdf') {
-    set term pdf
-}
-
-if(output_format eq 'png') {
-    set term pngcairo
-}
-
-if(output_format eq 'jpg') {
-    set term png
-}
-
-if(output_format eq 'wxt') {
-  set term wxt
-}
-
+output_file  = "pictures/".output_field."/".output_label."-".output_field."-".output_style."-".output_index.".".output_format
 set output output_file
 
-unset key
-set border
-set colorbox
-set tics
-
-set size ratio -1
-set lmargin at screen 0.06
-set rmargin at screen 0.85
-set bmargin at screen 0.15
-set tmargin at screen 0.95
-
-# Default palette
-set palette defined ( -1 "green", 1 "blue" )
+print "Producing picture ".output_file." from ".input_file
 
 if(output_field eq 'phi') {
   set title "Phase field - Iteration ".output_iter
+  # set palette maxcolors 2
   set palette defined ( -1 "light-green", 1 "light-blue" )
   set cbrange [-1:1]
 }
