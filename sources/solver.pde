@@ -328,6 +328,24 @@ for(int i = 0; i <= nIter; i++)
   real[int,int] xy(3,1);
   isoline(Th, phi, xy, close=false, iso=0.0, smoothing=0.1, file="output/iso/contactLine"+i+".dat");
 
+  // Export for gmsh
+  {
+      ofstream currentMesh("output/mesh/mesh-" + i + ".msh");
+      ofstream data("output/phi/phi-" + i + ".msh");
+
+      #ifdef ADAPT
+          writeHeader(currentMesh);
+          writeNodes(currentMesh, Vh);
+          writeElements(currentMesh, Vh, Th);
+
+          writeHeader(data);
+          write1dData(data, "Cahn-Hilliard", i*dt, i, phiOld);
+      #else
+          writeHeader(data); write1dData(data, "Cahn-Hilliard", i*dt, i, phiOld);
+      #endif
+  }
+  system("./bin/msh2pos output/mesh/mesh-" + i + ".msh output/phi/phi-" + i + ".msh");
+
   // Export to gnuplot
   {
       muOld = mu;
