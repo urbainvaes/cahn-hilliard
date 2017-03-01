@@ -1,6 +1,9 @@
 DIMENSION = 3
 GEOMETRY = problem.geo
-VIEW = views/cube-multimesh.geo
+VIEW = view.geo
 
 ADAPT = 1
-PLOT = 1
+PLOT = 0
+
+BEFORE = 1
+AFTER = 1
