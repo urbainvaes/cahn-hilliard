@@ -21,9 +21,10 @@ Geometry.SurfaceNumbers = 0;
 View[0].Visible = 1;
 View[0].ShowScale = 1;
 View[0].RangeType = 0;
+View[0].ColormapNumber = 3;
 
 viewsBefore = 1;
-viewsPerStep = 4;
+viewsPerStep = 1;
 maxIters = 10;
 startAt = 0;
 
@@ -32,43 +33,42 @@ For i In {startAt:maxIters}
     Merge Sprintf("./output/phi/phi-%g.pos", i);
     baseIndex = viewsBefore + (i-startAt)*viewsPerStep;
 
-    Plugin(CutPlane).A = 1;
-    Plugin(CutPlane).B = 0;
-    Plugin(CutPlane).C = 0;
-    Plugin(CutPlane).D = - 0.5*Lx;
-    Plugin(CutPlane).View = baseIndex;
-    Plugin(CutPlane).Run;
+    // Plugin(CutPlane).A = 1;
+    // Plugin(CutPlane).B = 0;
+    // Plugin(CutPlane).C = 0;
+    // Plugin(CutPlane).D = - 0.5*Lx;
+    // Plugin(CutPlane).View = baseIndex;
+    // Plugin(CutPlane).Run;
+    // View[baseIndex + 1].OffsetX = - 0.5*Lx;
 
-    Plugin(CutPlane).A = 0;
-    Plugin(CutPlane).B = 1;
-    Plugin(CutPlane).C = 0;
-    Plugin(CutPlane).D = - 0.5*Ly;
-    Plugin(CutPlane).View = baseIndex;
-    Plugin(CutPlane).Run;
+    // Plugin(CutPlane).A = 0;
+    // Plugin(CutPlane).B = 1;
+    // Plugin(CutPlane).C = 0;
+    // Plugin(CutPlane).D = - 0.5*Ly;
+    // Plugin(CutPlane).View = baseIndex;
+    // Plugin(CutPlane).Run;
+    // View[baseIndex + 2].OffsetY = 0.5*Ly;
 
-    Plugin(CutPlane).A = 0;
-    Plugin(CutPlane).B = 0;
-    Plugin(CutPlane).C = 1;
-    Plugin(CutPlane).D = 0;
-    Plugin(CutPlane).View = baseIndex;
-    Plugin(CutPlane).Run;
+    // Plugin(CutPlane).A = 0;
+    // Plugin(CutPlane).B = 0;
+    // Plugin(CutPlane).C = 1;
+    // Plugin(CutPlane).D = 0;
+    // Plugin(CutPlane).View = baseIndex;
+    // Plugin(CutPlane).Run;
+    // View[baseIndex + 3].OffsetZ = Lz;
 
-    Plugin(Isosurface).Value = 0;
-    Plugin(Isosurface).Value = baseIndex + 3;
-    Plugin(Isosurface).Run;
-    Delete View[baseIndex + 3];
+    // Plugin(Isosurface).Value = 0;
+    // Plugin(Isosurface).Value = baseIndex + 3;
+    // Plugin(Isosurface).Run;
+    // Delete View[baseIndex + 3];
 
     Plugin(Isosurface).Value = 0;
     Plugin(Isosurface).View = baseIndex;
     Plugin(Isosurface).Run;
+    View[baseIndex + viewsPerStep].SmoothNormals = 1;
+    View[baseIndex + viewsPerStep].ColormapAlpha = 0.7;
 
     Delete View[baseIndex];
-
-    View[baseIndex + 0].OffsetX = - 0.5*Lx;
-    View[baseIndex + 1].OffsetY = 0.5*Ly;
-    View[baseIndex + 2].OffsetZ = Lz;
-    View[baseIndex + viewsPerStep -1].SmoothNormals = 1;
-    View[baseIndex + viewsPerStep -1].ColormapAlpha = 0.7;
 
     For j In {0:viewsPerStep-1}
       View[baseIndex + j].Visible = 1;
