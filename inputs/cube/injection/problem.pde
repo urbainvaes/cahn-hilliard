@@ -4,12 +4,11 @@ nIter = 1000;
 
 // Dimensionless numbers
 Pe = 1;
-Cn = 1.5e-2;
+Cn = 0.03;
 
 // Parameters for adaptation
-hmin = 0.1;
+hmin = 0.03;
 hmax = 0.1;
-
 
 // INITIAL CONDITION
 real radius = 0.2*Lx;
@@ -67,3 +66,7 @@ VhSquare contactAngleVh = contactAngleFunc * 180 / pi;
   write1dData(data, "ContactAngle", 0, 0, contactAngleVh);
 }
 system("./bin/msh2pos square.msh contactAngle.msh");
+
+// PRINT OF DROPLET
+VhSquare printPlane;
+system("mkdir -p" + " output/print");

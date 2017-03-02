@@ -7,3 +7,6 @@ PLOT = 0
 
 BEFORE = 1
 AFTER = 1
+
+print :
+	gnuplot print.plt
