@@ -138,6 +138,7 @@ macro wetting(angle) ((sqrt(2.)/2.)*cos(angle)) // EOM
 #if DIMENSION == 2
 macro Grad(u) [dx(u), dy(u)] //EOM
 macro Div(u,v) (dx(u) + dy(v)) //EOM
+macro Normal [N.x, N.y] //EOM
 #define UVEC u,v
 #define UOLDVEC uOld,vOld
 #endif
@@ -145,6 +146,7 @@ macro Div(u,v) (dx(u) + dy(v)) //EOM
 #if DIMENSION == 3
 macro Grad(u) [dx(u), dy(u), dz(u)] //EOM
 macro Div(u,v,w) (dx(u) + dy(v) + dz(w)) //EOM
+macro Normal [N.x, N.y, N.z] //EOM
 #define UVEC u,v,w
 #define UOLDVEC uOld,vOld,wOld
 #endif
@@ -260,10 +262,10 @@ varf varPrhs(p,test) = INTEGRAL(DIMENSION)(Th)( -Div(UVEC)*test/dt );
   #endif
   #if DIMENSION == 3
   system("cp output/mesh.msh output/mesh/mesh-init-0.msh");
-  for(int i = 0; i < 3; i++)
+  for(int i = 0; i < 2; i++)
   {
       Vh metricField;
-      metricField[] = mshmet(Th, phi, aniso = 0, hmin = hmin, hmax = hmax, nbregul = 1);
+      metricField[] = mshmet(Th, phi, aniso = 0, hmin = hmin, hmax = hmax, nbregul = 1, verbosity = 0);
       Th=tetgreconstruction(Th,switch="raAQ",sizeofvolume=metricField*metricField*metricField/6.);
       [phi, mu] = [phi0, mu0];
 
@@ -289,7 +291,8 @@ varf varPrhs(p,test) = INTEGRAL(DIMENSION)(Th)( -Div(UVEC)*test/dt );
     ofstream file("output/thermodynamics.txt");
 };
 
-real freeEnergy, massPhi, dissipation;
+// Macroscopic variables
+real massPhi, freeEnergy, kineticEnergy;
 
 for(int i = 0; i <= nIter; i++)
 {
@@ -310,16 +313,121 @@ for(int i = 0; i <= nIter; i++)
   //}}}
   // Calculate macroscopic variables {{{
 
-  freeEnergy  = INTEGRAL(DIMENSION)(Th) (
-      0.5*(Grad(phi)'*Grad(phi))
-      + 0.25*(1/Cn^2)*(phi^2 - 1)^2
+  // Dimension of the boundary
+  #if DIMENSION == 2
+  #define BOUNDARYDIM 1
+  #endif
+  #if DIMENSION == 3
+  #define BOUNDARYDIM 2
+  #endif
+
+  // Mass {{{
+  real massPhiOld = massPhi;
+  massPhi = INTEGRAL(DIMENSION)(Th) (phi);
+  real deltaMassPhi = massPhi - massPhiOld;
+
+  // Mass fluxes outside of domain
+  real diffusiveFluxMass = - INTEGRAL(BOUNDARYDIM)(Th) ((1/Pe) * Normal'*Grad(mu));
+  real totalMassFlux = diffusiveFluxMass;
+  #ifdef NS
+  real convectiveFluxMass = INTEGRAL(BOUNDARYDIM)(Th) (phi * [UVEC]'*Normal);
+  totalMassFlux = totalMassFlux + convectiveFluxMass;
+  #endif
+  //}}}
+  // Free energy {{{
+  real bulkFreeEnergy  = INTEGRAL(DIMENSION)(Th) (
+      Cn * 0.5 * (Grad(phi)'*Grad(phi))
+      + (1/Cn) * 0.25 * (phi^2 - 1)^2
       #ifdef ELECTRO
       - 0.25 * (epsilonR1*(1 - phi) + epsilonR2*(1 + phi)) * Grad(theta)'*Grad(theta)
       #endif
       );
-  massPhi     = INTEGRAL(DIMENSION)(Th) (phi);
-  dissipation = INTEGRAL(DIMENSION)(Th) ((1/Pe)*(Grad(mu)'*Grad(mu)));
-  //}}}
+  real wallFreeEnergy = INTEGRAL(BOUNDARYDIM)(Th) (wetting(contactAngles) * (phi - phi^3/3));
+  real freeEnergyOld = freeEnergy;
+  freeEnergy = bulkFreeEnergy + wallFreeEnergy;
+  real deltaFreeEnergy = freeEnergy - freeEnergyOld;
+  real diffusiveFluxFreeEnergy = - INTEGRAL(BOUNDARYDIM)(Th) ((1/Pe) * mu * Normal'*Grad(mu));
+  real dissipationFree = INTEGRAL(DIMENSION)(Th) ((1/Pe)*(Grad(mu)'*Grad(mu)));
+  real totalFreeEnergyContributions = diffusiveFluxFreeEnergy + dissipationFree;
+  #ifdef NS
+  real transferEnergy = INTEGRAL(DIMENSION)(Th) (phi*[UVEC]'*Grad(mu));
+  real convectiveFluxFreeEnergy = INTEGRAL(BOUNDARYDIM)(Th) (mu * phi* [UVEC]'*Normal);
+  totalFreeEnergyContributions += convectiveFluxFreeEnergy + transferEnergy;
+  #endif
+  // }}}
+  // Kinetic energy {{{
+  #ifdef NS
+  real kineticEnergyOld = kineticEnergy;
+  kineticEnergy = INTEGRAL(DIMENSION)(Th) (u*u/2);
+  real deltaKineticEnergy = kineticEnergy - kineticEnergyOld;
+  real dissipationKinetic = INTEGRAL(DIMENSION)(Th) ((1/Re) * (Grad(u)'*Grad(u) + Grad(v)'*Grad(v)
+      #if DIMENSION == 3
+      + Grad(w)'*Grad(w)
+      #endif
+      ));
+  real diffusiveFluxKineticEnergy = - INTEGRAL(BOUNDARYDIM)(Th) ((1/Re) * (
+      u*(Normal'*Grad(u)) + v*(Normal'*Grad(v))
+      #if DIMENSION == 3
+      + w*(Normal'*Grad(w))
+      #endif
+      )); // check!
+  real convectiveFluxKineticEnergy = INTEGRAL(BOUNDARYDIM)(Th) (([UVEC]'* // splitting required for correct macro expansion
+      [UVEC]/2) * [UVEC]'*Normal);
+  real PressureFluxKineticEnergy = INTEGRAL(BOUNDARYDIM)(Th) (p * [UVEC]'*Normal);
+  real totalKineticEnergyContributions = diffusiveFluxKineticEnergy + convectiveFluxKineticEnergy + PressureFluxKineticEnergy - transferEnergy;
+  #endif
+  // }}}
+
+  // {
+  //     ofstream file("output/thermodynamics.txt", append);
+  //     file << i*dt           << "    "
+  //         << bulkFreeEnergy     << "    "
+  //         << massPhi        << "    " << endl;
+  // };
+
+  // Print to stdout {{{
+  cout << endl
+       << "** ITERATION **" << endl
+       << "Iteration: "     << i    << endl
+       << "Time:      "     << i*dt << endl
+       << endl
+       << "** Mass **"                   << endl
+       << "Mass:                       " << massPhi                         << endl
+       << "Diffusive mass flux:        " << dt*diffusiveFluxMass            << endl
+       #ifdef NS
+       << "Convective mass flux:       " << dt*convectiveFluxMass           << endl
+       << "Total outgoing mass flux:   " << dt*totalMassFlux                << endl
+       #endif
+       << "Increase in mass:           " << deltaMassPhi                    << endl
+       << "Mass balance (must be = 0): " << deltaMassPhi + dt*totalMassFlux << endl
+       << endl
+       << "** Free energy **"                   << endl
+       << "Bulk free energy:                  " << bulkFreeEnergy                                    << endl
+       << "Wall free energy:                  " << wallFreeEnergy                                    << endl
+       << "Free energy dissipations:          " << dt*dissipationFree                                << endl
+       << "Diffusive free energy flux:        " << dt*diffusiveFluxFreeEnergy                        << endl
+       #ifdef NS
+       << "Convective free energy flux:       " << dt*convectiveFluxFreeEnergy                       << endl
+       << "Transfer to kinetic energy:        " << dt*transferEnergy                                 << endl
+       << "Sum of all contributions:          " << dt*totalFreeEnergyContributions                   << endl
+       #endif
+       << "Increase in free energy:           " << deltaFreeEnergy                                   << endl
+       << "Free energy balance (must be = 0): " << deltaFreeEnergy + dt*totalFreeEnergyContributions << endl
+       #ifdef NS
+       << endl
+       << "** Kinetic energy **"                      << endl
+       << "Kinetic energy:                       "    << kineticEnergy                                           << endl
+       << "Kinetic energy dissipations:          "    << dt* dissipationKinetic                                  << endl
+       << "Diffusive kinetic energy flux:        "    << dt* diffusiveFluxKineticEnergy                          << endl
+       << "Convective kinetic energy flux:       "    << dt* convectiveFluxKineticEnergy                         << endl
+       << "Pressure-induced kinetic energy flux: "    << dt* PressureFluxKineticEnergy                           << endl
+       << "Sum of all contributions:             "    << dt* totalKineticEnergyContributions                     << endl
+       << "Increase in kinetic energy:           "    << deltaKineticEnergy                                      << endl
+       << "Kinetic energy balance (must be = 0): "    << deltaKineticEnergy + dt*totalKineticEnergyContributions << endl
+       #endif
+       << endl;
+  // }}}
+  // }}}
   // Save data to files and stdout {{{
   #if DIMENSION == 2
   savevtk("output/phi/phi."+i+".vtk", Th, phi, dataname="Phase");
