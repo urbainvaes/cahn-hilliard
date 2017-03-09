@@ -2,7 +2,9 @@
 #  Useful variables  #
 ######################
 gitRoot = $(shell git rev-parse --show-toplevel)
-problem = $(shell realpath -s --relative-to $(gitRoot)/tests $(CURDIR))
+# problem = $(shell realpath -s --relative-to $(gitRoot)/tests $(CURDIR))
+problem = $(CURDIR:$(gitRoot)/tests/%=%)
+label = $(subst /,_,$(problem))
 
 #########################
 #  Include ssh targets  #
@@ -76,28 +78,17 @@ geometry.pde : $(GEOMETRY)
 processed_solver.pde : solver.pde config.mk $(PROBLEM) $(PERIODICITY) $(BEFORE_FILE) $(AFTER_FILE)
 	cpp -w $(cpp_flags) $< | sed '/^\#/d' | sed 's#^\(macro.\+\)$$#\1 //EOM#' | sed '/^$$/d' > $@
 
-run : processed_solver.pde $(PROBLEM) output/mesh.msh geometry.pde
+run : processed_solver.pde geometry.pde output/mesh.msh
 	FreeFem++ $< $(ff_flags) | tee logs/freefem.log
 
 ##############
 #  Graphics  #
 ##############
+plots :
 ifeq ($(DIMENSION), 3)
-VIDEO = pictures/video.mpg
+	gmsh -display :0 $(GEOMETRY) $(VIEW) -setnumber video 1
 else
-VIDEO = pictures/video.avi
-endif
-video :
-	find pictures -mindepth 1 -type d -printf '%P\n' | while read l; \
-		do mencoder "mf://pictures/$${l}/*.jpg" -mf fps=1 -o pictures/$${l}.avi \
-		-ovc lavc -lavcopts vcodec=mpeg4:vhq; done
-
-$(VIDEO) : $(VIEW)
-ifeq ($(DIMENSION), 3)
-	gmsh -display :0 $(GEOMETRY) $< -setnumber video 1
-	mencoder "mf://output/iso/*.jpg" -mf fps=10 -o $(VIDEO) -ovc lavc -lavcopts vcodec=mpeg4:vhq
-else
-	DISPLAY=:0 pvpython $< --input phi --range -1,1 --video $(VIDEO)
+	label=$(label) gnuplot gnuplot/make-plots.plt
 endif
 
 visualization : $(VIEW)
@@ -108,17 +99,10 @@ ifeq ($(suffix $(VIEW)), .py)
 	DISPLAY=:0 pvpython $< --input phi --range -1,1
 endif
 
-view : $(VIDEO)
-	DISPLAY=:0 vlc -f $(VIDEO)
-
-problem = $(CURDIR:$(gitRoot)/tests/%=%)
-label = $(subst /,_,$(problem))
-plots :
-ifeq ($(DIMENSION), 3)
-	gmsh -display :0 $(GEOMETRY) $(VIEW) -setnumber video 1
-else
-	extension=$(extension) label=$(label) gnuplot gnuplot/make-plots.plt
-endif
+video :
+	find pictures -mindepth 1 -type d -printf '%P\n' | while read l; \
+		do mencoder "mf://pictures/$${l}/*.png" -mf fps=10 -o pictures/$${l}.avi \
+		-ovc lavc -lavcopts vcodec=mpeg4:vhq; done
 
 status :
 	@echo "Problem $(problem) reporting for duty"; \
