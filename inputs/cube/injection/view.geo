@@ -25,7 +25,7 @@ View[0].ColormapNumber = 3;
 
 viewsBefore = 1;
 viewsPerStep = 1;
-maxIters = 10;
+maxIters = 1000;
 startAt = 0;
 
 For i In {startAt:maxIters}
@@ -85,7 +85,7 @@ For i In {startAt:maxIters}
     Draw;
     If(Exists(video))
       System "mkdir -p pictures/iso";
-      Print Sprintf("./pictures/iso/isosurface-%04g.jpg", i);
+      Print Sprintf("./pictures/iso/isosurface-%04g.png", i);
     EndIf
 
     // General.RotationZ += 1;

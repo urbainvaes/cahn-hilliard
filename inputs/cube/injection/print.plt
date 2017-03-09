@@ -10,16 +10,22 @@ set yrange [0:1]
 unset key
 
 do for [i = 0:n_files] {
-    set output "pictures/print/cube_injection-print-".sprintf('%06.0f',i).".png"
     input_file = "output/print/print-".i.".txt"
 
-    size = system("cat ".input_file." | sed '/^$/d' | awk '{print $1,$2}' > tmp.txt; \
-                    cat tmp.txt | sed '1d' > tmp1.txt; cat tmp.txt | sed '$d' > tmp2.txt; \
-                    paste tmp1.txt tmp2.txt | awk 'BEGIN{s=0}{s+=sqrt(($1 - $3)^2 + ($2 - $4)^2)}END{print s}';\
-                    rm tmp.txt tmp1.txt tmp2.txt")
+    size = system("cat output/print/lengthPrint.txt | head -n ".(i+1)." | tail -n 1")
 
-    set title "Iteration: ".i." / Size of the print: ".sprintf('%6.2f',size + 0)
-    plot input_file with lines
+    set output "pictures/print/cube_injection-print-".sprintf('%06.0f',i).".png"
+    set title "Iteration: ".i." / Length of the contact line(s): ".sprintf('%6.2f',size + 0)
+
+    set palette defined ( -1 "light-green", 1 "light-blue" )
+    plot "output/contactAngle.gnuplot" with filledcurves palette, \
+        input_file using 1:2:9 with lines lt rgb "black"
+
+    set palette
+    set cbrange [60:120]
+    set output "pictures/print/cube_injection-angles-".sprintf('%06.0f',i).".png"
+    plot input_file using 1:2:9 with lines palette
 }
 
-system('mencoder "mf://pictures/print/*.png" -mf fps=4 -o pictures/print.avi -ovc lavc -lavcopts vcodec=mpeg4:vhq')
+system('mencoder "mf://pictures/print/cube_injection-print-*.png" -mf fps=4 -o pictures/print.avi -ovc lavc -lavcopts vcodec=mpeg4:vhq')
+system('mencoder "mf://pictures/print/cube_injection-angles-*.png" -mf fps=4 -o pictures/print.avi -ovc lavc -lavcopts vcodec=mpeg4:vhq')
