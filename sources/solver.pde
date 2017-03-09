@@ -10,11 +10,11 @@ include "geometry.pde"
 //}}}
 // Load modules {{{
 load "gmsh"
+load "isoline";
 
 #if DIMENSION == 2
 load "metis";
 load "iovtk";
-load "isoline";
 #endif
 
 #if DIMENSION == 3
