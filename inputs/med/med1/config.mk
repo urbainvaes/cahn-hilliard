@@ -1,5 +1,5 @@
 DIMENSION = 2
-GEOMETRY = med-2d-simplified.geo
+GEOMETRY = geometries/med/med-2d-simplified.geo
 PROBLEM = problem.pde
 VIEW = views/view-2d.py
 

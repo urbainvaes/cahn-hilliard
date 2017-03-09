@@ -1,10 +1,10 @@
-func phi0 = (x > 5.71 && x < 6.51 ? -1 : 1);
+func phi0 = 1;
 func mu0  = 0;
 [phi, mu] = [phi0, mu0];
 
 // Define boundary conditions
-real theta = 5*pi/12;
-// real theta = 0;
+// real theta = 5*pi/12;
+real theta = 0;
 
 real amplitudeInput = 1;
 real pulsePeriod = 2;
@@ -29,7 +29,6 @@ nIter = 1e4;
 muGradPhi = 1;
 
 // Parameters for adaptation
-// hmin = 0.001;
 hmin = 0.05;
 hmax = 0.5;
 
@@ -37,5 +36,4 @@ hmax = 0.5;
 Re = 1;
 Pe = 200;
 We = 200;
-// Cn = 0.01;
-Cn = 0.05;
+Cn = 5e-2;
