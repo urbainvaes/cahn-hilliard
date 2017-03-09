@@ -452,6 +452,11 @@ for(int i = 0; i <= nIter; i++)
       #endif
   #endif
   //}}}
+  // After iteration {{{
+  #ifdef AFTER
+      #include "after.pde"
+  #endif
+  /// }}}
   // Exit if required {{{
   if (i == nIter) break;
 
@@ -536,7 +541,7 @@ for(int i = 0; i <= nIter; i++)
 
     #if DIMENSION == 3
     Vh metricField;
-    metricField[] = mshmet(Th, phi, aniso = 0, hmin = hmin, hmax = hmax, nbregul = 1);
+    metricField[] = mshmet(Th, phi, aniso = 0, hmin = hmin, hmax = hmax, nbregul = 1, verbosity = 0);
     Th=tetgreconstruction(Th,switch="raAQ",sizeofvolume=metricField*metricField*metricField/6.);
     #endif
     [phi, mu] = [phi, mu];
@@ -554,11 +559,6 @@ for(int i = 0; i <= nIter; i++)
     theta = theta;
     #endif
   #endif
-  /// }}}
-  // After iteration {{{
-  #ifdef AFTER
-      #include "after.pde"
-  #endif
-  /// }}}
+  // }}}
 }
 //}}}
