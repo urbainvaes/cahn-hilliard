@@ -1,8 +1,0 @@
-if exists('g:cahnHilliardLoaded')
-  finish
-endif
-
-nnoremap <Leader>gp :exec "edit" "tests/".readfile(".problem")[0]."/problem.pde"<cr>
-nnoremap <Leader>gg :exec "edit" "tests/".readfile(".problem")[0]."/*.geo"<cr>
-
-let g:cahnHilliardLoaded = 1
