@@ -438,21 +438,19 @@ for(int i = 0; i <= nIter; i++)
 
   // Export for gmsh
   {
-      ofstream currentMesh("output/mesh/mesh-" + i + ".msh");
       ofstream data("output/phi/phi-" + i + ".msh");
-
-      #ifdef ADAPT
-          writeHeader(currentMesh);
-          writeNodes(currentMesh, Vh);
-          writeElements(currentMesh, Vh, Th);
-
-          writeHeader(data);
-          write1dData(data, "Cahn-Hilliard", i*dt, i, phiOld);
-      #else
-          writeHeader(data); write1dData(data, "Cahn-Hilliard", i*dt, i, phiOld);
-      #endif
+      writeHeader(data);
+      write1dData(data, "Cahn-Hilliard", i*dt, i, phiOld);
+  }
+  #ifdef ADAPT
+  {
+      ofstream currentMesh("output/mesh/mesh-" + i + ".msh");
+      writeHeader(currentMesh);
+      writeNodes(currentMesh, Vh);
+      writeElements(currentMesh, Vh, Th);
   }
   system("./bin/msh2pos output/mesh/mesh-" + i + ".msh output/phi/phi-" + i + ".msh");
+  #endif
 
   // Export to gnuplot
   {
@@ -511,39 +509,22 @@ for(int i = 0; i <= nIter; i++)
 
   #if DIMENSION == 3
   {
-      ofstream currentMesh("output/mesh/mesh-" + i + ".msh");
-      ofstream data("output/phi/phi-" + i + ".msh");
-
       #ifdef ADAPT
-          writeHeader(currentMesh);
-          writeNodes(currentMesh, Vh);
-          writeElements(currentMesh, Vh, Th);
-
-          writeHeader(data);
-          write1dData(data, "Cahn-Hilliard", i*dt, i, phiOld);
-      #else
-          writeHeader(data); write1dData(data, "Cahn-Hilliard", i*dt, i, phiOld);
+      ofstream currentMesh("output/mesh/mesh-" + i + ".msh");
+      writeHeader(currentMesh);
+      writeNodes(currentMesh, Vh);
+      writeElements(currentMesh, Vh, Th);
       #endif
+      ofstream data("output/phi/phi-" + i + ".msh");
+      writeHeader(data);
+      write1dData(data, "Cahn-Hilliard", i*dt, i, phiOld);
   }
+  #ifdef ADAPT
   system("./bin/msh2pos output/mesh/mesh-" + i + ".msh output/phi/phi-" + i + ".msh");
+  #endif
   // ! phi[]
   #endif
 
-  {
-      ofstream file("output/thermodynamics.txt", append);
-      file << i*dt           << "    "
-          << freeEnergy     << "    "
-          << massPhi        << "    "
-          << dt*dissipation << "    " << endl;
-  };
-
-  // Print variables at current iteration
-  cout << endl
-      << "** ITERATION **"      << endl
-      << "Time = "              << i*dt          << endl
-      << "Iteration = "         << i             << endl
-      << "Mass = "              << massPhi       << endl
-      << "Free energy bulk = "  << freeEnergy    << endl;
   //}}}
   // Visualize solution at current time step {{{
   #ifdef PLOT
@@ -553,7 +534,7 @@ for(int i = 0; i <= nIter; i++)
       plot(u, fill=true, WindowIndex = 1);
       plot(p, fill=true, WindowIndex = 2);
       #endif
-       #endif
+      #endif
 
       #if DIMENSION == 3
       medit("Phi",Th,phi,wait = false);
