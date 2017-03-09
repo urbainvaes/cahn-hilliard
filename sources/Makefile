@@ -70,15 +70,13 @@ output/mesh.msh : $(GEOMETRY) config.mk
 ###################
 #  Run FreeFem++  #
 ###################
-run : output/thermodynamics.txt
-
 geometry.pde : $(GEOMETRY)
 	grep -h 'export' $^ | sed 's/^/real /' > $@;
 
 processed_solver.pde : solver.pde config.mk $(PROBLEM) $(PERIODICITY) $(BEFORE_FILE) $(AFTER_FILE)
 	cpp -w $(cpp_flags) $< | sed '/^\#/d' | sed 's#^\(macro.\+\)$$#\1 //EOM#' | sed '/^$$/d' > $@
 
-output/thermodynamics.txt : processed_solver.pde $(PROBLEM) output/mesh.msh geometry.pde
+run : processed_solver.pde $(PROBLEM) output/mesh.msh geometry.pde
 	FreeFem++ $< $(ff_flags) | tee logs/freefem.log
 
 ##############
