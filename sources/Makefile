@@ -109,6 +109,9 @@ status :
 	echo "  Number of iterations calculated: $$(ls output/phi/phi.*.vtk 2>/dev/null | wc -l)"; \
 	echo ""
 
+macros :
+	./bin/macroPlots
+
 ###################################
 #  Communication with programmer  #
 ###################################
