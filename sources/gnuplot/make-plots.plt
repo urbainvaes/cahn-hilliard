@@ -1,20 +1,30 @@
 #!/usr/bin/env gnuplot
-n_plots = 1000
 
-# Get extension and label {{{
-output_label = system("echo ${label}")
+# Process input parameters {{{
+output_label  = system("echo ${label}")
 output_format = system("echo ${extension}")
-if (output_format eq '') {
-    output_format = 'pdf'
-}
-# }}}
-# Calculate step to use to generate plots {{{
-n_files = system("ls output/phi/phi.*.vtk | wc -l") - 1
+max_iter      = system("echo ${max_iter}")
+step          = system("echo ${step}")
 
-if (n_files > n_plots) {
-    step = n_files / n_plots
-} else {
-    step = 1
+if (output_format eq '') {
+    output_format = 'png'
+}
+
+
+if (max_iter eq '') {
+    n_files = system("ls output/phi/phi.*.vtk | wc -l") - 1
+    max_iter = n_files
+}
+
+if (step eq '') {
+
+    n_plots = 1000;
+
+    if (max_iter > n_plots) {
+        step = max_iter / n_plots
+    } else {
+        step = 1
+    }
 }
 # }}}
 # Extract boundary {{{
@@ -48,6 +58,7 @@ set xrange [x_min:x_max]
 set yrange [y_min:y_max]
 #}}}
 # Calculate size to give to terminal {{{
+# size_wanted = 7; # Size of canvas (not of plot)
 size_wanted = 7; # Size of canvas (not of plot)
 ratio_yx = (y_max - y_min)/(x_max - x_min)
 if(ratio_yx > 1) {
@@ -73,39 +84,36 @@ if(output_format eq 'pdf') {
 }
 
 if(output_format eq 'png') {
+    pixPerCm = 100
+    size_x = pixPerCm*size_x
+    size_y = pixPerCm*size_y
     set term pngcairo size size_x,size_y
 }
 # }}}
 # Set layout options {{{
 unset key
-set border
-set colorbox
-set tics
+unset border
+unset colorbox
+unset tics
 
 set size ratio -1
 # set lmargin at screen 0.1
 # set rmargin at screen 0.9
 # set bmargin at screen 0.1
 # set tmargin at screen 0.9
-
-# Default palette
-set palette defined ( -1 "green", 1 "blue" )
 # }}}
 
-system("mkdir -p pictures/phi pictures/mu pictures/pressure")
+system("mkdir -p pictures/phi pictures/mu pictures/pressure pictures/muGradPhi pictures/boundary")
 
-do for [output_iter=0:n_files:step] {
+# Plot edges
+set output "pictures/boundary/".output_label."-boundary.".output_format
+plot edges_file with lines lt rgb "black" lw 2
 
-    # output_index = sprintf('%06.0f',output_iter)
+do for [output_iter=0:max_iter:step] {
     output_index = output_iter
     isoline_file = "output/iso/contactLine".output_iter.".dat"
 
     output_field="phi"
     output_style="filledcurves"
     load "gnuplot/plot.plt"
-
-    # system("output_file=pictures/mu/".label."-mu-filledcurves-".iteration.extension." gnuplot gnuplot/plot.plt;")
-    # system("output_file=pictures/pressure/".label."-pressure-filledcurves-".iteration.extension." gnuplot gnuplot/plot.plt;")
-    # system("output_file=pictures/u/".label."-u-filledcurves-".iteration.extension." gnuplot gnuplot/plot.plt;")
-    # system("output_file=pictures/v/".label."-v-filledcurves-".iteration.extension." gnuplot gnuplot/plot.plt;")
 }
