@@ -61,6 +61,10 @@ ifeq ($(AFTER), 1)
 	AFTER_FILE = after.pde
 endif
 
+ifeq ($(MUMPS), 1)
+	cpp_flags += -DMUMPS
+endif
+
 ###############################
 #  Create mesh from geometry  #
 ###############################
