@@ -51,10 +51,12 @@ endif
 
 ifeq ($(BEFORE), 1)
 	cpp_flags += -DBEFORE
+	BEFORE_FILE = before.pde
 endif
 
 ifeq ($(AFTER), 1)
 	cpp_flags += -DAFTER
+	AFTER_FILE = after.pde
 endif
 
 ###############################
@@ -73,7 +75,7 @@ run : output/thermodynamics.txt
 geometry.pde : $(GEOMETRY)
 	grep -h 'export' $^ | sed 's/^/real /' > $@;
 
-processed_solver.pde : solver.pde $(PROBLEM) config.mk $(PERIODICITY)
+processed_solver.pde : solver.pde config.mk $(PROBLEM) $(PERIODICITY) $(BEFORE_FILE) $(AFTER_FILE)
 	cpp -w $(cpp_flags) $< | sed '/^\#/d' | sed 's#^\(macro.\+\)$$#\1 //EOM#' | sed '/^$$/d' > $@
 
 output/thermodynamics.txt : processed_solver.pde $(PROBLEM) output/mesh.msh geometry.pde
