@@ -130,6 +130,7 @@ real dt = 8.0*Pe*Cn^4;
 real nIter = 300;
 
 // Mesh parameters
+int aniso = 0;
 #if DIMENSION == 2
 real hmax = 0.01;
 real hmin = 0.001;
@@ -273,7 +274,7 @@ varf varPrhs(p,test) = INTEGRAL(DIMENSION)(Th)( -Div(UVEC)*test/dt );
   for(int i = 0; i < 2; i++)
   {
       Vh metricField;
-      metricField[] = mshmet(Th, phi, aniso = 0, hmin = hmin, hmax = hmax, nbregul = 1, verbosity = 0);
+      metricField[] = mshmet(Th, phi, aniso = aniso, hmin = hmin, hmax = hmax, nbregul = 1, verbosity = 0);
       Th=tetgreconstruction(Th,switch="raAQ",sizeofvolume=metricField*metricField*metricField/6.);
       [phi, mu] = [phi0, mu0];
 
@@ -638,7 +639,7 @@ for(int i = 0; i <= nIter; i++)
 
     #if DIMENSION == 3
     Vh metricField;
-    metricField[] = mshmet(Th, phi, aniso = 0, hmin = hmin, hmax = hmax, nbregul = 1, verbosity = 0);
+    metricField[] = mshmet(Th, phi, aniso = aniso, hmin = hmin, hmax = hmax, nbregul = 1, verbosity = 0);
     Th=tetgreconstruction(Th,switch="raAQ",sizeofvolume=metricField*metricField*metricField/6.);
     #endif
     [phi, mu] = [phi, mu];
