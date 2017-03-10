@@ -30,14 +30,14 @@ real massPhi1 = massPhiInit;
 
 // Space-dependent contact-angle
 real theta0 = pi/2;
-real frequency = 4;
-real amplitude = pi/6;
+real frequency = 0;
+real amplitude = -pi/6;
 real biasX = 0.0;
 real biasY = 0.0;
 func contactAngles = theta0 + amplitude * cos(frequency*pi*(x - biasX)) * ((label == 1) + (label == 2));
 
 // Parameters for input boundary
-real massInputByIteration = 0.0001;
+real massInputByIteration = 0;
 real absMassFlux = massInputByIteration/(dt*pi*r^2);
 real massFlux = absMassFlux;
 
