@@ -300,8 +300,28 @@ varf varPrhs(p,test) = INTEGRAL(DIMENSION)(Th)( -Div(UVEC)*test/dt );
     ofstream file("output/thermodynamics.txt");
 };
 
-// Macroscopic variables
+// Declare macroscopic variables {{{
 real massPhi, freeEnergy, kineticEnergy;
+
+real intDiffusiveFluxMass = 0;
+#ifdef NS
+real intConvectiveFluxMass = 0;
+#endif
+
+real intDissipationFreeEnergy = 0;
+real intDiffusiveFluxFreeEnergy = 0;
+#ifdef NS
+real intTransferEnergy = 0;
+real intConvectiveFluxFreeEnergy = 0;
+#endif
+
+#ifdef NS
+real intDissipationKineticEnergy = 0;
+real intDiffusiveFluxKineticEnergy = 0;
+real intConvectiveFluxKineticEnergy = 0;
+real intPressureFluxKineticEnergy = 0;
+#endif
+// }}}
 
 for(int i = 0; i <= nIter; i++)
 {
@@ -337,10 +357,10 @@ for(int i = 0; i <= nIter; i++)
 
   // Mass fluxes outside of domain
   real diffusiveFluxMass = - INTEGRAL(BOUNDARYDIM)(Th) ((1/Pe) * Normal'*Grad(mu));
-  real totalMassFlux = diffusiveFluxMass;
+  real totalFluxMass = diffusiveFluxMass;
   #ifdef NS
   real convectiveFluxMass = INTEGRAL(BOUNDARYDIM)(Th) (phi * [UVEC]'*Normal);
-  totalMassFlux = totalMassFlux + convectiveFluxMass;
+  totalFluxMass = totalFluxMass + convectiveFluxMass;
   #endif
   //}}}
   // Free energy {{{
@@ -355,13 +375,13 @@ for(int i = 0; i <= nIter; i++)
   real freeEnergyOld = freeEnergy;
   freeEnergy = bulkFreeEnergy + wallFreeEnergy;
   real deltaFreeEnergy = freeEnergy - freeEnergyOld;
+  real dissipationFreeEnergy = INTEGRAL(DIMENSION)(Th) ((1/Pe)*(Grad(mu)'*Grad(mu)));
   real diffusiveFluxFreeEnergy = - INTEGRAL(BOUNDARYDIM)(Th) ((1/Pe) * mu * Normal'*Grad(mu));
-  real dissipationFree = INTEGRAL(DIMENSION)(Th) ((1/Pe)*(Grad(mu)'*Grad(mu)));
-  real totalFreeEnergyContributions = diffusiveFluxFreeEnergy + dissipationFree;
+  real totalContributionsFreeEnergy = diffusiveFluxFreeEnergy + dissipationFreeEnergy;
   #ifdef NS
   real transferEnergy = INTEGRAL(DIMENSION)(Th) (phi*[UVEC]'*Grad(mu));
   real convectiveFluxFreeEnergy = INTEGRAL(BOUNDARYDIM)(Th) (mu * phi* [UVEC]'*Normal);
-  totalFreeEnergyContributions += convectiveFluxFreeEnergy + transferEnergy;
+  totalContributionsFreeEnergy += convectiveFluxFreeEnergy + transferEnergy;
   #endif
   // }}}
   // Kinetic energy {{{
@@ -369,7 +389,7 @@ for(int i = 0; i <= nIter; i++)
   real kineticEnergyOld = kineticEnergy;
   kineticEnergy = INTEGRAL(DIMENSION)(Th) (u*u/2);
   real deltaKineticEnergy = kineticEnergy - kineticEnergyOld;
-  real dissipationKinetic = INTEGRAL(DIMENSION)(Th) ((1/Re) * (Grad(u)'*Grad(u) + Grad(v)'*Grad(v)
+  real dissipationKineticEnergy = INTEGRAL(DIMENSION)(Th) ((1/Re) * (Grad(u)'*Grad(u) + Grad(v)'*Grad(v)
       #if DIMENSION == 3
       + Grad(w)'*Grad(w)
       #endif
@@ -382,8 +402,29 @@ for(int i = 0; i <= nIter; i++)
       )); // check!
   real convectiveFluxKineticEnergy = INTEGRAL(BOUNDARYDIM)(Th) (([UVEC]'* // splitting required for correct macro expansion
       [UVEC]/2) * [UVEC]'*Normal);
-  real PressureFluxKineticEnergy = INTEGRAL(BOUNDARYDIM)(Th) (p * [UVEC]'*Normal);
-  real totalKineticEnergyContributions = diffusiveFluxKineticEnergy + convectiveFluxKineticEnergy + PressureFluxKineticEnergy - transferEnergy;
+  real pressureFluxKineticEnergy = INTEGRAL(BOUNDARYDIM)(Th) (p * [UVEC]'*Normal);
+  real totalContributionsKineticEnergy = diffusiveFluxKineticEnergy + convectiveFluxKineticEnergy + pressureFluxKineticEnergy - transferEnergy;
+  #endif
+  // }}}
+
+  // Update integrated quantities {{{
+  intDiffusiveFluxMass += dt*diffusiveFluxMass;
+  #ifdef NS
+  intConvectiveFluxMass += dt*convectiveFluxMass;
+  #endif
+
+  intDissipationFreeEnergy += dt*dissipationFreeEnergy;
+  intDiffusiveFluxFreeEnergy += dt*diffusiveFluxFreeEnergy;
+  #ifdef NS
+  intTransferEnergy += dt*transferEnergy;
+  intConvectiveFluxFreeEnergy += dt*convectiveFluxFreeEnergy;
+  #endif
+
+  #ifdef NS
+  intDissipationKineticEnergy += dt*dissipationKineticEnergy;
+  intDiffusiveFluxKineticEnergy += dt*diffusiveFluxKineticEnergy;
+  intConvectiveFluxKineticEnergy += dt*convectiveFluxKineticEnergy;
+  intPressureFluxKineticEnergy += dt*pressureFluxKineticEnergy;
   #endif
   // }}}
 
@@ -400,39 +441,49 @@ for(int i = 0; i <= nIter; i++)
        << "Iteration: "     << i    << endl
        << "Time:      "     << i*dt << endl
        << endl
-       << "** Mass **"                   << endl
-       << "Mass:                       " << massPhi                         << endl
-       << "Diffusive mass flux:        " << dt*diffusiveFluxMass            << endl
+       << "** Mass **"                        << endl
+       << "Mass:                       "      << massPhi              << endl
+       << "Diffusive mass flux:        "      << dt*diffusiveFluxMass << endl
+       << "Integrated diffusive mass flux:  " << intDiffusiveFluxMass << endl
        #ifdef NS
-       << "Convective mass flux:       " << dt*convectiveFluxMass           << endl
-       << "Total outgoing mass flux:   " << dt*totalMassFlux                << endl
+       << "Convective mass flux:       "            << dt*convectiveFluxMass << endl
+       << "Integrated convective mass flux:       " << intConvectiveFluxMass << endl
+       << "Total outgoing mass flux:   "            << dt*totalFluxMass      << endl
        #endif
-       << "Increase in mass:           " << deltaMassPhi                    << endl
-       << "Mass balance (must be = 0): " << deltaMassPhi + dt*totalMassFlux << endl
+       << "Increase in mass:           "                   << deltaMassPhi                    << endl
+       << "Mass balance (must be = 0): "                   << deltaMassPhi + dt*totalFluxMass << endl
        << endl
-       << "** Free energy **"                   << endl
-       << "Bulk free energy:                  " << bulkFreeEnergy                                    << endl
-       << "Wall free energy:                  " << wallFreeEnergy                                    << endl
-       << "Free energy dissipations:          " << dt*dissipationFree                                << endl
-       << "Diffusive free energy flux:        " << dt*diffusiveFluxFreeEnergy                        << endl
+       << "** Free energy **"                              << endl
+       << "Bulk free energy:                  "            << bulkFreeEnergy                  << endl
+       << "Wall free energy:                  "            << wallFreeEnergy                  << endl
+       << "Free energy dissipations:          "            << dt*dissipationFreeEnergy        << endl
+       << "Integrated free energy dissipations:          " << intDissipationFreeEnergy        << endl
+       << "Diffusive free energy flux:        "            << dt*diffusiveFluxFreeEnergy      << endl
+       << "Integrated diffusive free energy flux:        " << intDiffusiveFluxFreeEnergy      << endl
        #ifdef NS
-       << "Convective free energy flux:       " << dt*convectiveFluxFreeEnergy                       << endl
-       << "Transfer to kinetic energy:        " << dt*transferEnergy                                 << endl
-       << "Sum of all contributions:          " << dt*totalFreeEnergyContributions                   << endl
+       << "Convective free energy flux:       "            << dt*convectiveFluxFreeEnergy     << endl
+       << "Integrated convective free energy flux:       " << intConvectiveFluxFreeEnergy     << endl
+       << "Transfer to kinetic energy:        "            << dt*transferEnergy               << endl
+       << "Integrated transfer to kinetic energy:        " << intTransferEnergy               << endl
+       << "Sum of all contributions:          "            << dt*totalContributionsFreeEnergy << endl
        #endif
        << "Increase in free energy:           " << deltaFreeEnergy                                   << endl
-       << "Free energy balance (must be = 0): " << deltaFreeEnergy + dt*totalFreeEnergyContributions << endl
+       << "Free energy balance (must be = 0): " << deltaFreeEnergy + dt*totalContributionsFreeEnergy << endl
        #ifdef NS
        << endl
-       << "** Kinetic energy **"                      << endl
-       << "Kinetic energy:                       "    << kineticEnergy                                           << endl
-       << "Kinetic energy dissipations:          "    << dt* dissipationKinetic                                  << endl
-       << "Diffusive kinetic energy flux:        "    << dt* diffusiveFluxKineticEnergy                          << endl
-       << "Convective kinetic energy flux:       "    << dt* convectiveFluxKineticEnergy                         << endl
-       << "Pressure-induced kinetic energy flux: "    << dt* PressureFluxKineticEnergy                           << endl
-       << "Sum of all contributions:             "    << dt* totalKineticEnergyContributions                     << endl
-       << "Increase in kinetic energy:           "    << deltaKineticEnergy                                      << endl
-       << "Kinetic energy balance (must be = 0): "    << deltaKineticEnergy + dt*totalKineticEnergyContributions << endl
+       << "** Kinetic energy **"                              << endl
+       << "Kinetic energy:                       "            << kineticEnergy                                           << endl
+       << "Kinetic energy dissipations:          "            << dt* dissipationKineticEnergy                            << endl
+       << "Integrated kinetic energy dissipations:          " << intDissipationKineticEnergy                             << endl
+       << "Diffusive kinetic energy flux:        "            << dt* diffusiveFluxKineticEnergy                          << endl
+       << "Integrated diffusive kinetic energy flux:        " << intDiffusiveFluxKineticEnergy                           << endl
+       << "Convective kinetic energy flux:       "            << dt* convectiveFluxKineticEnergy                         << endl
+       << "Integrated convective kinetic energy flux:       " << intConvectiveFluxKineticEnergy                          << endl
+       << "Pressure-induced kinetic energy flux: "            << dt* pressureFluxKineticEnergy                           << endl
+       << "Integrated pressure-induced kinetic energy flux: " << intPressureFluxKineticEnergy                            << endl
+       << "Sum of all contributions:             "            << dt* totalContributionsKineticEnergy                     << endl
+       << "Increase in kinetic energy:           "            << deltaKineticEnergy                                      << endl
+       << "Kinetic energy balance (must be = 0): "            << deltaKineticEnergy + dt*totalContributionsKineticEnergy << endl
        #endif
        << endl;
   // }}}
