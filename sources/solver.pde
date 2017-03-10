@@ -23,6 +23,14 @@ load "mshmet"
 load "tetgen"
 #endif
 
+#ifdef MUMPS
+load "MUMPS_FreeFem"
+string ssparams="nprow=1, npcol="+mpisize;
+#define SPARAMS , sparams=ssparams
+#else
+#define SPARAMS
+#endif
+
 // Create output directories
 system("mkdir -p" + " output/phi"
                   + " output/mu"
@@ -557,7 +565,7 @@ for(int i = 0; i <= nIter; i++)
   matrix matPotentialBoundary = varBoundaryPotential(Vh, Vh);
   matrix matPotential = matPotentialBulk + matPotentialBoundary;
   real[int] rhsPotential = varBoundaryPotential(0, Vh);
-  set(matPotential,solver=sparsesolver);
+  set(matPotential,solver=sparsesolver SPARAMS);
   theta[] = matPotential^-1*rhsPotential;
   #endif
   //}}}
@@ -568,7 +576,7 @@ for(int i = 0; i <= nIter; i++)
   real[int] rhsPhiBulk = varPhiRhs(0, V2h);
   real[int] rhsPhiBoundary = varPhiBoundary(0, V2h);
   real[int] rhsPhi = rhsPhiBulk + rhsPhiBoundary;
-  set(matPhi,solver=sparsesolver);
+  set(matPhi,solver=sparsesolver SPARAMS);
   phi[] = matPhi^-1*rhsPhi;
   //}}}
   // Navier stokes {{{
@@ -583,7 +591,7 @@ for(int i = 0; i <= nIter; i++)
   real[int] rhsUBulk = varUrhs(0, Vh);
   real[int] rhsUBoundary = varUBoundary(0, Vh);
   real[int] rhsU = rhsUBulk + rhsUBoundary;
-  set(matU,solver=sparsesolver);
+  set(matU,solver=sparsesolver SPARAMS);
   u[] = matU^-1*rhsU;
 
   matrix matVBulk = varV(Vh, Vh);
@@ -592,7 +600,7 @@ for(int i = 0; i <= nIter; i++)
   real[int] rhsVBulk = varVrhs(0, Vh);
   real[int] rhsVBoundary = varVBoundary(0, Vh);
   real[int] rhsV = rhsVBulk + rhsVBoundary;
-  set(matV,solver=sparsesolver);
+  set(matV,solver=sparsesolver SPARAMS);
   v[] = matV^-1*rhsV;
 
   #if DIMENSION == 3
@@ -602,7 +610,7 @@ for(int i = 0; i <= nIter; i++)
   real[int] rhsWBulk = varWrhs(0, Vh);
   real[int] rhsWBoundary = varWBoundary(0, Vh);
   real[int] rhsW = rhsWBulk + rhsWBoundary;
-  set(matW,solver=sparsesolver);
+  set(matW,solver=sparsesolver SPARAMS);
   w[] = matW^-1*rhsW;
   #endif
 
@@ -612,7 +620,7 @@ for(int i = 0; i <= nIter; i++)
   real[int] rhsPBulk = varPrhs(0, Vh);
   real[int] rhsPBoundary = varPBoundary(0, Vh);
   real[int] rhsP = rhsPBulk + rhsPBoundary;
-  set(matP,solver=sparsesolver);
+  set(matP,solver=sparsesolver SPARAMS);
   p[] = matP^-1*rhsP;
 
   u = u - dx(p)*dt;
