@@ -1,6 +1,6 @@
-Include "macros-gmsh/square.geo";
-Include "macros-gmsh/circle.geo";
-Include "macros-gmsh/cube.geo";
+Include "../macros-gmsh/square.geo";
+Include "../macros-gmsh/circle.geo";
+Include "../macros-gmsh/cube.geo";
 
 If (!Exists(Lx))
   Lx = 1;
