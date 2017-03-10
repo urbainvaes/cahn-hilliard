@@ -76,6 +76,10 @@ output/mesh.msh : $(GEOMETRY) config.mk
 ###################
 #  Run FreeFem++  #
 ###################
+ifndef FF_COMMAND
+	FF_COMMAND = FreeFem++
+endif
+
 geometry.pde : $(GEOMETRY)
 	grep -h 'export' $^ | sed 's/^/real /' > $@;
 
@@ -83,7 +87,7 @@ processed_solver.pde : solver.pde config.mk $(PROBLEM) $(PERIODICITY) $(BEFORE_F
 	cpp -w $(cpp_flags) $< | sed '/^\#/d' | sed 's#^\(macro.\+\)$$#\1 //EOM#' | sed '/^$$/d' > $@
 
 run : processed_solver.pde geometry.pde output/mesh.msh
-	FreeFem++ $< $(ff_flags) | tee logs/freefem.log
+	$(FF_COMMAND) $< $(ff_flags) | tee logs/freefem.log
 
 ##############
 #  Graphics  #
