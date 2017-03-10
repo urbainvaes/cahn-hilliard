@@ -7,3 +7,5 @@ PLOT = 0
 
 BEFORE = 1
 AFTER = 1
+
+FF_COMMAND = FreeFem++

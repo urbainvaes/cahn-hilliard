@@ -12,10 +12,12 @@ func phi0 = -1 + droplet;
 func mu0 = 0;
 [phi, mu] = [phi0, mu0];
 
+func contactAngles = thetaFinal*(label == 1);
+
 // Define boundary conditions
 varf varPhiBoundary([phi1,mu1], [phi2,mu2]) =
-  int1d(Th,1) (wetting(thetaFinal) * mu2)
-  + int1d(Th,1) (wetting(thetaFinal) * phi1 * phiOld * mu2)
+  int1d(Th,1) (wetting(contactAngles) * mu2)
+  + int1d(Th,1) (wetting(contactAngles) * phi1 * phiOld * mu2)
   /* - int1d(Th,1) (1/Dw*Cn*phi1*phi2/dt) */
   /* - int1d(Th,1) (1/Dw*Cn*convect([UOLDVEC],-dt,phiOld)*phi2/dt) */
 ;
