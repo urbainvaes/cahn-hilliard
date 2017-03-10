@@ -34,6 +34,7 @@ string ssparams="nprow=1, npcol="+mpisize;
 // Create output directories
 system("mkdir -p" + " output/phi"
                   + " output/mu"
+                  + " output/muGradPhi"
                   + " output/velocity"
                   + " output/u"
                   + " output/v"
@@ -528,6 +529,14 @@ for(int i = 0; i <= nIter; i++)
           for (int j=0; j <3; j++)
               fmu << Th[ielem][j].x << " " << Th[ielem][j].y << " " << muOld[][Vh(ielem,j)] << endl;
           fmu << Th[ielem][0].x << " " << Th[ielem][0].y << " " << muOld[][Vh(ielem,0)] << "\n\n\n";
+      }
+
+      Vh muGradPhi = sqrt(mu*mu*Grad(phi)'*Grad(phi));
+      ofstream fmuGradPhi("output/muGradPhi/muGradPhi."+i+".gnuplot");
+      for (int ielem=0; ielem<Th.nt; ielem++) {
+          for (int j=0; j <3; j++)
+              fmuGradPhi << Th[ielem][j].x << " " << Th[ielem][j].y << " " << muGradPhi[][Vh(ielem,j)] << endl;
+          fmuGradPhi << Th[ielem][0].x << " " << Th[ielem][0].y << " " << muGradPhi[][Vh(ielem,0)] << "\n\n\n";
       }
 
       #ifdef NS
