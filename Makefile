@@ -10,7 +10,7 @@ fzf     ?= sources/bin/fzf-0.16.3-linux_386
 #  Install bunch  #
 ###################
 bunch :
-	find .bunches/* -printf "%f\n" | $(fzf) --print-query | tail -1 > $(live);
+	find .bunches/* -printf "%f\n" 2>/dev/null | $(fzf) --print-query | tail -1 > $(live);
 
 #######################################################
 #  Install and uninstall a test to the current bunch  #
