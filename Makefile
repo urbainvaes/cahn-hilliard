@@ -17,7 +17,7 @@ bunch :
 #######################################################
 install :
 	@find inputs -type d -printf '%P\n' | \
-		while read l; do [[ $$(find inputs/$$l/* -type d) = "" ]] && echo $$l; done | \
+		while read l; do test -n "$$(find inputs/$$l/* -type d)" || echo $$l; done | \
 		$(fzf) -m --bind=ctrl-t:toggle >> .bunches/$(bunch) || echo "No change";
 
 uninstall :
