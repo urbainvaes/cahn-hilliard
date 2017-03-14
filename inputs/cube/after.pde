@@ -2,15 +2,9 @@
 
 // Position of center of mass
 massPhi1 = int3d(Th) ((phi + 1.)/2.);
-real positionX = int3d(Th) ((phi + 1.)/2. * x) / massPhi1;
-real positionY = int3d(Th) ((phi + 1.)/2. * y) / massPhi1;
+real positionX = int3d(Th) ((phi + 1.)/2. * x) / massPhi1 - 0.5;
+real positionY = int3d(Th) ((phi + 1.)/2. * y) / massPhi1 - 0.5;
 
-cout << endl
-     << "** Problem-specific output **"  << endl
-     << "Imposed mass flux: "            << massFlux  << endl // Careful: factor 2 between massPhi and massPhi1
-     << "Total mass of phi = 1: "        << massPhi1  << endl
-     << "X position of center of mass: " << positionX << endl
-     << "Y position of center of mass: " << positionY << endl;
 
 // Contact plane
 
@@ -54,7 +48,23 @@ Vh dzphi = dz(phi);
             fiso << endl;
     }
 
-    ofstream flength("output/print/lengthPrint.txt",append);
-    flength << lengthOfLine << endl;
-    cout << "Length of the contact line: " << lengthOfLine << endl;
+    ofstream file1("output/cubeDynamics/massPhi1.txt",append);
+    file1 << massPhi1 << endl;
+
+    ofstream file2("output/cubeDynamics/positionX.txt",append);
+    file2 << positionX << endl;
+
+    ofstream file3("output/cubeDynamics/positionY.txt",append);
+    file3 << positionY << endl;
+
+    ofstream file4("output/cubeDynamics/lengthPrint.txt",append);
+    file4 << lengthOfLine << endl;
+
+    cout << endl
+         << "** Problem-specific output **"  << endl
+         << "Imposed mass flux: "            << massFlux  << endl // Careful: factor 2 between massPhi and massPhi1
+         << "Total mass of phi = 1: "        << massPhi1  << endl
+         << "X position of center of mass: " << positionX << endl
+         << "Y position of center of mass: " << positionY << endl
+         << "Length of the contact line: " << lengthOfLine << endl;
 }
