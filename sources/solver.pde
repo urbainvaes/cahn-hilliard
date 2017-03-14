@@ -9,12 +9,13 @@ include "freefem/clock.pde"
 include "geometry.pde"
 //}}}
 // Load modules {{{
+load "freefem/match"
 load "gmsh"
-load "isoline";
+load "isoline"
 
 #if DIMENSION == 2
-load "metis";
-load "iovtk";
+load "metis"
+load "iovtk"
 #endif
 
 #if DIMENSION == 3
@@ -141,6 +142,7 @@ real hmin = 0.001;
 real hmax = 0.1;
 real hmin = hmax/20;
 #endif
+
 //}}}
 // Define macros {{{
 macro wetting(angle) ((sqrt(2.)/2.)*cos(angle)) // EOM
@@ -326,11 +328,6 @@ real intPressureFluxKineticEnergy = 0;
 
 for(int i = 0; i <= nIter; i++)
 {
-  // Before iteration {{{
-  #ifdef BEFORE
-      #include "before.pde"
-  #endif
-  // }}}
   // Update previous solution {{{
   phiOld = phi;
   #ifdef NS
@@ -486,6 +483,19 @@ for(int i = 0; i <= nIter; i++)
        << "Increase in kinetic energy:           "            << deltaKineticEnergy                                      << endl
        << "Kinetic energy balance (must be = 0): "            << deltaKineticEnergy + dt*totalContributionsKineticEnergy << endl
        #endif
+       << endl
+       << "** Parameters **" << endl
+       << "dt = "            << dt   << endl
+       << "Pe = "            << Pe   << endl
+       << "Cn = "            << Cn   << endl
+       #ifdef ADAPT
+       << "hmin = "          << hmin << endl
+       << "hmax = "          << hmax << endl
+       #endif
+       #ifdef NS
+       << "Re = "            << Re   << endl
+       << "We = "            << We   << endl
+       #endif
        << endl;
   // }}}
   // }}}
@@ -617,9 +627,40 @@ for(int i = 0; i <= nIter; i++)
   /// }}}
   // Exit if required {{{
   if (i == nIter) break;
-
-  tic();
   //}}}
+  // Before iteration {{{
+  #ifdef BEFORE
+      #include "before.pde"
+  #endif
+
+  if(i == 0) {
+      ofstream file("parameters.txt");
+      file << "dt = " << dt << endl;
+      file << "Pe = " << Pe << endl;
+      file << "Cn = " << Cn << endl;
+      #ifdef ADAPT
+      file << "hmin = " << hmin << endl;
+      file << "hmax = " << hmax << endl;
+      #endif
+      #ifdef NS
+      file << "Re = " << Re << endl;
+      file << "We = " << We << endl;
+      #endif
+  }
+  else {
+      if (doesMatch("dt")) dt = getMatch("dt");
+      if (doesMatch("Pe")) Pe = getMatch("Pe");
+      if (doesMatch("Cn")) Cn = getMatch("Cn");
+      #ifdef ADAPT
+      if (doesMatch("hmin")) hmin = getMatch("hmin");
+      if (doesMatch("hmax")) hmax = getMatch("hmax");
+      #endif
+      #ifdef NS
+      if (doesMatch("Re")) Re = getMatch("Re");
+      if (doesMatch("We")) We = getMatch("We");
+      #endif
+  }
+  // }}}
   // Poisson for electric potential {{{
   #ifdef ELECTRO
   matrix matPotentialBulk = varPotential(Vh, Vh);
