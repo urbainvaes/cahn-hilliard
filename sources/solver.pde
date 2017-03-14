@@ -369,7 +369,7 @@ for(int i = 0; i <= nIter; i++)
       - 0.25 * (epsilonR1*(1 - phi) + epsilonR2*(1 + phi)) * Grad(theta)'*Grad(theta)
       #endif
       );
-  real wallFreeEnergy = INTEGRAL(BOUNDARYDIM)(Th) (wetting(contactAngles) * (phi - phi^3/3));
+  real wallFreeEnergy = INTEGRAL(BOUNDARYDIM)(Th,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20) (wetting(contactAngles) * (phi - phi^3/3));
   real freeEnergyOld = freeEnergy;
   freeEnergy = bulkFreeEnergy + wallFreeEnergy;
   real deltaFreeEnergy = freeEnergy - freeEnergyOld;
