@@ -6,13 +6,14 @@ n_files = system("ls output/print/print-*.txt | wc -l") - 1
 set term pngcairo
 set xrange [0:1]
 set yrange [0:1]
+set size ratio -1
 
 unset key
 
 do for [i = 0:n_files] {
     input_file = "output/print/print-".i.".txt"
 
-    size = system("cat output/print/lengthPrint.txt | head -n ".(i+1)." | tail -n 1")
+    size = system("cat output/cubeDynamics/lengthPrint.txt | head -n ".(i+1)." | tail -n 1")
 
     set output "pictures/print/cube_injection-print-".sprintf('%06.0f',i).".png"
     set title "Iteration: ".i." / Length of the contact line(s): ".sprintf('%6.2f',size + 0)
