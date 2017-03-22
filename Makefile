@@ -26,7 +26,7 @@ uninstall :
 # Select in bunch
 select :
 	@p=$$(cat .bunches/$(bunch) | $(fzf)); \
-	  [[ -n $${p} ]] && sed -i "\#$${p}#d" .bunches/$(bunch) && \
+	  test -n $${p} && sed -i "\#$${p}#d" .bunches/$(bunch) && \
 	  echo $${p} >> .bunches/$(bunch) || echo "No change";
 
 #################################
