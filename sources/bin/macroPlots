@@ -4,17 +4,17 @@ macros=output/macros
 pictures=pictures/macros
 mkdir -p $macros $pictures
 
-cat logs/freefem.log | grep "Iteration: "                  | awk '{ print $NF }' > $macros/iter.txt
-cat logs/freefem.log | grep "Time: "                       | awk '{ print $NF }' > $macros/iter.txt
-cat logs/freefem.log | grep "Mass: "                       | awk '{ print $NF }' > $macros/mass.txt
+cat logs/freefem.log | grep "Iteration: "                             | awk '{ print $NF }' > $macros/iter.txt
+cat logs/freefem.log | grep "Time: "                                  | awk '{ print $NF }' > $macros/time.txt
+cat logs/freefem.log | grep "Mass: "                                  | awk '{ print $NF }' > $macros/mass.txt
 cat logs/freefem.log | grep "Integrated diffusive mass flux: "        | awk '{ print $NF }' > $macros/diffMass.txt
 cat logs/freefem.log | grep "Integrated convective mass flux: "       | awk '{ print $NF }' > $macros/convMass.txt
-cat logs/freefem.log | grep "Bulk free energy: "           | awk '{ print $NF }' > $macros/bulkFree.txt
-cat logs/freefem.log | grep "Wall free energy: "           | awk '{ print $NF }' > $macros/wallFree.txt
+cat logs/freefem.log | grep "Bulk free energy: "                      | awk '{ print $NF }' > $macros/bulkFree.txt
+cat logs/freefem.log | grep "Wall free energy: "                      | awk '{ print $NF }' > $macros/wallFree.txt
 cat logs/freefem.log | grep "Integrated free energy dissipations: "   | awk '{ print $NF }' > $macros/dissFree.txt
 cat logs/freefem.log | grep "Integrated diffusive free energy flux: " | awk '{ print $NF }' > $macros/diffFree.txt
-cat logs/freefem.log | grep "Increase in free energy: "    | awk '{ print $NF }' > $macros/incFree.txt
-cat logs/freefem.log | grep "Free energy balance"          | awk '{ print $NF }' > $macros/freeBal.txt
+cat logs/freefem.log | grep "Increase in free energy: "               | awk '{ print $NF }' > $macros/incFree.txt
+cat logs/freefem.log | grep "Free energy balance"                     | awk '{ print $NF }' > $macros/freeBal.txt
 
 ls $macros | while read f; do
 gnuplot -p <<endOfScript
