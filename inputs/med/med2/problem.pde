@@ -7,17 +7,28 @@ func mu0  = 0;
 real theta = 0;
 
 real amplitudeInput = 1;
-real pulsePeriod = 2;
+real pulsePeriod = 4;
+real pInlet = 20;
+real pCentralOutlet = 0;
+real pLateralOutlets = 0;
+
+func contactAngles = theta*((label == 4) + (label == 5) + (label == 6));
 
 varf varPhiBoundary([phi1,mu1], [phi2,mu2]) =
+  // -------------
+  // Input
+  // -------------
   on (1, phi1 = amplitudeInput)
-  + int1d(Th,4,5,6) (wetting(theta) * mu2)
-  + int1d(Th,4,5,6) (wetting(theta) * phi1 * phiOld * mu2)
+  // -------------
+  // Contact angle
+  // -------------
+  + int1d(Th) (wetting(contactAngles) * mu2)
+  + int1d(Th) (wetting(contactAngles) * phi1 * phiOld * mu2)
 ;
 
 varf varUBoundary(u, test) = on(4, 5, 6, u = 0);
 varf varVBoundary(v, test) = on(4, 5, 6, v = 0);
-varf varPBoundary(p, test) = on(1, p = 100) + on(2, p = 0) + on(3, p = 0);
+varf varPBoundary(p, test) = on(1, p = pInlet) + on(2, p = pCentralOutlet) + on(3, p = pLateralOutlets);
 
 // Time step
 dt = 1e-1;

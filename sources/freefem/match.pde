@@ -1,7 +1,7 @@
 func bool doesMatch(string filename, string match) {
     ifstream file(filename);
-    string s; getline(file,s);
-    for (getline(file,s) ;s.length != 0; getline(file,s)) {
+    string s;
+    for (getline(file,s); s.length != 0; getline(file,s)) {
         if (s.find(match) != -1) {
             return true;
         }
@@ -12,10 +12,9 @@ func bool doesMatch(string filename, string match) {
 func real getMatch(string filename, string match) {
     ifstream file(filename);
     string s;
-    for (getline(file,s) ;s.length != 0; getline(file,s)) {
+    for (getline(file,s); s.length != 0; getline(file,s)) {
         if (s.find(match) != -1) {
             return atof(s(s.find("=")+2:s.length));
         }
     }
 }
-

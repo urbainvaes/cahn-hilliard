@@ -131,10 +131,10 @@ macro write2dData (ff, desc, time, index, f1, f2) {
     ff << "$NodeData" << endl;
     ff << "1" << endl << desc << endl;
     ff << "1" << endl << time << endl;
-    ff << "3" << endl << index << endl << "2" << endl << f1.n << endl;
-    for (int i = 0; i < function.n; i++)
+    ff << "3" << endl << index << endl << "3" << endl << f1.n << endl;
+    for (int i = 0; i < f1.n; i++)
     {
-        ff << i + 1 << "  " << f1[][i] << "  " << f2[][i] << endl;
+        ff << i + 1 << "  " << f1[][i] << "  " << f2[][i] << " 0.0" <<  endl;
     }
     ff << "$EndNodeData" << endl;
 }//
@@ -144,31 +144,36 @@ macro write3dData (ff, desc, time, index, f1, f2, f3) {
     ff << "1" << endl << desc << endl;
     ff << "1" << endl << time << endl;
     ff << "3" << endl << index << endl << "3" << endl << f1.n << endl;
-    for (int i = 0; i < function.n; i++)
+    for (int i = 0; i < f1.n; i++)
     {
         ff << i + 1 << "  " << f1[][i] << "  " << f2[][i] << "  " << f3[][i] << endl;
     }
     ff << "$EndNodeData" << endl;
 }//
 
-// -- Write mesh (without data) --
-macro writeMsh (filename, Vh, Th) {
-    ofstream ff(filename);
-    writeHeader(ff);
-    writeNodes(ff, Vh);
-    writeElements(ff, Vh, Th);
-}//
+// My additions
 
-macro writeData (filename, desc, time, index, function) {
-    ofstream ff(filename);
-    writeHeader(ff);
-    write1dData(ff, desc, time, index, function);
-}//
+macro savegmsh(filename, title, time, iteration, field) {
+  ofstream data(filename);
+  writeHeader(data);
+  write1dData(data, title, time, iteration, field);
+} //EOM
 
-macro writeAll (filename, Vh, Th, desc, time, index, function) {
-    ofstream ff(filename);
-    writeHeader(ff);
-    writeNodes(ff, Vh);
-    writeElements(ff, Vh, Th);
-    write1dData(ff, desc, time, index, function);
-}//
+macro savegmsh3(filename, title, time, iteration, field1, field2, field3) {
+  ofstream data(filename);
+  writeHeader(data);
+  write3dData(data, title, time, iteration, field1, field2, field3);
+} //EOM
+
+macro savegmsh2(filename, title, time, iteration, field1, field2) {
+  ofstream data(filename);
+  writeHeader(data);
+  write2dData(data, title, time, iteration, field1, field2);
+} //EOM
+
+macro savemesh(filename, vh, th) {
+  ofstream currentMesh(filename);
+  writeHeader(currentMesh);
+  writeNodes(currentMesh, vh);
+  writeElements(currentMesh, vh, th);
+} //EOM

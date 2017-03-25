@@ -6,10 +6,10 @@
 include "freefem/write-mesh.pde"
 include "freefem/getargs.pde"
 include "freefem/clock.pde"
+include "freefem/match.pde"
 include "geometry.pde"
 //}}}
 // Load modules {{{
-load "freefem/match"
 load "gmsh"
 load "isoline"
 
@@ -165,6 +165,8 @@ macro Normal [N.x, N.y, N.z] //EOM
 
 #define AUX_INTEGRAL(dim) int ## dim ## d
 #define INTEGRAL(dim) AUX_INTEGRAL(dim)
+#define AUX_SAVEGMSHVEC(dim) savegmsh ## dim
+#define SAVEGMSHVEC(dim) AUX_SAVEGMSHVEC(dim)
 //}}}
 // Include problem file {{{
 #include xstr(PROBLEM)
@@ -301,6 +303,7 @@ varf varPrhs(p,test) = INTEGRAL(DIMENSION)(Th)( -Div(UVEC)*test/dt );
 // CLear and create output file
 {
     ofstream file("output/thermodynamics.txt");
+    ofstream params("parameters.txt");
 };
 
 // Declare macroscopic variables {{{
@@ -330,6 +333,7 @@ for(int i = 0; i <= nIter; i++)
 {
   // Update previous solution {{{
   phiOld = phi;
+  muOld = mu;
   #ifdef NS
   uOld = u;
   vOld = v;
@@ -508,19 +512,21 @@ for(int i = 0; i <= nIter; i++)
   isoline(Th, phi, xy, close=false, iso=0.0, smoothing=0.1, file="output/iso/contactLine"+i+".dat");
 
   // Export for gmsh
-  {
-      ofstream data("output/phi/phi-" + i + ".msh");
-      writeHeader(data);
-      write1dData(data, "Cahn-Hilliard", i*dt, i, phiOld);
-  }
+  savegmsh("output/phi/phi-" + i + ".msh", "Cahn-Hilliard", i*dt, i, phiOld);
+  savegmsh("output/mu/mu-" + i + ".msh", "Chemical potential", i*dt, i, muOld);
+  #ifdef NS
+  savegmsh("output/pressure/pressure-" + i + ".msh", "Pressure", i*dt, i, p);
+  SAVEGMSHVEC(DIMENSION)("output/velocity/velocity-" + i + ".msh", "Velocity field", i*dt, i, UVEC);
+  #endif
+
   #ifdef ADAPT
-  {
-      ofstream currentMesh("output/mesh/mesh-" + i + ".msh");
-      writeHeader(currentMesh);
-      writeNodes(currentMesh, Vh);
-      writeElements(currentMesh, Vh, Th);
-  }
+  savemesh("output/mesh/mesh-" + i + ".msh", Vh, Th);
   system("./bin/msh2pos output/mesh/mesh-" + i + ".msh output/phi/phi-" + i + ".msh");
+  system("./bin/msh2pos output/mesh/mesh-" + i + ".msh output/pressure/pressure-" + i + ".msh");
+  system("./bin/msh2pos output/mesh/mesh-" + i + ".msh output/mu/mu-" + i + ".msh");
+  system("./bin/msh2pos output/mesh/mesh-" + i + ".msh output/velocity/velocity-" + i + ".msh");
+  #ifdef NS
+  #endif
   #endif
 
   // Export to gnuplot
@@ -634,7 +640,7 @@ for(int i = 0; i <= nIter; i++)
   #endif
 
   if(i == 0) {
-      ofstream file("parameters.txt");
+      ofstream file("parameters.txt",append);
       file << "dt = " << dt << endl;
       file << "Pe = " << Pe << endl;
       file << "Cn = " << Cn << endl;
@@ -648,16 +654,16 @@ for(int i = 0; i <= nIter; i++)
       #endif
   }
   else {
-      if (doesMatch("dt")) dt = getMatch("dt");
-      if (doesMatch("Pe")) Pe = getMatch("Pe");
-      if (doesMatch("Cn")) Cn = getMatch("Cn");
+      if (doesMatch("parameters.txt","dt")) dt = getMatch("parameters.txt","dt =");
+      if (doesMatch("parameters.txt","Pe")) Pe = getMatch("parameters.txt","Pe =");
+      if (doesMatch("parameters.txt","Cn")) Cn = getMatch("parameters.txt","Cn =");
       #ifdef ADAPT
-      if (doesMatch("hmin")) hmin = getMatch("hmin");
-      if (doesMatch("hmax")) hmax = getMatch("hmax");
+      if (doesMatch("parameters.txt","hmin")) hmin = getMatch("parameters.txt","hmin =");
+      if (doesMatch("parameters.txt","hmax")) hmax = getMatch("parameters.txt","hmax =");
       #endif
       #ifdef NS
-      if (doesMatch("Re")) Re = getMatch("Re");
-      if (doesMatch("We")) We = getMatch("We");
+      if (doesMatch("parameters.txt","Re")) Re = getMatch("parameters.txt","Re =");
+      if (doesMatch("parameters.txt","We")) We = getMatch("parameters.txt","We =");
       #endif
   }
   // }}}

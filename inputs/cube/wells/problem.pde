@@ -1,13 +1,13 @@
 // Iteration
 dt = 1e-4;
-nIter = 1000;
+nIter = 100;
 
 // Dimensionless numbers
 Pe = 10;
 Cn = 0.02;
 
 // Parameters for adaptation
-hmin = 0.01;
+hmin = 0.02;
 hmax = 0.1;
 
 // INITIAL CONDITION
@@ -30,11 +30,12 @@ real massPhi1 = massPhiInit;
 
 // Space-dependent contact-angle
 real theta0 = pi/2;
-real frequency = 4;
+real frequencyX = 4;
+real frequencyY = 4;
 real amplitude = pi/6;
 real biasX = 0.0;
 real biasY = 0.0;
-func contactAngles = theta0 + amplitude * cos(frequency*pi*(x - biasX)) * cos(frequency*pi*(y - biasY)) * ((label == 1) + (label == 2));
+func contactAngles = theta0 + amplitude * cos(frequencyX*pi*(x - biasX)) * cos(frequencyY*pi*(y - biasY)) * ((label == 1) + (label == 2));
 
 // Parameters for input boundary
 real massInputByIteration = 0.0001;
