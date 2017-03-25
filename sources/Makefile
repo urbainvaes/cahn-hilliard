@@ -2,7 +2,6 @@
 #  Useful variables  #
 ######################
 gitRoot = $(shell git rev-parse --show-toplevel)
-# problem = $(shell realpath -s --relative-to $(gitRoot)/tests $(CURDIR))
 problem = $(CURDIR:$(gitRoot)/tests/%=%)
 label = $(subst /,_,$(problem))
 
@@ -76,9 +75,7 @@ output/mesh.msh : $(GEOMETRY) config.mk
 ###################
 #  Run FreeFem++  #
 ###################
-ifndef FF_COMMAND
-	FF_COMMAND = FreeFem++
-endif
+FF_COMMAND ?= FreeFem++
 
 geometry.pde : $(GEOMETRY)
 	grep -h 'export' $^ | sed 's/^/real /' > $@;
