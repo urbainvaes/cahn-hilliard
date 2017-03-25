@@ -6,10 +6,10 @@
 include "freefem/write-mesh.pde"
 include "freefem/getargs.pde"
 include "freefem/clock.pde"
+include "freefem/match.pde"
 include "geometry.pde"
 //}}}
 // Load modules {{{
-load "freefem/match"
 load "gmsh"
 load "isoline"
 
@@ -634,7 +634,7 @@ for(int i = 0; i <= nIter; i++)
   #endif
 
   if(i == 0) {
-      ofstream file("parameters.txt");
+      ofstream file("parameters.txt",append);
       file << "dt = " << dt << endl;
       file << "Pe = " << Pe << endl;
       file << "Cn = " << Cn << endl;
@@ -648,16 +648,16 @@ for(int i = 0; i <= nIter; i++)
       #endif
   }
   else {
-      if (doesMatch("dt")) dt = getMatch("dt");
-      if (doesMatch("Pe")) Pe = getMatch("Pe");
-      if (doesMatch("Cn")) Cn = getMatch("Cn");
+      if (doesMatch("parameters.txt","dt")) dt = getMatch("parameters.txt","dt =");
+      if (doesMatch("parameters.txt","Pe")) Pe = getMatch("parameters.txt","Pe =");
+      if (doesMatch("parameters.txt","Cn")) Cn = getMatch("parameters.txt","Cn =");
       #ifdef ADAPT
-      if (doesMatch("hmin")) hmin = getMatch("hmin");
-      if (doesMatch("hmax")) hmax = getMatch("hmax");
+      if (doesMatch("parameters.txt","hmin")) hmin = getMatch("parameters.txt","hmin =");
+      if (doesMatch("parameters.txt","hmax")) hmax = getMatch("parameters.txt","hmax =");
       #endif
       #ifdef NS
-      if (doesMatch("Re")) Re = getMatch("Re");
-      if (doesMatch("We")) We = getMatch("We");
+      if (doesMatch("parameters.txt","Re")) Re = getMatch("parameters.txt","Re =");
+      if (doesMatch("parameters.txt","We")) We = getMatch("parameters.txt","We =");
       #endif
   }
   // }}}
