@@ -34,7 +34,8 @@ string ssparams="nprow=1, npcol="+mpisize;
 #endif
 
 // Create output directories
-system("mkdir -p" + " output/phi"
+system("mkdir -p" + " output/done"
+                  + " output/phi"
                   + " output/mu"
                   + " output/muGradPhi"
                   + " output/velocity"
@@ -623,6 +624,12 @@ for(int i = 0; i <= nIter; i++)
       if (doesMatch("parameters.txt","Re")) Re = getMatch("parameters.txt","Re =");
       if (doesMatch("parameters.txt","We")) We = getMatch("parameters.txt","We =");
       #endif
+  }
+
+
+  {
+      ofstream fdone("output/done/done-"+i+".txt");
+      fdone << "done" << endl;
   }
   // }}}
   // Poisson for electric potential {{{
