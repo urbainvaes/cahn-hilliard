@@ -107,6 +107,8 @@ Vh theta;
 // Cahn-Hilliard parameters
 real Pe = 1;
 real Cn = 0.01;
+func energyA = 1/Cn;
+func energyB = Cn;
 
 // Navier-Stokes parameters
 #ifdef NS
@@ -200,9 +202,9 @@ varf varPhi([phi1,mu1], [phi2,mu2]) =
     phi1*phi2/dt
     + (1/Pe)*(Grad(mu1)'*Grad(phi2))
     - mu1*mu2
-    + Cn     * (Grad(phi1)'*Grad(mu2))
-    + (1/Cn) * 0.5*3*phiOld*phiOld*phi1*mu2
-    - (1/Cn) * 0.5*phi1*mu2
+    + energyB * (Grad(phi1)'*Grad(mu2))
+    + energyA * 0.5*3*phiOld*phiOld*phi1*mu2
+    - energyA *0.5*phi1*mu2
     )
 ;
 
@@ -213,8 +215,8 @@ varf varPhiRhs([phi1,mu1], [phi2,mu2]) =
     #else
     phiOld*phi2/dt
     #endif
-    + (1/Cn) * 0.5*phiOld*phiOld*phiOld*mu2
-    + (1/Cn) * 0.5*phiOld*mu2
+    + energyA * 0.5*phiOld*phiOld*phiOld*mu2
+    + energyA * 0.5*phiOld*mu2
     #ifdef ELECTRO
     + 0.25 * (epsilonR2 - epsilonR1) * (Grad(theta)'*Grad(theta)) * mu2
     #endif
