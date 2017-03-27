@@ -4,6 +4,7 @@
 // }}}
 // Include auxiliary files and load modules {{{
 include "freefem/write-mesh.pde"
+include "freefem/writers.pde"
 include "freefem/getargs.pde"
 include "freefem/clock.pde"
 include "freefem/match.pde"
@@ -505,91 +506,48 @@ for(int i = 0; i <= nIter; i++)
   // }}}
   // Save data to files and stdout {{{
   #if DIMENSION == 2
-  savevtk("output/phi/phi."+i+".vtk", Th, phi, dataname="Phase");
-  savevtk("output/mu/mu."+i+".vtk",  Th, mu,  dataname="ChemicalPotential");
-
-  real[int,int] xy(3,1);
-  isoline(Th, phi, xy, close=false, iso=0.0, smoothing=0.1, file="output/iso/contactLine"+i+".dat");
-
-  // Export for gmsh
-  savegmsh("output/phi/phi-" + i + ".msh", "Cahn-Hilliard", i*dt, i, phiOld);
-  savegmsh("output/mu/mu-" + i + ".msh", "Chemical potential", i*dt, i, muOld);
-  #ifdef NS
-  savegmsh("output/pressure/pressure-" + i + ".msh", "Pressure", i*dt, i, p);
-  SAVEGMSHVEC(DIMENSION)("output/velocity/velocity-" + i + ".msh", "Velocity field", i*dt, i, UVEC);
-  #endif
-
-  #ifdef ADAPT
-  savemesh("output/mesh/mesh-" + i + ".msh", Vh, Th);
-  system("./bin/msh2pos output/mesh/mesh-" + i + ".msh output/phi/phi-" + i + ".msh");
-  system("./bin/msh2pos output/mesh/mesh-" + i + ".msh output/pressure/pressure-" + i + ".msh");
-  system("./bin/msh2pos output/mesh/mesh-" + i + ".msh output/mu/mu-" + i + ".msh");
-  system("./bin/msh2pos output/mesh/mesh-" + i + ".msh output/velocity/velocity-" + i + ".msh");
-  #ifdef NS
-  #endif
-  #endif
-
-  // Export to gnuplot
-  {
-      muOld = mu;
-
-      ofstream fphi("output/phi/phi."+i+".gnuplot");
-      for (int ielem=0; ielem<Th.nt; ielem++) {
-          for (int j=0; j <3; j++)
-              fphi << Th[ielem][j].x << " " << Th[ielem][j].y << " " << phiOld[][Vh(ielem,j)] << endl;
-          fphi << Th[ielem][0].x << " " << Th[ielem][0].y << " " << phiOld[][Vh(ielem,0)] << "\n\n\n";
-      }
-
-      ofstream fmu("output/mu/mu."+i+".gnuplot");
-      for (int ielem=0; ielem<Th.nt; ielem++) {
-          for (int j=0; j <3; j++)
-              fmu << Th[ielem][j].x << " " << Th[ielem][j].y << " " << muOld[][Vh(ielem,j)] << endl;
-          fmu << Th[ielem][0].x << " " << Th[ielem][0].y << " " << muOld[][Vh(ielem,0)] << "\n\n\n";
-      }
-
-      Vh muGradPhi = sqrt(mu*mu*Grad(phi)'*Grad(phi));
-      ofstream fmuGradPhi("output/muGradPhi/muGradPhi."+i+".gnuplot");
-      for (int ielem=0; ielem<Th.nt; ielem++) {
-          for (int j=0; j <3; j++)
-              fmuGradPhi << Th[ielem][j].x << " " << Th[ielem][j].y << " " << muGradPhi[][Vh(ielem,j)] << endl;
-          fmuGradPhi << Th[ielem][0].x << " " << Th[ielem][0].y << " " << muGradPhi[][Vh(ielem,0)] << "\n\n\n";
-      }
-
-      #ifdef NS
-      ofstream fpressure("output/pressure/pressure."+i+".gnuplot");
-      ofstream fu("output/u/u."+i+".gnuplot");
-      ofstream fv("output/v/v."+i+".gnuplot");
-      for (int ielem=0; ielem<Th.nt; ielem++) {
-          for (int j=0; j <3; j++) {
-              fpressure << Th[ielem][j].x << " " << Th[ielem][j].y << " " << p[][Vh(ielem,j)] << endl;
-              fu        << Th[ielem][j].x << " " << Th[ielem][j].y << " " << u[][Vh(ielem,j)] << endl;
-              fv        << Th[ielem][j].x << " " << Th[ielem][j].y << " " << v[][Vh(ielem,j)] << endl;
-          }
-          fpressure << Th[ielem][0].x << " " << Th[ielem][0].y << " " << p[][Vh(ielem,0)] << "\n\n\n";
-          fu        << Th[ielem][0].x << " " << Th[ielem][0].y << " " << u[][Vh(ielem,0)] << "\n\n\n";
-          fv        << Th[ielem][0].x << " " << Th[ielem][0].y << " " << v[][Vh(ielem,0)] << "\n\n\n";
-      }
-
-      Vh[int] xh(2); xh[0] = x; xh[1] = y;
-      ofstream fvelocity("output/velocity/velocity."+i+".gnuplot");
-      for (int inode = 0; inode < Vh.ndof; inode++) {
-          fvelocity << xh[0][][inode] << " "
-                    << xh[1][][inode] << " "
-                    << u[][inode]  << " "
-                    << v[][inode]  << " "
-                    << sqrt(u[][inode]^2 + v[][inode]^2) << endl;
-      }
+      // Isoline
+      real[int,int] xy(3,1);
+      isoline(Th, phi, xy, close=false, iso=0.0, smoothing=0.1, file="output/iso/contactLine"+i+".dat");
+      // vtk (paraview format)
+      #if SAVEVTK == 1
+          savevtk("output/phi/phi."+i+".vtk", Th, phi, dataname="Phase");
+          savevtk("output/mu/mu."+i+".vtk",  Th, mu,  dataname="ChemicalPotential");
+          #ifdef NS
+          savevtk("output/velocity/velocity."+i+".vtk", Th, [u,v,0], dataname="Velocity");
+          savevtk("output/pressure/pressure."+i+".vtk", Th, p, dataname="Pressure");
+          #endif
+          #ifdef ELECTRO
+          savevtk("output/potential/potential."+i+".vtk",Th,theta, dataname="Potential");
+          #endif
       #endif
-  }
-
-  #ifdef NS
-  savevtk("output/velocity/velocity."+i+".vtk", Th, [u,v,0], dataname="Velocity");
-  savevtk("output/pressure/pressure."+i+".vtk", Th, p, dataname="Pressure");
-  #endif
-
-  #ifdef ELECTRO
-  savevtk("output/potential/potential."+i+".vtk",Th,theta, dataname="Potential");
-  #endif
+      // gmsh
+      savegmsh("output/phi/phi-" + i + ".msh", "Cahn-Hilliard", i*dt, i, phiOld);
+      savegmsh("output/mu/mu-" + i + ".msh", "Chemical potential", i*dt, i, muOld);
+      #ifdef NS
+      savegmsh("output/pressure/pressure-" + i + ".msh", "Pressure", i*dt, i, p);
+      SAVEGMSHVEC(DIMENSION)("output/velocity/velocity-" + i + ".msh", "Velocity field", i*dt, i, UVEC);
+      #endif
+      #ifdef ADAPT
+      savemesh("output/mesh/mesh-" + i + ".msh", Vh, Th);
+      system("./bin/msh2pos output/mesh/mesh-" + i + ".msh output/phi/phi-" + i + ".msh");
+      system("./bin/msh2pos output/mesh/mesh-" + i + ".msh output/mu/mu-" + i + ".msh");
+      #ifdef NS
+      system("./bin/msh2pos output/mesh/mesh-" + i + ".msh output/pressure/pressure-" + i + ".msh");
+      system("./bin/msh2pos output/mesh/mesh-" + i + ".msh output/velocity/velocity-" + i + ".msh");
+      #endif
+      #endif
+      // gnuplot
+      savegnuplot("output/phi/phi."+i+".gnuplot", Th, phiOld);
+      savegnuplot("output/mu/mu."+i+".gnuplot", Th, muOld);
+      Vh muGradPhi = sqrt(mu*mu*Grad(phi)'*Grad(phi));
+      savegnuplot("output/muGradPhi/muGradPhi."+i+".gnuplot", Th, muGradPhi);
+      #ifdef NS
+      savegnuplot("output/pressure/pressure."+i+".gnuplot", Th, p);
+      savegnuplot("output/u/u."+i+".gnuplot", Th, u);
+      savegnuplot("output/v/v."+i+".gnuplot", Th, v);
+      savegnuplot2("output/velocity/velocity."+i+".gnuplot", Th, Vh, u, v);
+      #endif
   #endif
 
   #if DIMENSION == 3
