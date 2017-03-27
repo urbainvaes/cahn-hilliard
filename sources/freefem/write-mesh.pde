@@ -150,30 +150,3 @@ macro write3dData (ff, desc, time, index, f1, f2, f3) {
     }
     ff << "$EndNodeData" << endl;
 }//
-
-// My additions
-
-macro savegmsh(filename, title, time, iteration, field) {
-  ofstream data(filename);
-  writeHeader(data);
-  write1dData(data, title, time, iteration, field);
-} //EOM
-
-macro savegmsh3(filename, title, time, iteration, field1, field2, field3) {
-  ofstream data(filename);
-  writeHeader(data);
-  write3dData(data, title, time, iteration, field1, field2, field3);
-} //EOM
-
-macro savegmsh2(filename, title, time, iteration, field1, field2) {
-  ofstream data(filename);
-  writeHeader(data);
-  write2dData(data, title, time, iteration, field1, field2);
-} //EOM
-
-macro savemesh(filename, vh, th) {
-  ofstream currentMesh(filename);
-  writeHeader(currentMesh);
-  writeNodes(currentMesh, vh);
-  writeElements(currentMesh, vh, th);
-} //EOM
