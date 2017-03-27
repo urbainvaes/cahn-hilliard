@@ -272,7 +272,7 @@ varf varPrhs(p,test) = INTEGRAL(DIMENSION)(Th)( -Div(UVEC)*test/dt );
   #if DIMENSION == 2
   for(int i = 0; i < 3; i++)
   {
-      Th = adaptmesh(Th, phi, hmax = hmax, hmin = hmin, nbvx = 1e6 ARGPERIODIC);
+      Th = adaptmesh(anisomax = aniso, Th, phi, hmax = hmax, hmin = hmin, nbvx = 1e6 ARGPERIODIC);
       [phi, mu] = [phi0, mu0];
   }
   #endif
@@ -706,7 +706,7 @@ for(int i = 0; i <= nIter; i++)
   // Adapt mesh {{{
   #ifdef ADAPT
     #if DIMENSION == 2
-    Th = adaptmesh(Th, phi, hmax = hmax, hmin = hmin, nbvx = 1e6 ARGPERIODIC);
+    Th = adaptmesh(anisomax = aniso, Th, phi, hmax = hmax, hmin = hmin, nbvx = 1e6 ARGPERIODIC);
     #endif
 
     #if DIMENSION == 3
