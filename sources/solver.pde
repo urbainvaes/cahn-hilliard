@@ -198,6 +198,7 @@ varf varPotential(theta,test) =
 //}}}
 // Cahn-Hilliard {{{
 varf varPhi([phi1,mu1], [phi2,mu2]) =
+  // Bilinear form
   INTEGRAL(DIMENSION)(Th)(
     phi1*phi2/dt
     + (1/Pe)*(Grad(mu1)'*Grad(phi2))
@@ -206,10 +207,8 @@ varf varPhi([phi1,mu1], [phi2,mu2]) =
     + energyA * 0.5*3*phiOld*phiOld*phi1*mu2
     - energyA *0.5*phi1*mu2
     )
-;
-
-varf varPhiRhs([phi1,mu1], [phi2,mu2]) =
-  INTEGRAL(DIMENSION)(Th)(
+  // Right-hand side
+  + INTEGRAL(DIMENSION)(Th)(
     #ifdef NS
     convect([UOLDVEC],-dt,phiOld)/dt*phi2
     #else
@@ -225,42 +224,53 @@ varf varPhiRhs([phi1,mu1], [phi2,mu2]) =
 //}}}
 // Navier-Stokes {{{
 #ifdef NS
-varf varU(u,test) = INTEGRAL(DIMENSION)(Th)( u*test/dt + (1/Re)*(Grad(u)'*Grad(test)) );
-varf varUrhs(u,test) =
-  INTEGRAL(DIMENSION)(Th)(
-    (convect([UOLDVEC],-dt,uOld)/dt)*test
-    + muGradPhi     * (1/We)*mu*dx(phi)*test
-    - (1-muGradPhi) * (1/We)*phi*dx(mu)*test
-    #ifdef GRAVITY
-    + gx*phi*test
-    #endif
-    );
-varf varV(v,test) = INTEGRAL(DIMENSION)(Th)( v*test/dt + (1/Re)*(Grad(v)'*Grad(test)) );
-varf varVrhs(v,test) =
-  INTEGRAL(DIMENSION)(Th)(
-    (convect([UOLDVEC],-dt,vOld)/dt)*test
-    + muGradPhi     * (1/We)*mu*dy(phi)*test
-    - (1-muGradPhi) * (1/We)*phi*dy(mu)*test
-    #ifdef GRAVITY
-    + gy*phi*test
-    #endif
-    );
+varf varU(u,test) =
+    // Bilinear form
+    INTEGRAL(DIMENSION)(Th)(u*test/dt + (1/Re)*(Grad(u)'*Grad(test)))
+    // Right-hand side
+    + INTEGRAL(DIMENSION)(Th)(
+        (convect([UOLDVEC],-dt,uOld)/dt)*test
+        + muGradPhi     * (1/We)*mu*dx(phi)*test
+        - (1-muGradPhi) * (1/We)*phi*dx(mu)*test
+        #ifdef GRAVITY
+        + gx*phi*test
+        #endif
+        )
+;
+varf varV(v,test) =
+    // Bilinear form
+    INTEGRAL(DIMENSION)(Th)(v*test/dt + (1/Re)*(Grad(v)'*Grad(test)))
+    // Right-hand side
+    + INTEGRAL(DIMENSION)(Th)(
+        (convect([UOLDVEC],-dt,vOld)/dt)*test
+        + muGradPhi     * (1/We)*mu*dy(phi)*test
+        - (1-muGradPhi) * (1/We)*phi*dy(mu)*test
+        #ifdef GRAVITY
+        + gy*phi*test
+        #endif
+        )
+;
 #if DIMENSION == 3
-varf varW(w,test) = INTEGRAL(DIMENSION)(Th)(
-    w*test/dt +(1/Re)*(Grad(w)'*Grad(test))
-    );
-varf varWrhs(w,test) =
-  INTEGRAL(DIMENSION)(Th)(
-    (convect([UOLDVEC],-dt,wOld)/dt)*test
-    + muGradPhi     * (1/We)*mu*dz(phi)*test
-    - (1-muGradPhi) * (1/We)*mu*dz(phi)*test
-    #ifdef GRAVITY
-    + gz*phi*test
-    #endif
-    );
+varf varW(w,test) =
+    // Bilinear form
+    INTEGRAL(DIMENSION)(Th)(w*test/dt + (1/Re)*(Grad(w)'*Grad(test)))
+    // Right-hand side
+    + INTEGRAL(DIMENSION)(Th)(
+      (convect([UOLDVEC],-dt,wOld)/dt)*test
+      + muGradPhi     * (1/We)*mu*dz(phi)*test
+      - (1-muGradPhi) * (1/We)*mu*dz(phi)*test
+      #ifdef GRAVITY
+      + gz*phi*test
+      #endif
+    )
+;
 #endif
-varf varP(p,test) = INTEGRAL(DIMENSION)(Th)( Grad(p)'*Grad(test) );
-varf varPrhs(p,test) = INTEGRAL(DIMENSION)(Th)( -Div(UVEC)*test/dt );
+varf varP(p,test) =
+    // Bilinear form
+    INTEGRAL(DIMENSION)(Th)( Grad(p)'*Grad(test) )
+    // Right-hand side
+    + INTEGRAL(DIMENSION)(Th)( -Div(UVEC)*test/dt )
+;
 #endif
 //}}}
 //}}}
@@ -648,7 +658,7 @@ for(int i = 0; i <= nIter; i++)
   matrix matPhiBulk = varPhi(V2h, V2h);
   matrix matPhiBoundary = varPhiBoundary(V2h, V2h);
   matrix matPhi = matPhiBulk + matPhiBoundary;
-  real[int] rhsPhiBulk = varPhiRhs(0, V2h);
+  real[int] rhsPhiBulk = varPhi(0, V2h);
   real[int] rhsPhiBoundary = varPhiBoundary(0, V2h);
   real[int] rhsPhi = rhsPhiBulk + rhsPhiBoundary;
   set(matPhi,solver=sparsesolver SPARAMS);
@@ -663,7 +673,7 @@ for(int i = 0; i <= nIter; i++)
   matrix matUBulk = varU(Vh, Vh);
   matrix matUBoundary = varUBoundary(Vh, Vh);
   matrix matU = matUBulk + matUBoundary;
-  real[int] rhsUBulk = varUrhs(0, Vh);
+  real[int] rhsUBulk = varU(0, Vh);
   real[int] rhsUBoundary = varUBoundary(0, Vh);
   real[int] rhsU = rhsUBulk + rhsUBoundary;
   set(matU,solver=sparsesolver SPARAMS);
@@ -672,7 +682,7 @@ for(int i = 0; i <= nIter; i++)
   matrix matVBulk = varV(Vh, Vh);
   matrix matVBoundary = varVBoundary(Vh, Vh);
   matrix matV = matVBulk + matVBoundary;
-  real[int] rhsVBulk = varVrhs(0, Vh);
+  real[int] rhsVBulk = varV(0, Vh);
   real[int] rhsVBoundary = varVBoundary(0, Vh);
   real[int] rhsV = rhsVBulk + rhsVBoundary;
   set(matV,solver=sparsesolver SPARAMS);
@@ -682,7 +692,7 @@ for(int i = 0; i <= nIter; i++)
   matrix matWBulk = varW(Vh, Vh);
   matrix matWBoundary = varWBoundary(Vh, Vh);
   matrix matW = matWBulk + matWBoundary;
-  real[int] rhsWBulk = varWrhs(0, Vh);
+  real[int] rhsWBulk = varW(0, Vh);
   real[int] rhsWBoundary = varWBoundary(0, Vh);
   real[int] rhsW = rhsWBulk + rhsWBoundary;
   set(matW,solver=sparsesolver SPARAMS);
@@ -692,7 +702,7 @@ for(int i = 0; i <= nIter; i++)
   matrix matPBulk = varP(Vh, Vh);
   matrix matPBoundary = varPBoundary(Vh, Vh);
   matrix matP = matPBulk + matPBoundary;
-  real[int] rhsPBulk = varPrhs(0, Vh);
+  real[int] rhsPBulk = varP(0, Vh);
   real[int] rhsPBoundary = varPBoundary(0, Vh);
   real[int] rhsP = rhsPBulk + rhsPBoundary;
   set(matP,solver=sparsesolver SPARAMS);
