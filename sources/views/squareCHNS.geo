@@ -15,7 +15,7 @@ Geometry.OffsetX = centerX - deltaX;
 Geometry.OffsetY = centerY - deltaY;
 Geometry.OffsetY = 20;
 
-If(Exists(onefield))
+If(StrCmp(field, "all") != 0)
   Printf(field);
   For i In {startAt: maxIters}
     Merge StrCat("../output/", field, "/", field, Sprintf("-%g.pos", i));

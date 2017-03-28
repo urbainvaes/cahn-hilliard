@@ -96,9 +96,10 @@ else
 	label=$(label) gnuplot gnuplot/make-plots.plt
 endif
 
+field ?= "all"
 visualization : $(VIEW)
 ifeq ($(suffix $(VIEW)), .geo)
-	gmsh -display :0 $(GEOMETRY) $<
+	gmsh -setstring field $(field) -display :0 $<
 endif
 ifeq ($(suffix $(VIEW)), .py)
 	DISPLAY=:0 pvpython $< --input phi --range -1,1
