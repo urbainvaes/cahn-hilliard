@@ -1,7 +1,7 @@
 // Dimensions of square
-Lx = 1.; // export
-Ly = 0.5; // export
-s = .1;
+Lx = 0.5; // export
+Ly = 1; // export
+s = 1;
 t = 0.;
 x = 0.;
 y = 0.;
@@ -90,8 +90,8 @@ Plane Surface(domain) = {square, loops[]};
 Physical Surface (1) = {domain};
 
 // View options
-Geometry.LabelType = 2;
-Geometry.Lines = 1;
-Geometry.LineNumbers = 2;
-Geometry.Surfaces = 1;
+Geometry.LabelType      = 2;
+Geometry.Lines          = 1;
+Geometry.LineNumbers    = 2;
+Geometry.Surfaces       = 1;
 Geometry.SurfaceNumbers = 2;

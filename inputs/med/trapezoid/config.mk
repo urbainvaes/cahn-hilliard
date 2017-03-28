@@ -1,10 +1,12 @@
 DIMENSION = 2
 GEOMETRY = med.geo
-VIEW = views/view-2d.py
+VIEW = view.geo
 PROBLEM = problem.pde
 
 # Flags
 NS = 1
 ADAPT = 1
 PLOT = 0
-PERIODICITY = periodicity.pde
+BEFORE = 1
+AFTER = 1
+# PERIODICITY = periodicity.pde

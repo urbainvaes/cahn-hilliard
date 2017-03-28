@@ -11,8 +11,9 @@ func mu0 = 0;
 [phi, mu] = [phi0, mu0];
 
 // Define boundary conditions
+func contactAngles = pi/2;
 varf varPhiBoundary([phi1,mu1], [phi2,mu2]) =
-  int1d(Th,1,2) (-0*mu2)
+  int1d(Th,1,2) (0 * mu2)
 ;
 
 varf varUBoundary(u, unused) = on(1,2,3,4, u = 0);
@@ -25,7 +26,6 @@ dt = 1e-2;
 // Number of iterations
 nIter = 100;
 
-muGradPhi = 1;
 We = 1;
 Re = 1;
 Pe = 1;

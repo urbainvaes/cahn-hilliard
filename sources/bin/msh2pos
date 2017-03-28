@@ -5,5 +5,5 @@
 
 echo "Merge \"$1\"; Merge \"$2\"; Save View[0] \"tmp.pos\";" > tmp.geo
 gmsh -v 0 tmp.geo -0
-mv tmp.pos ${2%.msh}.pos 
+cp "tmp.pos" "${2%.msh}.pos"
 rm tmp.geo tmp.geo_unrolled
