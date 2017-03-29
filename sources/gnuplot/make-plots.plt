@@ -12,7 +12,7 @@ if (output_format eq '') {
 
 
 if (max_iter eq '') {
-    n_files = system("ls output/phi/phi.*.vtk | wc -l") - 1
+    n_files = system("ls output/phi/phi.*.gnuplot | wc -l") - 1
     max_iter = n_files
 }
 
@@ -110,10 +110,14 @@ set output "pictures/boundary/".output_label."-boundary.".output_format
 plot edges_file with lines lt rgb "black" lw 2
 
 do for [output_iter=0:max_iter:step] {
-    output_index = output_iter
+    output_index = sprintf("%06.0f", output_iter)
     isoline_file = "output/iso/contactLine".output_iter.".dat"
 
     output_field="phi"
-    output_style="filledcurves"
+    output_style="mesh"
     load "gnuplot/plot.plt"
+
+    # output_field="pressure"
+    # output_style="filledcurves"
+    # load "gnuplot/plot.plt"
 }

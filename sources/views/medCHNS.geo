@@ -1,3 +1,5 @@
+video = 0; // ---
+
 maxIters = 1000;
 startAt = 0;
 
@@ -14,42 +16,49 @@ If(StrCmp(field, "all") != 0)
 EndIf
 
 If(StrCmp(field, "all") == 0)
+
+  offsetX = .6;
+  startX = -.9;
   viewsPerStep = 4;
+  General.ScaleX = 0.6;
+  General.ScaleY = 0.6;
+  View.ShowScale = 1;
 
-  deltaX = .55;
-  deltaY = .55;
-  centerX = 0;
-  centerY = 0;
-
-  View.ShowScale = 0;
-  General.ScaleX = 0.5;
-  General.ScaleY = 0.5;
-  Geometry.OffsetX = centerX - deltaX;
-  Geometry.OffsetY = centerY - deltaY;
-  Geometry.OffsetY = 20;
-  For i In {startAt: maxIters}
+  For i In {startAt:maxIters-1}
     If (FileExists(Sprintf("../output/done/done-%g.txt", i)))
+
       indexStart = (i-startAt)*viewsPerStep;
-      Merge Sprintf("./../output/phi/phi-%g.pos", i);
-      View[indexStart].ShowScale = 0;
+
+      Merge Sprintf("../output/phi/phi-%g.pos", i);
+      View[indexStart].ShowScale = 1;
+      View[indexStart].RangeType = 2;
+      View[indexStart].CustomMin = -1.3;
+      View[indexStart].CustomMax = 1.3;
+
       Merge Sprintf("../output/mu/mu-%g.pos", i);
-      View[indexStart+1].ShowScale = 1;
       Merge Sprintf("../output/pressure/pressure-%g.pos", i);
-      View[indexStart+2].ShowScale = 1;
       Merge Sprintf("../output/velocity/velocity-%g.pos", i);
-      View[indexStart+3].ShowScale = 1;
+
       For j In {0:viewsPerStep-1}
-        View[indexStart+j].OffsetX = centerX - (1-j%2)*deltaX + (j%2)*deltaX;
-        View[indexStart+j].OffsetY = centerY + (1-Floor(j/2))*deltaY - Floor(j/2)*deltaY;
+        View[indexStart + j].OffsetX = startX + j*offsetX;
         View[indexStart + j].Visible = 1;
       EndFor
+
       Draw;
+      If(video == 1)
+        System "mkdir -p pictures/phi";
+        Print Sprintf("../pictures/phi/phi-%06g.png", i);
+      EndIf
+
       For j In {0:viewsPerStep-1}
-        View[indexStart + j].Visible = 0;
+        View[(i-startAt)*viewsPerStep + j].Visible = 0;
       EndFor
+
     EndIf
     If (!FileExists(Sprintf("../output/done/done-%g.txt", i)))
-      Sleep .5; i = i - 1;
+      // i = maxIters;
+      /* i = i - 1; Sleep 0.1; */
+      i = i - 1;
     EndIf
   EndFor
 EndIf

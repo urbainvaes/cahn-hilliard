@@ -21,7 +21,7 @@ if(output_field eq 'mu') {
 
 if(output_field eq 'pressure') {
   set title "Pressure field - Iteration ".output_iter
-  set cbrange [0:100]
+  # set cbrange [0:100]
   # set palette defined ( -1 "light-green", 1 "light-blue" )
   set palette defined ( 0 '#000090', 1 '#000fff', 2 '#0090ff', 3 '#0fffee', 4 '#90ff70', 5 '#ffee00', 6 '#ff7000', 7 '#ee0000', 8 '#7f0000')
 }

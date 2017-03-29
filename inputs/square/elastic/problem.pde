@@ -5,9 +5,10 @@ nIter = 1e4;
 hmin = 0.005;
 hmax = 0.05;
 
-Pe = 100;
-Re = 1;
+Pe = 500;
+Re = 500;
 We = 1;
+Cn = .01;
 
 real r = 0.2;
 real a = 1;

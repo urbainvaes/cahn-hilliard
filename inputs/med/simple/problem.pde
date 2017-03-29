@@ -1,7 +1,6 @@
-// Time step
-// dt = .2e-1;
+// Time step dt = .2e-1;
 // dt = 0.05;
-dt = .1;
+dt = .05;
 
 // Number of iterations
 nIter = 1e4;
@@ -16,7 +15,7 @@ hmax = 0.1;
 // Dimensionless numbers
 Re = 1;
 Pe = 1000;
-We = 10;
+We = 1;
 Cn = 0.02;
 
 // INITIAL CONDITIONS
@@ -30,8 +29,8 @@ func mu0  = 0;
 real theta = 30 * pi/180;
 real amplitudeInput = 1;
 real pulsePeriod = 2;
-real pInlet = 10;
-real pCentralOutlet = -5;
+real pInlet = 2;
+real pCentralOutlet = 0;
 real pLateralOutlets = 0;
 
 func contactAngles = theta*((label == 4) + (label == 5) + (label == 6));

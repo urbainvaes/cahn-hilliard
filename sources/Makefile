@@ -99,15 +99,16 @@ endif
 field ?= "all"
 visualization : $(VIEW)
 ifeq ($(suffix $(VIEW)), .geo)
-	gmsh -setstring field $(field) -display :0 $<
+	gmsh -setstring field $(field) $<
 endif
 ifeq ($(suffix $(VIEW)), .py)
 	DISPLAY=:0 pvpython $< --input phi --range -1,1
 endif
 
+fps ?= 10
 video :
 	find pictures -mindepth 1 -type d -printf '%P\n' | while read l; \
-		do mencoder "mf://pictures/$${l}/*.png" -mf fps=10 -o pictures/$${l}.avi \
+		do mencoder "mf://pictures/$${l}/*.png" -mf fps=$(fps) -o pictures/$${l}.avi \
 		-ovc lavc -lavcopts vcodec=mpeg4:vhq; done
 
 status :
