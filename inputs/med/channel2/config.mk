@@ -1,0 +1,4 @@
+DIMENSION = 2
+NS = 1
+ADAPT = 1
+BEFORE = 1

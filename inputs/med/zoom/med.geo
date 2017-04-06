@@ -35,9 +35,10 @@ Line Loop(square) = {lines[1],lines[2],lines[3],lines[4]};
 
 Macro Obstacle
 
-  x1 = - 1.2*lx/2;
+  trapezoidity = 1.0;
+  x1 = - trapezoidity*lx/2;
   y1 = - ly/2;
-  x2 =   1.2*lx/2;
+  x2 =   trapezoidity*lx/2;
   y2 = - ly/2;
   x3 =   lx/2;
   y3 =   ly/2;
@@ -64,13 +65,11 @@ Macro Obstacle
 Return
 
 // "Characteristic width and height
-lx = Lx/1.5; // export
+lx = 0.3; // export
 ly = Ly/7;
 
 // Number of obstacles
 nPores = 1; // export
-topWidth = 1.2 * lx; // export
-
 d = Lx/nPores;
 
 x0 = d/2;

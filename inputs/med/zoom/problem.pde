@@ -1,5 +1,5 @@
 // Dimensionless numbers
-Pe = 500;
+Pe = 1000;
 Cn = 5e-3;
 Re = 1;
 We = 1;
@@ -9,18 +9,18 @@ hmax = .05;
 dt = 1e-3;
 nIter = 1e4;
 
-func phi0 = (y < 0.4 ? 1 : -1);
+func phi0 = (y < 0.5 ? 1 : -1);
 func mu0  = 0;
 [phi, mu] = [phi0, mu0];
 
-real theta = 30 * (pi/180);
+real theta = (180 - 40) * (pi/180);
 func contactAngles = theta*(label == 10);
-real pInlet = 20;
 
 // Define boundary conditions
-real radius = 0.5 * (Lx/nPores - topWidth);
-real DP = (2*sqrt(2)/3) * (1/radius) * (1/We);
+real radius = 0.1;
+real DP = (2*sqrt(2)/3) * (cos(pi - theta)/radius) * (1/We);
 cout << "Pressure difference: " << DP << endl;
+real pInlet = DP;
 
 varf varPhiBoundary([phi1,mu1], [phi2,mu2]) =
   on (1, phi1 = 1)

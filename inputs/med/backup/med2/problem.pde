@@ -31,7 +31,7 @@ varf varVBoundary(v, test) = on(4, 5, 6, v = 0);
 varf varPBoundary(p, test) = on(1, p = pInlet) + on(2, p = pCentralOutlet) + on(3, p = pLateralOutlets);
 
 // Time step
-dt = 1e-1;
+dt = 1e-2;
 
 // Number of iterations
 nIter = 1e4;

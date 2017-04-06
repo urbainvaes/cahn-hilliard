@@ -7,6 +7,6 @@ PROBLEM = problem.pde
 NS = 1
 ADAPT = 1
 PLOT = 0
+AFTER = 1
 # BEFORE = 1
-# AFTER = 1
 # PERIODICITY = periodicity.pde

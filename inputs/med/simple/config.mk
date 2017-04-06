@@ -1,7 +1,7 @@
 DIMENSION = 2
 GEOMETRY = geometries/med/oneSided.geo
 PROBLEM = problem.pde
-VIEW = view-cube-med.geo
+VIEW = view.geo
 
 # Flags
 NS = 1
