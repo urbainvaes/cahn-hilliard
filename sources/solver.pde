@@ -13,6 +13,7 @@ include "geometry.pde"
 // Load modules {{{
 load "gmsh"
 load "isoline"
+load "UMFPACK64"
 
 #if DIMENSION == 2
 load "metis"
@@ -134,6 +135,7 @@ real epsilonR2 = 2;
 // Time parameters
 real dt = 8.0*Pe*Cn^4;
 real nIter = 300;
+real time = 0;
 
 // Mesh parameters
 int aniso = 0;
@@ -345,6 +347,7 @@ real intPressureFluxKineticEnergy = 0;
 
 for(int i = 0; i <= nIter; i++)
 {
+  tic();
   // Update previous solution {{{
   phiOld = phi;
   muOld = mu;
@@ -516,6 +519,7 @@ for(int i = 0; i <= nIter; i++)
        #endif
        << endl;
   // }}}
+  cout << "Calculate macroscopic variables: " << tic() << endl;
   // }}}
   // Save data to files and stdout {{{
   #if DIMENSION == 2
@@ -543,12 +547,14 @@ for(int i = 0; i <= nIter; i++)
       #endif
       #ifdef ADAPT
       savemesh("output/mesh/mesh-" + i + ".msh", Vh, Th);
-      system("./bin/msh2pos output/mesh/mesh-" + i + ".msh output/phi/phi-" + i + ".msh");
-      system("./bin/msh2pos output/mesh/mesh-" + i + ".msh output/mu/mu-" + i + ".msh");
-      #ifdef NS
-      system("./bin/msh2pos output/mesh/mesh-" + i + ".msh output/pressure/pressure-" + i + ".msh");
-      system("./bin/msh2pos output/mesh/mesh-" + i + ".msh output/velocity/velocity-" + i + ".msh");
-      #endif
+      system("./bin/msh2pos output/mesh/mesh-" + i + ".msh"
+                  + " output/phi/phi-" + i + ".msh"
+                  + " output/mu/mu-" + i + ".msh"
+                  #ifdef NS
+                  + " output/pressure/pressure-" + i + ".msh"
+                  + " output/velocity/velocity-" + i + ".msh"
+                  #endif
+            );
       #endif
       // gnuplot
       savegnuplot("output/phi/phi."+i+".gnuplot", Th, phiOld);
@@ -580,7 +586,7 @@ for(int i = 0; i <= nIter; i++)
   #endif
   // ! phi[]
   #endif
-
+  cout << "Save data to files and stdout: " << tic() << endl;
   //}}}
   // Visualize solution at current time step {{{
   #ifdef PLOT
@@ -601,6 +607,11 @@ for(int i = 0; i <= nIter; i++)
   #ifdef AFTER
       #include "after.pde"
   #endif
+  {
+      ofstream fdone("output/done/done-"+i+".txt");
+      fdone << "done" << endl;
+  }
+  time += dt;
   /// }}}
   // Exit if required {{{
   if (i == nIter) break;
@@ -637,12 +648,6 @@ for(int i = 0; i <= nIter; i++)
       if (doesMatch("parameters.txt","We")) We = getMatch("parameters.txt","We =");
       #endif
   }
-
-
-  {
-      ofstream fdone("output/done/done-"+i+".txt");
-      fdone << "done" << endl;
-  }
   // }}}
   // Poisson for electric potential {{{
   #ifdef ELECTRO
@@ -652,6 +657,7 @@ for(int i = 0; i <= nIter; i++)
   real[int] rhsPotential = varBoundaryPotential(0, Vh);
   set(matPotential,solver=sparsesolver SPARAMS);
   theta[] = matPotential^-1*rhsPotential;
+  cout << "Solve Poisson equation for electric potential: " << tic() << endl;
   #endif
   //}}}
   // Cahn-Hilliard equation {{{
@@ -663,6 +669,7 @@ for(int i = 0; i <= nIter; i++)
   real[int] rhsPhi = rhsPhiBulk + rhsPhiBoundary;
   set(matPhi,solver=sparsesolver SPARAMS);
   phi[] = matPhi^-1*rhsPhi;
+  cout << "Solve Cahn-Hilliard system: " << tic() << endl;
   //}}}
   // Navier stokes {{{
   #ifdef NS
@@ -713,6 +720,7 @@ for(int i = 0; i <= nIter; i++)
   #if DIMENSION == 3
   w = w - dz(p)*dt;
   #endif
+  cout << "Solve Navier-Stokes system: " << tic() << endl;
   #endif
   //}}}
   // Adapt mesh {{{
@@ -740,6 +748,7 @@ for(int i = 0; i <= nIter; i++)
     #ifdef ELECTRO
     theta = theta;
     #endif
+  cout << "Adapt mesh: " << tic() << endl;
   #endif
   // }}}
 }
