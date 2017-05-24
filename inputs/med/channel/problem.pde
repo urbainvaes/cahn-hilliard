@@ -1,22 +1,33 @@
-// dt        = 1e-3;
-// nIter     = 1e5;
-// muGradPhi = 0;
-// hmin      = 1e-2;
-// hmax      = 1e-1;
-// Re        = 1;
-// We        = 1e-1;
-// Pe        = 200;
-// Cn        = 1e-2;
+dt        = 1e-2;
+nIter     = 1e5;
+muGradPhi = 0;
+hmin      = 1e-2;
+hmax      = 1e-1;
+Re        = 1;
+We        = 1;
+Pe        = 1e5;
+Cn        = 1e-2;
 
-dt        = 1e-1;
+dt        = .5e-1;
 nIter     = 1e4;
 muGradPhi = 0;
-hmin      = 5e-2;
+hmin      = 1e-2;
 hmax      = 5e-1;
 Re        = 1;
-We        = 200;
-Pe        = 200;
+We        = 10;
+Pe        = 1e5;
 Cn        = 5e-2;
+
+
+/* dt        = .5e-1; */
+/* nIter     = 1e4; */
+/* muGradPhi = 0; */
+/* hmin      = 5e-2; */
+/* hmax      = 5e-1; */
+/* Re        = 1; */
+/* We        = 200; */
+/* Pe        = 1e5; */
+/* Cn        = 5e-2; */
 
 // INITIAL CONDITIONS
 func phi0 = 1;
@@ -24,7 +35,7 @@ func mu0  = 0;
 [phi, mu] = [phi0, mu0];
 
 // BOUNDARY CONDITIONS
-real theta          = 40 * pi/180;
+real theta          = pi/2;
 real signInput      = 1;
 real amplitudeInput = 1;
 real pulsePeriod    = 1;
@@ -37,7 +48,7 @@ varf varPhiBoundary([phi1,mu1], [phi2,mu2]) =
   // -------------
   // Input
   // -------------
-  on (4, phi1 = signInput*amplitudeInput)
+  on (4, phi1 = tanh(cos(2*pi*time/(20*dt))/.2))
   // -------------
   // Contact angle
   // -------------

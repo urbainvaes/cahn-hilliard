@@ -1,5 +1,5 @@
 DIMENSION = 2
-GEOMETRY = med.geo
+GEOMETRY = geometries/misc/i-shape.geo
 VIEW = views/medCHNS.geo
 PROBLEM = problem.pde
 

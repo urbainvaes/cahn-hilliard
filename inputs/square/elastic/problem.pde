@@ -8,7 +8,7 @@ hmax = 0.05;
 Pe = 500;
 Re = 500;
 We = 1;
-Cn = .01;
+Cn = 5e-3;
 
 real r = 0.2;
 real a = 1;

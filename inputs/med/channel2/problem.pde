@@ -27,7 +27,7 @@ func mu0  = 0;
 real theta          = 40 * pi/180;
 real signInput      = 1;
 real amplitudeInput = 1;
-real pulsePeriod    = 2;
+real pulsePeriod    = 4;
 real pInlet         = 50;
 real pOutlet        = 0;
 

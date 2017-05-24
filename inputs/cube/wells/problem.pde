@@ -1,17 +1,17 @@
 // Iteration
-dt = 1e-4;
-nIter = 100;
+dt = 0.0008;
+nIter = 1000;
 
 // Dimensionless numbers
-Pe = 10;
+Pe = 10000;
 Cn = 0.02;
 
 // Parameters for adaptation
-hmin = 0.02;
-hmax = 0.1;
+hmin = 0.005;
+hmax = 0.05;
 
 // INITIAL CONDITION
-real radius = 0.2*Lx;
+real radius = 0.24*Lx;
 real x1 = 0.5*Lx;
 real y1 = 0.5*Ly;
 real z1 = 0;
@@ -38,7 +38,7 @@ real biasY = 0.0;
 func contactAngles = theta0 + amplitude * cos(frequencyX*pi*(x - biasX)) * cos(frequencyY*pi*(y - biasY)) * ((label == 1) + (label == 2));
 
 // Parameters for input boundary
-real massInputByIteration = 0.0001;
+real massInputByIteration = 0.00;
 real absMassFlux = massInputByIteration/(dt*pi*r^2);
 real massFlux = absMassFlux;
 
