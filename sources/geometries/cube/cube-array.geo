@@ -1,12 +1,13 @@
-Include "macros-gmsh/square.geo";
-Include "macros-gmsh/circle.geo";
-Include "macros-gmsh/cube.geo";
-Include "macros-gmsh/cylinder.geo";
+Include "../macros-gmsh/square.geo";
+Include "../macros-gmsh/circle.geo";
+Include "../macros-gmsh/cube.geo";
+Include "../macros-gmsh/sphere.geo";
+Include "../macros-gmsh/cylinder.geo";
 
 If (!Exists(Lx)) Lx = 1; EndIf
 If (!Exists(Ly)) Ly = 1; EndIf
 If (!Exists(Lz)) Lz = 1; EndIf
-If (!Exists(s)) s = 0.07; EndIf
+If (!Exists(s)) s = 0.04; EndIf
 
 // Outer cube
   dx   = Lx;
@@ -25,7 +26,7 @@ If (!Exists(s)) s = 0.07; EndIf
 // Configuration of array
   nx = 3;
   ny = 3;
-  nz = 2;
+  nz = 3;
 
   dx = Lx/(2*nx + 1);
   dy = Ly/(2*ny + 1);
@@ -39,12 +40,13 @@ If (!Exists(s)) s = 0.07; EndIf
 For i In {0:nx-1}
   For j In {0:ny-1}
     For k In {0:nz-1}
-      
+
       x = 1.5*dx + 2*i*dx;
       y = 1.5*dy + 2*j*dy;
       z = 1.5*dz + 2*k*dz;
+      r = 0.1;
 
-      Call Cube;
+      Call mySphere;
 
       Physical Surface("Array") += {surfaceloop[]};
       array_sl_indices[i*nz*ny + j*nz + k] = surfaceloopindex;
@@ -94,6 +96,7 @@ EndFor
 
 // View options
   Geometry.LabelType = 2;
+  Geometry.Surfaces = 1;
   Geometry.SurfaceNumbers = 2;
 
   Color Gray

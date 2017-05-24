@@ -1,10 +1,10 @@
 Macro Circ
   // Define surface circle
-  points[1] = newp; Point(points[1]) = {x    , y    , 0, s}; // Center
-  points[2] = newp; Point(points[2]) = {x - r, y - r, 0, s};
-  points[3] = newp; Point(points[3]) = {x + r, y - r, 0, s};
-  points[4] = newp; Point(points[4]) = {x + r, y + r, 0, s};
-  points[5] = newp; Point(points[5]) = {x - r, y + r, 0, s};
+  points[1] = newp; Point(points[1]) = {x,             y,             0, s}; // Center
+  points[2] = newp; Point(points[2]) = {x - r/Sqrt(2), y - r/Sqrt(2), 0, s};
+  points[3] = newp; Point(points[3]) = {x + r/Sqrt(2), y - r/Sqrt(2), 0, s};
+  points[4] = newp; Point(points[4]) = {x + r/Sqrt(2), y + r/Sqrt(2), 0, s};
+  points[5] = newp; Point(points[5]) = {x - r/Sqrt(2), y + r/Sqrt(2), 0, s};
 
   lines[1] = newl; Circle(lines[1]) = {points[2],points[1],points[3]};
   lines[2] = newl; Circle(lines[2]) = {points[3],points[1],points[4]};

@@ -20,8 +20,8 @@ Point(2314) = {4.5606362066244,     24.0581489310716,      0, s1};
 Point(2315) = {3.5124756654572,     21.4360006553258,      0, s1};
 Point(2361) = {6.4114531012292,     26.2904425250194,      0, s1};
 Point(3265) = {5.811453101,         24.425442529,          0, s1};
-Point(1615) = {6.411453101,         16.970442529,          0, s1};
-Point(1693) = {5.811453101,         16.970442529,          0, s1};
+Point(1615) = {6.411453101,         16.960442526271,          0, s1};
+Point(1693) = {5.811453101,         16.960442526271,          0, s1};
 Point(2308) = {5.811453101,         24.425442529,          0, s1};
 Point(2360) = {6.411453101,         24.425442529,          0, s1};
 
@@ -234,7 +234,7 @@ Line(2436) = {2360, 1615};
 /*{{{ Points in the middle */
 
 // Endpoints in y direction
-yb = 16.970442529;
+yb = 16.960442526271;
 yt = 24.425442529;
 
 // Coordinates of the left and right rows
@@ -256,14 +256,14 @@ n_blocks = 5;
 delta = 0.2;
 width = 0.2;
 
-height = (yt - yb - delta*(n_blocks + 1))/n_blocks;
+height = (yt - yb - delta*n_blocks)/n_blocks;
 period = height + delta;
 
 // Coordinates with respect to left-right corner
-x1 = 0     ; y1 = 0             ;
-x2 = width ; y2 = 0.01          ;
-x3 = width ; y3 = height - 0.01 ;
-x4 = 0     ; y4 = height        ;
+x1 = 0     ; y1 = 0      ;
+x2 = width ; y2 = 0      ;
+x3 = width ; y3 = height ;
+x4 = 0     ; y4 = height ;
 
 inner_loops_left = {};
 Physical Line("Blocks", 4) = {};
@@ -271,10 +271,10 @@ Physical Line("Blocks", 4) = {};
 For i In {0:n_blocks - 1}
   // Left
   p = newp;
-  Point(p + 0) = {xl - x1, yb + delta +  i*period + y1, 0, s2};
-  Point(p + 1) = {xl - x2, yb + delta +  i*period + y2, 0, s2};
-  Point(p + 2) = {xl - x3, yb + delta +  i*period + y3, 0, s2};
-  Point(p + 3) = {xl - x4, yb + delta +  i*period + y4, 0, s2};
+  Point(p + 0) = {xl - x1, yb + delta/2 + i*period + y1, 0, s2};
+  Point(p + 1) = {xl - x2, yb + delta/2 + i*period + y2, 0, s2};
+  Point(p + 2) = {xl - x3, yb + delta/2 + i*period + y3, 0, s2};
+  Point(p + 3) = {xl - x4, yb + delta/2 + i*period + y4, 0, s2};
 
   l = newl;
   Line(l + 0) = {p + 0, p + 1};

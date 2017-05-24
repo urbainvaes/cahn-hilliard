@@ -1,10 +1,10 @@
 // Dimensions of square
 
 If (!Exists(Lx))
-  Lx = 1; // export
+  Lx = 2; // export
 EndIf
 If (!Exists(Ly))
-  Ly = 1; // export
+  Ly = 0.5; // export
 EndIf
 
 If (!Exists(r)) r = 0.1; EndIf // Width of region of injection

@@ -32,17 +32,17 @@ Macro Cube
                lines[4] ,  lines[9] , -lines[8] , -lines[12] ,
                lines[5] ,  lines[6] ,  lines[7] ,   lines[8] };
 
-  For i In {1:6}
-   lineloops[i] = newreg; 
-   Line Loop(lineloops[i]) = { theloops[4*(i-1)+0] ,
-                               theloops[4*(i-1)+1] ,
-                               theloops[4*(i-1)+2] ,
-                               theloops[4*(i-1)+3] };
+  For macro_i In {1:6}
+   lineloops[macro_i] = newreg;
+   Line Loop(lineloops[macro_i]) = { theloops[4*(macro_i-1)+0] ,
+                               theloops[4*(macro_i-1)+1] ,
+                               theloops[4*(macro_i-1)+2] ,
+                               theloops[4*(macro_i-1)+3] };
   EndFor
 
   If (surf == 1)
-    For i In {1:6}
-      surfaces[i] = news; Plane Surface(surfaces[i]) = {lineloops[i]};
+    For macro_i In {1:6}
+      surfaces[macro_i] = news; Plane Surface(surfaces[macro_i]) = {lineloops[macro_i]};
     EndFor
 
     surfaceloopindex = newreg;
