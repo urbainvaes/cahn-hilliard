@@ -205,7 +205,11 @@ varf varPhi([phi1,mu1], [phi2,mu2]) =
     phi1*phi2/dt
     + (1/Pe)*(Grad(mu1)'*Grad(phi2))
     - mu1*mu2
+    #ifdef OD2
+    + 0.5 * energyB * (Grad(phi1)'*Grad(mu2))
+    #else
     + energyB * (Grad(phi1)'*Grad(mu2))
+    #endif
     + energyA * 0.5*3*phiOld*phiOld*phi1*mu2
     - energyA *0.5*phi1*mu2
     )
@@ -218,6 +222,9 @@ varf varPhi([phi1,mu1], [phi2,mu2]) =
     #endif
     + energyA * 0.5*phiOld*phiOld*phiOld*mu2
     + energyA * 0.5*phiOld*mu2
+    #ifdef OD2
+    - 0.5 * energyB * (Grad(phiOld)'*Grad(mu2))
+    #endif
     #ifdef ELECTRO
     + 0.25 * (epsilonR2 - epsilonR1) * (Grad(theta)'*Grad(theta)) * mu2
     #endif

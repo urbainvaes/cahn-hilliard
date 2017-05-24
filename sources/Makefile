@@ -64,6 +64,10 @@ ifeq ($(MUMPS), 1)
 	cpp_flags += -DMUMPS
 endif
 
+ifeq ($(OD2), 1)
+	cpp_flags += -DOD2
+endif
+
 ###############################
 #  Create mesh from geometry  #
 ###############################
@@ -91,15 +95,18 @@ run : processed_solver.pde geometry.pde output/mesh.msh
 ##############
 plots :
 ifeq ($(DIMENSION), 3)
-	gmsh -display :0 $(GEOMETRY) $(VIEW) -setnumber video 1
+	gmsh -display :0 $(VIEW) -setnumber video 1
 else
 	label=$(label) gnuplot gnuplot/make-plots.plt
 endif
 
-field ?= "all"
+field   ?= all
+step    ?= 1
+startAt ?= 0
+
 visualization : $(VIEW)
 ifeq ($(suffix $(VIEW)), .geo)
-	gmsh -setstring field $(field) $<
+	gmsh -v 1000 -setstring field $(field) -setnumber step $(step) -setnumber startAt $(startAt) $<
 endif
 ifeq ($(suffix $(VIEW)), .py)
 	DISPLAY=:0 pvpython $< --input phi --range -1,1
@@ -113,7 +120,7 @@ video :
 
 status :
 	@echo "Problem $(problem) reporting for duty"; \
-	echo "  Number of iterations calculated: $$(ls output/phi/phi.*.vtk 2>/dev/null | wc -l)"; \
+	echo "  Number of iterations calculated: $$(ls output/done/done-*.txt 2>/dev/null | wc -l)"; \
 	echo ""
 
 macros :
