@@ -15,10 +15,11 @@ bunch :
 #######################################################
 #  Install and uninstall a test to the current bunch  #
 #######################################################
+list_inputs = $(shell find inputs -type d -printf '%P\n' | while read l; do test -n "$$(find inputs/$$l/* -type d)" || echo $$l; done)
+choose_input = $(shell echo $(list_inputs) | tr " " "\n" | $(fzf) -m --bind=ctrl-t:toggle)
+
 install :
-	@find inputs -type d -printf '%P\n' | \
-		while read l; do test -n "$$(find inputs/$$l/* -type d)" || echo $$l; done | \
-		$(fzf) -m --bind=ctrl-t:toggle >> .bunches/$(bunch) || echo "No change";
+	@echo $(choose_input) >> .bunches/$(bunch) || echo "No change";
 
 uninstall :
 	cat .bunches/$(bunch) | $(fzf) -m --bind=ctrl-t:toggle | while read p; do sed -i "\#$${p}#d" .bunches/$(bunch); done;
@@ -28,6 +29,13 @@ select :
 	@p=$$(cat .bunches/$(bunch) | $(fzf)); \
 	  test -n "$${p}" && sed -i "\#$${p}#d" .bunches/$(bunch) && \
 	  echo $${p} >> .bunches/$(bunch) || echo "No change";
+
+################
+#  Copy input  #
+################
+copy :
+	@toCopy=$(choose_input); echo "Enter new name"; read name; \
+	cp -r inputs/$${toCopy} inputs/$${toCopy%/*}/$${name};
 
 #################################
 #  Set up environment for test  #
