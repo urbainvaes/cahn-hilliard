@@ -94,7 +94,7 @@ VhOut phiOut, muOut;
 Vh adaptField;
 
 #ifdef NS
-Vh u = 0, v = 0, w = 0, p = 0;
+Vh u = 0, v = 0, w = 0, p = 0, deltaP = 0;
 Vh uOld, vOld, wOld;
 VhOut uOut, vOut, wOut, pOut;
 #endif
@@ -239,6 +239,7 @@ varf varU(u,test) =
     // Right-hand side
     + INTEGRAL(DIMENSION)(Th)(
         (convect([UOLDVEC],-dt,uOld)/dt)*test
+        - dx(p)*test
         + muGradPhi     * (1/We)*mu*dx(phi)*test
         - (1-muGradPhi) * (1/We)*phi*dx(mu)*test
         #ifdef GRAVITY
@@ -252,6 +253,7 @@ varf varV(v,test) =
     // Right-hand side
     + INTEGRAL(DIMENSION)(Th)(
         (convect([UOLDVEC],-dt,vOld)/dt)*test
+        - dy(p)*test
         + muGradPhi     * (1/We)*mu*dy(phi)*test
         - (1-muGradPhi) * (1/We)*phi*dy(mu)*test
         #ifdef GRAVITY
@@ -266,6 +268,7 @@ varf varW(w,test) =
     // Right-hand side
     + INTEGRAL(DIMENSION)(Th)(
       (convect([UOLDVEC],-dt,wOld)/dt)*test
+      - dz(p)*test
       + muGradPhi     * (1/We)*mu*dz(phi)*test
       - (1-muGradPhi) * (1/We)*mu*dz(phi)*test
       #ifdef GRAVITY
@@ -280,6 +283,20 @@ varf varP(p,test) =
     // Right-hand side
     + INTEGRAL(DIMENSION)(Th)( -Div(UVEC)*test/dt )
 ;
+
+// Laplace equation for initial pressure
+varf varPLap(p,test) =
+    // Bilinear form
+    INTEGRAL(DIMENSION)(Th)( Grad(p)'*Grad(test) )
+;
+
+matrix matPLapBulk = varPLap(Vh, Vh);
+matrix matPLapBoundary = varPBoundary(Vh, Vh);
+matrix matPLap = matPLapBulk + matPLapBoundary;
+real[int] rhsPLap = varPBoundary(0, Vh);
+set(matPLap,solver=sparsesolver SPARAMS);
+p[] = matPLap^-1*rhsPLap;
+
 #endif
 //}}}
 //}}}
@@ -315,6 +332,7 @@ varf varP(p,test) =
   u = u;
   v = v;
   p = p;
+  deltaP = deltaP;
   #if DIMENSION == 3
   w = w;
   #endif
@@ -716,16 +734,15 @@ for(int i = 0; i <= nIter; i++)
   matrix matPBulk = varP(Vh, Vh);
   matrix matPBoundary = varPBoundary(Vh, Vh);
   matrix matP = matPBulk + matPBoundary;
-  real[int] rhsPBulk = varP(0, Vh);
-  real[int] rhsPBoundary = varPBoundary(0, Vh);
-  real[int] rhsP = rhsPBulk + rhsPBoundary;
+  real[int] rhsP = varP(0, Vh);
   set(matP,solver=sparsesolver SPARAMS);
-  p[] = matP^-1*rhsP;
+  deltaP[] = matP^-1*rhsP;
 
-  u = u - dx(p)*dt;
-  v = v - dy(p)*dt;
+  p = p + deltaP;
+  u = u - dx(deltaP)*dt;
+  v = v - dy(deltaP)*dt;
   #if DIMENSION == 3
-  w = w - dz(p)*dt;
+  w = w - dz(deltaP)*dt;
   #endif
   cout << "Solve Navier-Stokes system: " << tic() << endl;
   #endif
@@ -747,6 +764,7 @@ for(int i = 0; i <= nIter; i++)
     u = u;
     v = v;
     p = p;
+    deltaP = deltaP;
     #if DIMENSION == 3
     w = w;
     #endif
