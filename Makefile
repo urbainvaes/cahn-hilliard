@@ -20,6 +20,7 @@ choose_input = $(shell echo $(list_inputs) | tr " " "\n" | $(fzf) -m --bind=ctrl
 
 install :
 	@echo $(choose_input) >> .bunches/$(bunch) || echo "No change";
+	@sed -i "/^$$/d" .bunches/$(bunch)
 
 uninstall :
 	cat .bunches/$(bunch) | $(fzf) -m --bind=ctrl-t:toggle | while read p; do sed -i "\#$${p}#d" .bunches/$(bunch); done;
