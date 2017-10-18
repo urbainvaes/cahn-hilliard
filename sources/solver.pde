@@ -355,6 +355,49 @@ real intPressureFluxKineticEnergy = 0;
 for(int i = 0; i <= nIter; i++)
 {
   tic();
+  // Adapt mesh {{{
+  #ifdef ADAPT
+    int nAdapts = ((i == 0) ? 3 : 1);
+
+    for(int iAdapt = 0; iAdapt < nAdapts; iAdapt++)
+    {
+      #if DIMENSION == 2
+        Th = adaptmesh(anisomax = aniso, Th, phi, hmax = hmax, hmin = hmin, nbvx = 1e6 ARGPERIODIC);
+        [phi, mu] = [phi0, mu0];
+      #endif
+      #if DIMENSION == 3
+        Vh metricField;
+        metricField[] = mshmet(Th, phi, aniso = aniso, hmin = hmin, hmax = hmax, nbregul = 1, verbosity = 0);
+        Th=tetgreconstruction(Th,switch="raAQ",sizeofvolume=metricField*metricField*metricField/6.);
+      #endif
+      if(i = 0) {
+        [phi, mu] = [phi0, mu0];
+      }
+      else {
+        [phi, mu] = [phi, mu];
+      }
+      #ifdef PLOT
+        #if DIMENSION == 3
+        medit("Phi", Th, phi, wait = false);
+        #endif
+      #endif
+    }
+
+    #ifdef NS
+      u = u;
+      v = v;
+      p = p;
+      #if DIMENSION == 3
+        w = w;
+      #endif
+    #endif
+
+    #ifdef ELECTRO
+      theta = theta;
+    #endif
+    cout << "Adapt mesh: " << tic() << endl;
+  #endif
+  // }}}
   // Update previous solution {{{
   phiOld = phi;
   muOld = mu;
@@ -730,33 +773,5 @@ for(int i = 0; i <= nIter; i++)
   cout << "Solve Navier-Stokes system: " << tic() << endl;
   #endif
   //}}}
-  // Adapt mesh {{{
-  #ifdef ADAPT
-    #if DIMENSION == 2
-    Th = adaptmesh(anisomax = aniso, Th, phi, hmax = hmax, hmin = hmin, nbvx = 1e6 ARGPERIODIC);
-    #endif
-
-    #if DIMENSION == 3
-    Vh metricField;
-    metricField[] = mshmet(Th, phi, aniso = aniso, hmin = hmin, hmax = hmax, nbregul = 1, verbosity = 0);
-    Th=tetgreconstruction(Th,switch="raAQ",sizeofvolume=metricField*metricField*metricField/6.);
-    #endif
-    [phi, mu] = [phi, mu];
-
-    #ifdef NS
-    u = u;
-    v = v;
-    p = p;
-    #if DIMENSION == 3
-    w = w;
-    #endif
-    #endif
-
-    #ifdef ELECTRO
-    theta = theta;
-    #endif
-  cout << "Adapt mesh: " << tic() << endl;
-  #endif
-  // }}}
 }
 //}}}
