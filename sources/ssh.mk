@@ -2,7 +2,7 @@
 #  Run on remote machine  #
 ###########################
 cx1 = uv113@login.cx1.hpc.imperial.ac.uk
-macomp = uv113@macomp01.ma.ic.ac.uk
+macomp = uv113@macomp001.ma.ic.ac.uk
 
 remoteHost ?= $(macomp)
 remoteRoot ?= cahn-hilliard
