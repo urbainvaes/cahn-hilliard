@@ -25,6 +25,7 @@ VIEW      ?= view.geo
 # Flags
 cpp_flags = -DDIMENSION=$(DIMENSION) -DPROBLEM=$(PROBLEM) -DGEOMETRY=$(GEOMETRY)
 ff_flags = -ne -v 0
+plot_flags = --parallel
 
 ifdef PERIODICITY
 	cpp_flags += -DPERIODICITY=$(PERIODICITY)
@@ -32,6 +33,7 @@ endif
 
 ifeq ($(NS), 1)
 	cpp_flags += -DNS
+	plot_flags += --flow
 endif
 
 ifeq ($(ELECTRO), 1)
@@ -44,6 +46,10 @@ endif
 
 ifeq ($(ADAPT), 1)
 	cpp_flags += -DADAPT
+endif
+
+ifeq ($(TIMEADAPT), 1)
+	cpp_flags += -DTIMEADAPT
 endif
 
 ifeq ($(PLOT), 1)
@@ -97,7 +103,7 @@ plots :
 ifeq ($(DIMENSION), 3)
 	gmsh -display :0 $(VIEW) -setnumber video 1
 else
-	label=$(label) gnuplot gnuplot/make-plots.plt
+	python bin/python/plot.py $(plot_flags) $(label)
 endif
 
 field   ?= all
@@ -124,7 +130,19 @@ status :
 	echo ""
 
 macros :
-	./bin/macroPlots
+	mkdir -p output/macros
+	grep "Iteration: "                             logs/freefem.log | awk '{ print $$NF }' > output/macros/iter.txt
+	grep "Time: "                                  logs/freefem.log | awk '{ print $$NF }' > output/macros/time.txt
+	grep "Mass: "                                  logs/freefem.log | awk '{ print $$NF }' > output/macros/mass.txt
+	grep "Integrated diffusive mass flux: "        logs/freefem.log | awk '{ print $$NF }' > output/macros/diffMass.txt
+	grep "Integrated convective mass flux: "       logs/freefem.log | awk '{ print $$NF }' > output/macros/convMass.txt
+	grep "Bulk free energy: "                      logs/freefem.log | awk '{ print $$NF }' > output/macros/bulkFree.txt
+	grep "Wall free energy: "                      logs/freefem.log | awk '{ print $$NF }' > output/macros/wallFree.txt
+	grep "Integrated free energy dissipations: "   logs/freefem.log | awk '{ print $$NF }' > output/macros/dissFree.txt
+	grep "Integrated diffusive free energy flux: " logs/freefem.log | awk '{ print $$NF }' > output/macros/diffFree.txt
+	grep "Increase in free energy: "               logs/freefem.log | awk '{ print $$NF }' > output/macros/incFree.txt
+	grep "Free energy balance"                     logs/freefem.log | awk '{ print $$NF }' > output/macros/freeBal.txt
+	python bin/python/graphs.py
 
 ###################################
 #  Communication with programmer  #
