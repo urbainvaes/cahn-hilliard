@@ -3,12 +3,12 @@
 # Import packages
 import argparse  # parse options
 import matplotlib
+matplotlib.use('Agg')
 import matplotlib.pyplot as plt
 import mesh  # gmsh
 import multiprocessing
 import numpy as np
 import os
-matplotlib.use('Agg')
 
 # Parse options
 parser = argparse.ArgumentParser()
@@ -151,7 +151,6 @@ def plot_iteration(iteration):
             str(iteration) + '.' + args.extension
         plt.xticks([])
         plt.yticks([])
-        plt.show()
         plt.savefig(output, bbox_inches='tight')
         for c in tricontourf.collections:
             c.remove()

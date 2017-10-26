@@ -24,6 +24,8 @@ matplotlib.rc('text', usetex=True)
 
 # Load data from files
 titles = {'time': 'Time',
+          'iter': 'Iteration',
+          'timeStep': 'Time step',
           'mass': 'Mass',
           'bulkFree': 'Free energy',
           'wallFree': 'Wall free energy',
@@ -38,9 +40,27 @@ output_dir = args.output + '/macros'
 if not os.path.isdir(output_dir):
     os.makedirs(output_dir)
 
+line_format = 'k.-'
+
+# vs iteration
 for key in data:
-    if not key == 'time':
-        plt.figure()
-        plt.plot(data['time'], data[key])
-        plt.title(titles[key])
-        plt.savefig(args.output_dir + '/' + key + '.pdf', bbox_inches='tight')
+    plt.figure()
+    if key == 'timeStep':
+        plt.semilogy(data['iter'], data[key], line_format)
+    else:
+        plt.plot(data['iter'], data[key], line_format)
+    plt.title(titles[key])
+    plt.xlabel('Iteration')
+    plt.savefig(args.output + '/macros/iter-' + key + '.pdf',
+                bbox_inches='tight')
+    plt.close()
+
+# vs time
+for key in data:
+    plt.figure()
+    plt.plot(data['time'], data[key], line_format)
+    plt.title(titles[key])
+    plt.xlabel('Time')
+    plt.savefig(args.output + '/macros/time-' + key + '.pdf',
+                bbox_inches='tight')
+    plt.close()
