@@ -136,6 +136,13 @@ real epsilonR2 = 2;
 real dt = 8.0*Pe*Cn^4;
 real nIter = 300;
 real time = 0;
+#ifdef TIMEADAPT
+real maxDeltaE = 0.005;
+real minDeltaE = 0.001;
+real factor = 2;
+real dtMin = dt/20;
+real dtMax = dt;
+#endif
 
 // Mesh parameters
 int aniso = 0;
@@ -363,14 +370,13 @@ for(int i = 0; i <= nIter; i++)
     {
       #if DIMENSION == 2
         Th = adaptmesh(anisomax = aniso, Th, phi, hmax = hmax, hmin = hmin, nbvx = 1e6 ARGPERIODIC);
-        [phi, mu] = [phi0, mu0];
       #endif
       #if DIMENSION == 3
         Vh metricField;
         metricField[] = mshmet(Th, phi, aniso = aniso, hmin = hmin, hmax = hmax, nbregul = 1, verbosity = 0);
         Th=tetgreconstruction(Th,switch="raAQ",sizeofvolume=metricField*metricField*metricField/6.);
       #endif
-      if(i = 0) {
+      if(i == 0) {
         [phi, mu] = [phi0, mu0];
       }
       else {
@@ -509,6 +515,7 @@ for(int i = 0; i <= nIter; i++)
        << "** ITERATION **" << endl
        << "Iteration: "     << i    << endl
        << "Time:      "     << i*dt << endl
+       << "Time step: "     << dt << endl
        << endl
        << "** Mass **"                        << endl
        << "Mass:                       "      << massPhi              << endl
@@ -711,6 +718,10 @@ for(int i = 0; i <= nIter; i++)
   #endif
   //}}}
   // Cahn-Hilliard equation {{{
+  #ifdef TIMEADAPT
+  bool recalculate = true;
+  while(recalculate) {
+  #endif
   matrix matPhiBulk = varPhi(V2h, V2h);
   matrix matPhiBoundary = varPhiBoundary(V2h, V2h);
   matrix matPhi = matPhiBulk + matPhiBoundary;
@@ -719,6 +730,20 @@ for(int i = 0; i <= nIter; i++)
   real[int] rhsPhi = rhsPhiBulk + rhsPhiBoundary;
   set(matPhi,solver=sparsesolver SPARAMS);
   phi[] = matPhi^-1*rhsPhi;
+  #ifdef TIMEADAPT
+  real dissipationFreeEnergy = dt*INTEGRAL(DIMENSION)(Th) ((1/Pe)*(Grad(mu)'*Grad(mu)));
+  real dtTooLarge = (dissipationFreeEnergy > maxDeltaE && dt > dtMin);
+  real dtTooLow   = (dissipationFreeEnergy < minDeltaE && dt < dtMax);
+
+  cout << "Dissipations of free energy: " << dissipationFreeEnergy << endl;
+  recalculate = dtTooLarge;
+  if (dtTooLarge) dt = dt/factor;
+  if (dtTooLow) dt = dt*factor;
+  if (recalculate) {
+    cout << "Dissipations of free energy is too large (" << dissipationFreeEnergy << ") : refining time step." << endl;
+    cout << "Recalculating solution with dt=" << dt << endl; }
+  }
+  #endif
   cout << "Solve Cahn-Hilliard system: " << tic() << endl;
   //}}}
   // Navier stokes {{{
