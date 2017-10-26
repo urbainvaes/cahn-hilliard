@@ -3,7 +3,13 @@
 # Argument 1: the mesh
 # Argument 2: node data
 
-echo "Merge \"$1\"; Merge \"$2\"; Save View[0] \"tmp.pos\";" > tmp.geo
+echo "Merge \"$1\";" > tmp.geo; shift
+
+for arg in "$@"; do
+    echo "Merge \"$arg\";"                   >> tmp.geo
+    echo "Save View[0] \"${arg%.msh}.pos\";" >> tmp.geo
+    echo "Delete View[0];"                   >> tmp.geo
+done
+
 gmsh -v 0 tmp.geo -0
-cp "tmp.pos" "${2%.msh}.pos"
-rm tmp.geo tmp.geo_unrolled
+# rm tmp.geo tmp.geo_unrolled

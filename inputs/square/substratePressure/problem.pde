@@ -1,4 +1,4 @@
-dt = 1e-3;
+dt = 1e-4;
 nIter = 1e4;
 // muGradPhi = 1;
 
@@ -27,6 +27,6 @@ varf varPhiBoundary([phi1,mu1], [phi2,mu2]) =
 
 varf varUBoundary(u, test) = on(1, u = 0);
 varf varVBoundary(v, test) = on(1, v = 0);
-varf varPBoundary(p, test) = on(3, p = 0);
+varf varPBoundary(p, test) = on(3, p = 5);
 
 cout << "Expected pressure: " << 2*sqrt(2)/3/r << endl;

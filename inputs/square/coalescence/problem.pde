@@ -6,25 +6,20 @@ hmin = 0.005;
 hmax = 0.05;
 
 Pe = 500;
-Re = 1000;
-We = .1;
 Cn = 5e-3;
 
-real r = 0.2;
-real a = 1;
-real b = 3;
-func phi0 = -tanh((sqrt(a*x*x + b*y*y) - r)/Cn);
+real r = 0.25;
+real x1 = 0.65;
+real x2 = 1.35;
+func phi0 = (1-tanh((sqrt((x-x1)*(x-x1) + y*y) - r)/Cn)) +
+            (1-tanh((sqrt((x-x2)*(x-x2) + y*y) - r)/Cn)) - 1;
 func mu0  = 0;
 [phi, mu] = [phi0, mu0];
 
 // Define boundary conditions
-real theta = 5*pi/12;
+real theta = pi/4;
 func contactAngles = theta;
 varf varPhiBoundary([phi1,mu1], [phi2,mu2]) =
   int1d(Th,1) (wetting(contactAngles) * mu2)
   + int1d(Th,1) (wetting(contactAngles) * phi1 * phiOld * mu2)
 ;
-
-varf varUBoundary(u, test) = on(1, u = 0);
-varf varVBoundary(v, test) = on(1, v = 0);
-varf varPBoundary(p, test) = on(1, p = 0);

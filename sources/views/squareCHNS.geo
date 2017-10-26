@@ -1,55 +1,72 @@
-maxIters = 1000;
-startAt = 0;
-
-If(StrCmp(field, "all") != 0)
-  For i In {startAt: maxIters}
-    If (FileExists(Sprintf("../output/done/done-%g.txt", i)))
-      Merge StrCat("../output/", field, "/", field, Sprintf("-%g.pos", i));
-      View[i].Visible = 1; Draw; View[i].Visible = 0;
-    EndIf
-    If (!FileExists(Sprintf("../output/done/done-%g.txt", i)))
-      Sleep .5; i = i - 1;
-    EndIf
-  EndFor
+If(!Exists(video))
+  video = 0;
 EndIf
 
-If(StrCmp(field, "all") == 0)
-  viewsPerStep = 4;
+If(!Exists(step))
+  step = 0;
+EndIf
 
+If(!Exists(startAt))
+  startAt = 0;
+EndIf
+
+maxIters = 10000;
+
+If(StrCmp(field, "all") != 0) viewsPerStep = 1; EndIf
+If(StrCmp(field, "all") == 0)
+  viewsPerStep   = 4;
+  // General.ScaleX = 0.6;
+  // General.ScaleY = 0.6;
   deltaX = .55;
   deltaY = .55;
   centerX = 0;
   centerY = 0;
 
-  View.ShowScale = 0;
   General.ScaleX = 0.5;
   General.ScaleY = 0.5;
   Geometry.OffsetX = centerX - deltaX;
   Geometry.OffsetY = centerY - deltaY;
   Geometry.OffsetY = 20;
-  For i In {startAt: maxIters}
-    If (FileExists(Sprintf("../output/done/done-%g.txt", i)))
-      indexStart = (i-startAt)*viewsPerStep;
-      Merge Sprintf("./../output/phi/phi-%g.pos", i);
-      View[indexStart].ShowScale = 0;
-      Merge Sprintf("../output/mu/mu-%g.pos", i);
-      View[indexStart+1].ShowScale = 1;
-      Merge Sprintf("../output/pressure/pressure-%g.pos", i);
-      View[indexStart+2].ShowScale = 1;
-      Merge Sprintf("../output/velocity/velocity-%g.pos", i);
-      View[indexStart+3].ShowScale = 1;
+EndIf
+
+For i In {0: maxIters}
+  iteration = startAt + i*step;
+  indexStart = i*viewsPerStep;
+  If (FileExists(Sprintf("../output/done/done-%g.txt", iteration)))
+    For j In {0:viewsPerStep-1}
+      View[indexStart - viewsPerStep + j].Visible = 0;
+    EndFor
+    If(StrCmp(field, "all") != 0)
+      Merge StrCat("../output/", field, "/", field, Sprintf("-%g.pos", iteration));
+    EndIf
+    If(StrCmp(field, "all") == 0)
+      Merge Sprintf("../output/phi/phi-%g.pos", iteration);
+      View[indexStart].ShowScale = 1;
+      View[indexStart].RangeType = 2;
+      View[indexStart].CustomMin = -1.3;
+      View[indexStart].CustomMax = 1.3;
+
+      Merge Sprintf("../output/mu/mu-%g.pos", iteration);
+      Merge Sprintf("../output/pressure/pressure-%g.pos", iteration);
+      Merge Sprintf("../output/velocity/velocity-%g.pos", iteration);
+
       For j In {0:viewsPerStep-1}
         View[indexStart+j].OffsetX = centerX - (1-j%2)*deltaX + (j%2)*deltaX;
         View[indexStart+j].OffsetY = centerY + (1-Floor(j/2))*deltaY - Floor(j/2)*deltaY;
-        View[indexStart + j].Visible = 1;
-      EndFor
-      Draw;
-      For j In {0:viewsPerStep-1}
-        View[indexStart + j].Visible = 0;
       EndFor
     EndIf
-    If (!FileExists(Sprintf("../output/done/done-%g.txt", i)))
-      Sleep .5; i = i - 1;
+    For j In {0:viewsPerStep-1}
+      View[indexStart + j].Visible = 1;
+    EndFor
+    Draw;
+    If(video == 1)
+      System StrCat("mkdir -p pictures/", field);
+      Print StrCat("../pictures/", field, "/", field, Sprintf("-%04g.png", iteration));
     EndIf
-  EndFor
-EndIf
+  EndIf
+    If (!FileExists(Sprintf("../output/done/done-%g.txt", iteration)))
+      Sleep .1; Draw; i = i - 1;
+    EndIf
+EndFor
+
+
