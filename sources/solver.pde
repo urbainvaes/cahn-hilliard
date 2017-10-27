@@ -3,12 +3,11 @@
 #define str(s) #s
 // }}}
 // Include auxiliary files and load modules {{{
-include "freefem/write-mesh.pde"
-include "freefem/writers.pde"
-include "freefem/getargs.pde"
-include "freefem/clock.pde"
-include "freefem/match.pde"
-include "geometry.pde"
+#include "freefem/write-mesh.pde"
+#include "freefem/writers.pde"
+#include "freefem/getargs.pde"
+#include "freefem/clock.pde"
+#include "freefem/match.pde"
 //}}}
 // Load modules {{{
 load "gmsh"

@@ -1,12 +1,12 @@
 // Dimensions of square
 
-If (!Exists(Lx))
-  Lx = 1;
-EndIf
+#ifndef LX
+#define LX 1
+#endif
 
-If (!Exists(Ly))
-  Ly = 1;
-EndIf
+#ifndef LY
+#define LY 1
+#endif
 
 If (!Exists(s))
   s = 0.03;
@@ -14,9 +14,9 @@ EndIf
 
 // Define domain
 Point(1) = {0,  0,  0, s};
-Point(2) = {Lx, 0,  0, s};
-Point(3) = {Lx, Ly, 0, s};
-Point(4) = {0,  Ly, 0, s};
+Point(2) = {LX, 0,  0, s};
+Point(3) = {LX, LY, 0, s};
+Point(4) = {0,  LY, 0, s};
 
 Line(1) = {1,2};
 Line(2) = {2,3};

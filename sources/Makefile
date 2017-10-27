@@ -1,101 +1,58 @@
 ######################
 #  Useful variables  #
 ######################
-gitRoot = $(shell git rev-parse --show-toplevel)
-binDir  = $(gitRoot)/sources/bin
-problem = $(CURDIR:$(gitRoot)/tests/%=%)
-label = $(subst /,_,$(problem))
+GITROOT = $(shell git rev-parse --show-toplevel)
+BINDIR  = $(GITROOT)/sources/bin
+PROBLEM = $(CURDIR:$(GITROOT)/tests/%=%)
+LABEL   = $(subst /,_,$(PROBLEM))
 
 #########################
 #  Include ssh targets  #
 #########################
-include ssh.mk
+include $(GITROOT)/sources/ssh.mk
+
 
 ###################################
-#  Include problem configuration  #
+#  Include PROBLEM configuration  #
 ###################################
 include config.mk
 
-DIMENSION ?= 3
+# Default values (configurable in command line or via config.mk)
+DIMENSION    ?= 3
+SOLVER       ?= $(GITROOT)/sources/solver.pde
+CPP_FLAGS    ?= -P -DGITROOT=$(GITROOT) -DDIMENSION=$(DIMENSION) -imacros config.mk
 
-# Files
-GEOMETRY  ?= problem.geo
-PROBLEM   ?= problem.pde
-VIEW      ?= view.geo
+FF_COMMAND   ?= FreeFem++
+FF_FLAGS     ?= -ne -v 0
+PLOT_FLAGS   ?= --parallel
+VIDEO_FPS    ?= 10
+VIEW_FIELD   ?= all
+VIEW_STARTAT ?= 0
+VIEW_STEP    ?= 1
 
-# Flags
-cpp_flags = -DDIMENSION=$(DIMENSION) -DPROBLEM=$(PROBLEM) -DGEOMETRY=$(GEOMETRY)
-ff_flags = -ne -v 0
-plot_flags = --parallel
-
-ifdef PERIODICITY
-	cpp_flags += -DPERIODICITY=$(PERIODICITY)
-endif
-
-ifeq ($(NS), 1)
-	cpp_flags += -DNS
-	plot_flags += --flow
-endif
-
-ifeq ($(ELECTRO), 1)
-	cpp_flags += -DELECTRO
-endif
-
-ifeq ($(GRAVITY), 1)
-	cpp_flags += -DGRAVITY
-endif
-
-ifeq ($(ADAPT), 1)
-	cpp_flags += -DADAPT
-endif
-
-ifeq ($(TIMEADAPT), 1)
-	cpp_flags += -DTIMEADAPT
-endif
-
-ifeq ($(PLOT), 1)
-	cpp_flags += -DPLOT
-endif
-
-ifeq ($(BEFORE), 1)
-	cpp_flags += -DBEFORE
-	BEFORE_FILE = before.pde
-endif
-
-ifeq ($(AFTER), 1)
-	cpp_flags += -DAFTER
-	AFTER_FILE = after.pde
-endif
-
-ifeq ($(MUMPS), 1)
-	cpp_flags += -DMUMPS
-endif
-
-ifeq ($(OD2), 1)
-	cpp_flags += -DOD2
-endif
 
 ###############################
 #  Create mesh from geometry  #
 ###############################
 mesh : output/mesh.msh
 
-output/mesh.msh : $(GEOMETRY) config.mk
+geometry.geo : $(GEOMETRY) config.mk
+	cpp $(CPP_FLAGS) $< > $@
+
+output/mesh.msh : geometry.geo
 	gmsh $< -$(DIMENSION) -o $@ | tee logs/gmsh.log
+
 
 ###################
 #  Run FreeFem++  #
 ###################
-FF_COMMAND ?= FreeFem++
 
-geometry.pde : $(GEOMETRY)
-	grep -h 'export' $^ | sed 's/^/real /' > $@;
+solver.pde : $(SOLVER) config.mk
+	cpp -C -w $(CPP_FLAGS) $(SOLVER) > $@
 
-processed_solver.pde : solver.pde config.mk $(PROBLEM) $(PERIODICITY) $(BEFORE_FILE) $(AFTER_FILE)
-	cpp -w -C -P $(cpp_flags) $< > $@
+run : solver.pde
+	$(FF_COMMAND) solver.pde $(FF_FLAGS) | tee logs/freefem.log
 
-run : processed_solver.pde geometry.pde output/mesh.msh
-	$(FF_COMMAND) $< $(ff_flags) | tee logs/freefem.log
 
 ##############
 #  Graphics  #
@@ -104,32 +61,28 @@ plots :
 ifeq ($(DIMENSION), 3)
 	gmsh -display :0 $(VIEW) -setnumber video 1
 else
-	python $(binDir)/python/plot.py $(plot_flags) $(label)
+	python $(BINDIR)/python/plot.py $(plot_flags) $(LABEL)
 endif
 
-field   ?= all
-step    ?= 1
-startAt ?= 0
+view.geo:
+	cpp -C -P -w -imacros config.mk $(VIEW) > $@
 
-visualization : $(VIEW)
-ifeq ($(suffix $(VIEW)), .geo)
-	gmsh -v 1000 -setstring field $(field) -setnumber step $(step) -setnumber startAt $(startAt) $<
-endif
-ifeq ($(suffix $(VIEW)), .py)
-	DISPLAY=:0 pvpython $< --input phi --range -1,1
-endif
+view :
+	gmsh \
+	    -v 1000 \
+		-setstring field $(VIEW_FIELD) \
+		-setnumber step $(VIEW_STEP) \
+		-setnumber startAt $(VIEW_STARTAT) \
+		view.geo
 
-fps ?= 10
 video :
 	find pictures -mindepth 1 -type d -printf '%P\n' | while read l; \
-		do mencoder "mf://pictures/$${l}/*.png" -mf fps=$(fps) -o pictures/$${l}.avi \
+		do mencoder "mf://pictures/$${l}/*.png" -mf VIDEO_FPS=$(VIDEO_FPS) -o pictures/$${l}.avi \
 		-ovc lavc -lavcopts vcodec=mpeg4:vhq; done
 
-status :
-	@echo "Problem $(problem) reporting for duty"; \
-	echo "  Number of iterations calculated: $$(ls output/done/done-*.txt 2>/dev/null | wc -l)"; \
-	echo ""
-
+##################################
+#  Graphs of mass, energy, etc.  #
+##################################
 macros :
 	mkdir -p output/macros
 	grep "Iteration: "                             logs/freefem.log | awk '{ print $$NF }' > output/macros/iter.txt
@@ -144,19 +97,25 @@ macros :
 	grep "Integrated diffusive free energy flux: " logs/freefem.log | awk '{ print $$NF }' > output/macros/diffFree.txt
 	grep "Increase in free energy: "               logs/freefem.log | awk '{ print $$NF }' > output/macros/incFree.txt
 	grep "Free energy balance"                     logs/freefem.log | awk '{ print $$NF }' > output/macros/freeBal.txt
-	python $(binDir)/python/graphs.py $(label)
+	python $(BINDIR)/python/graphs.py $(LABEL)
 
-###################################
-#  Communication with programmer  #
-###################################
-
-report :
-	find pictures -mindepth 1 -type d -printf '%P\n' | while read l; \
-		do pdfunite $$(ls -v pictures/$${l}/*.pdf) report-$(label)-$${l}.pdf; \
-		done
 
 ###################
 #  Clean outputs  #
 ###################
 clean :
 	rm -rf  pictures/* output/* logs/*
+
+
+###########################
+#  Convenience functions  #
+###########################
+report :
+	find pictures -mindepth 1 -type d -printf '%P\n' | while read l; \
+		do pdfunite $$(ls -v pictures/$${l}/*.pdf) report-$(LABEL)-$${l}.pdf; \
+		done
+
+status :
+	@echo "Problem $(PROBLEM) reporting for duty"; \
+	echo "  Number of iterations calculated: $$(ls output/done/done-*.txt 2>/dev/null | wc -l)"; \
+	echo ""

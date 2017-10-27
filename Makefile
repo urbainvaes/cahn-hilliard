@@ -43,7 +43,7 @@ copy :
 #################################
 link :
 	mkdir -p $(addprefix tests/$(problem)/, output pictures logs);
-	cp -alft tests/$(problem) sources/* $$(realpath inputs/$(problem)/*);
+	ln -sfrt tests/$(problem) inputs/$(problem)/config.mk sources/Makefile
 
 unlink :
 	rm -rf tests/$(problem)
