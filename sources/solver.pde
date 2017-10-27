@@ -405,6 +405,9 @@ for(int i = 0; i <= nIter; i++)
   #endif
   // }}}
   // Update previous solution {{{
+  if (i != 0) {
+      time += dt;
+  }
   phiOld = phi;
   muOld = mu;
   #ifdef NS
@@ -481,7 +484,6 @@ for(int i = 0; i <= nIter; i++)
   real totalContributionsKineticEnergy = diffusiveFluxKineticEnergy + convectiveFluxKineticEnergy + pressureFluxKineticEnergy - transferEnergy;
   #endif
   // }}}
-
   // Update integrated quantities {{{
   intDiffusiveFluxMass += dt*diffusiveFluxMass;
   #ifdef NS
@@ -502,20 +504,12 @@ for(int i = 0; i <= nIter; i++)
   intPressureFluxKineticEnergy += dt*pressureFluxKineticEnergy;
   #endif
   // }}}
-
-  // {
-  //     ofstream file("output/thermodynamics.txt", append);
-  //     file << i*dt           << "    "
-  //         << bulkFreeEnergy     << "    "
-  //         << massPhi        << "    " << endl;
-  // };
-
   // Print to stdout {{{
   cout << endl
        << "** ITERATION **" << endl
        << "Iteration: "     << i    << endl
-       << "Time:      "     << i*dt << endl
-       << "Time step: "     << dt << endl
+       << "Time:      "     << time << endl
+       << "Time step: "     << dt   << endl
        << endl
        << "** Mass **"                        << endl
        << "Mass:                       "      << massPhi              << endl
@@ -668,7 +662,6 @@ for(int i = 0; i <= nIter; i++)
       ofstream fdone("output/done/done-"+i+".txt");
       fdone << "done" << endl;
   }
-  time += dt;
   /// }}}
   // Exit if required {{{
   if (i == nIter) break;
@@ -798,5 +791,8 @@ for(int i = 0; i <= nIter; i++)
   cout << "Solve Navier-Stokes system: " << tic() << endl;
   #endif
   //}}}
+// Iteration variables {{{
+
+// }}}
 }
 //}}}
