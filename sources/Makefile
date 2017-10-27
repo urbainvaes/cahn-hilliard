@@ -2,6 +2,7 @@
 #  Useful variables  #
 ######################
 gitRoot = $(shell git rev-parse --show-toplevel)
+binDir  = $(gitRoot)/sources/bin
 problem = $(CURDIR:$(gitRoot)/tests/%=%)
 label = $(subst /,_,$(problem))
 
@@ -91,7 +92,7 @@ geometry.pde : $(GEOMETRY)
 	grep -h 'export' $^ | sed 's/^/real /' > $@;
 
 processed_solver.pde : solver.pde config.mk $(PROBLEM) $(PERIODICITY) $(BEFORE_FILE) $(AFTER_FILE)
-	cpp -w $(cpp_flags) $< | sed '/^\#/d' | sed 's#^\(macro.\+\)$$#\1 //EOM#' | sed '/^$$/d' > $@
+	cpp -w -C -P $(cpp_flags) $< > $@
 
 run : processed_solver.pde geometry.pde output/mesh.msh
 	$(FF_COMMAND) $< $(ff_flags) | tee logs/freefem.log
@@ -103,7 +104,7 @@ plots :
 ifeq ($(DIMENSION), 3)
 	gmsh -display :0 $(VIEW) -setnumber video 1
 else
-	python bin/python/plot.py $(plot_flags) $(label)
+	python $(binDir)/python/plot.py $(plot_flags) $(label)
 endif
 
 field   ?= all
@@ -143,7 +144,7 @@ macros :
 	grep "Integrated diffusive free energy flux: " logs/freefem.log | awk '{ print $$NF }' > output/macros/diffFree.txt
 	grep "Increase in free energy: "               logs/freefem.log | awk '{ print $$NF }' > output/macros/incFree.txt
 	grep "Free energy balance"                     logs/freefem.log | awk '{ print $$NF }' > output/macros/freeBal.txt
-	python bin/python/graphs.py $(label)
+	python $(binDir)/python/graphs.py $(label)
 
 ###################################
 #  Communication with programmer  #
