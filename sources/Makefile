@@ -24,7 +24,7 @@ CPP_FLAGS    ?= -P -DGITROOT=$(GITROOT) -DDIMENSION=$(DIMENSION) -imacros config
 
 FF_COMMAND   ?= FreeFem++
 FF_FLAGS     ?= -ne -v 0
-PLOT_FLAGS   ?= --parallel
+PLOT_FLAGS   ?= --parallel --extension "png"
 VIDEO_FPS    ?= 10
 VIEW_FIELD   ?= all
 VIEW_STARTAT ?= 0
@@ -36,23 +36,26 @@ VIEW_STEP    ?= 1
 ###############################
 mesh : output/mesh.msh
 
-geometry.geo : $(GEOMETRY) config.mk
-	cpp $(CPP_FLAGS) $< > $@
-
 output/mesh.msh : geometry.geo
 	gmsh $< -$(DIMENSION) -o $@ | tee logs/gmsh.log
+
+geometry.geo : $(GEOMETRY) config.mk
+	cpp $(CPP_FLAGS) $< > $@
 
 
 ###################
 #  Run FreeFem++  #
 ###################
 
-solver.pde : $(SOLVER) config.mk
+solver.pde : $(SOLVER) config.mk output/mesh.msh
 	cpp -C -w $(CPP_FLAGS) $(SOLVER) > $@
 
 run : solver.pde
 	$(FF_COMMAND) solver.pde $(FF_FLAGS) | tee logs/freefem.log
 
+rebuild :
+	rm -f geometry.geo solver.pde
+	make geometry.geo solver.pde
 
 ##############
 #  Graphics  #
@@ -61,7 +64,7 @@ plots :
 ifeq ($(DIMENSION), 3)
 	gmsh -display :0 $(VIEW) -setnumber video 1
 else
-	python $(BINDIR)/python/plot.py $(plot_flags) $(LABEL)
+	python $(BINDIR)/python/plot.py $(PLOT_FLAGS) $(LABEL)
 endif
 
 view.geo:
@@ -77,13 +80,14 @@ view :
 
 video :
 	find pictures -mindepth 1 -type d -printf '%P\n' | while read l; \
-		do mencoder "mf://pictures/$${l}/*.png" -mf VIDEO_FPS=$(VIDEO_FPS) -o pictures/$${l}.avi \
-		-ovc lavc -lavcopts vcodec=mpeg4:vhq; done
+		do mencoder "mf://pictures/$${l}/*.png" -mf fps=$(VIDEO_FPS):type=png -o pictures/$${l}.avi \
+		-ovc copy -oac copy; done
+		# -ovc lavc -lavcopts vcodec=mpeg4:vhq; done
 
 ##################################
 #  Graphs of mass, energy, etc.  #
 ##################################
-macros :
+graphs :
 	mkdir -p output/macros
 	grep "Iteration: "                             logs/freefem.log | awk '{ print $$NF }' > output/macros/iter.txt
 	grep "Time: "                                  logs/freefem.log | awk '{ print $$NF }' > output/macros/time.txt
