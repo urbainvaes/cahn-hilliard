@@ -148,7 +148,7 @@ def plot_iteration(iteration):
             plt.quiver(x, y, vx, vy)
         plt.title(titles[f], y=1.02)
         output = args.output + '/' + f + '/' + args.label + '-' + f + '-' + \
-            str(iteration) + '.' + args.extension
+            '%05d' % (iteration) + '.' + args.extension
         plt.xticks([])
         plt.yticks([])
         plt.savefig(output, bbox_inches='tight')
