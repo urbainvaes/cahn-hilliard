@@ -181,7 +181,7 @@ macro Normal [N.x, N.y, N.z] //EOM
 #define SAVEGMSHVEC(dim) AUX_SAVEGMSHVEC(dim)
 //}}}
 // Include problem file {{{
-#include xstr(PROBLEM)
+#include xstr(SOLVER_CONF)
 //}}}
 // Calculate dependent parameters {{{
 // real Re1 = 1;

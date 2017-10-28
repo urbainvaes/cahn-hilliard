@@ -15,7 +15,7 @@ bunch :
 #######################################################
 #  Install and uninstall a test to the current bunch  #
 #######################################################
-list_inputs = $(shell find inputs -type d -printf '%P\n' | while read l; do test -n "$$(find inputs/$$l/* -type d)" || echo $$l; done)
+list_inputs = $(shell find inputs -name "*.h" | sed 's!inputs/!!;s!\(-\|/\)config.h!!')
 choose_input = $(shell echo $(list_inputs) | tr " " "\n" | $(fzf) -m --bind=ctrl-t:toggle)
 
 install :
@@ -31,19 +31,13 @@ select :
 	  test -n "$${p}" && sed -i "\#$${p}#d" .bunches/$(bunch) && \
 	  echo $${p} >> .bunches/$(bunch) || echo "No change";
 
-################
-#  Copy input  #
-################
-copy :
-	@toCopy=$(choose_input); echo "Enter new name"; read name; \
-	cp -r inputs/$${toCopy} inputs/$${toCopy%/*}/$${name};
-
 #################################
 #  Set up environment for test  #
 #################################
 link :
 	mkdir -p $(addprefix tests/$(problem)/, output pictures logs);
-	ln -sfrt tests/$(problem)/config.mk inputs/$(problem)/config.mk
+	ln -srf $(PWD)/$(shell find inputs -name "*.h" | grep $(problem)) tests/$(problem)/config.h
+	ln -srft tests/$(problem) sources/Makefile
 
 unlink :
 	rm -rf tests/$(problem)

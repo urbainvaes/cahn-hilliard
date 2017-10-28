@@ -1,10 +1,11 @@
 ######################
 #  Useful variables  #
 ######################
-GITROOT = $(shell git rev-parse --show-toplevel)
-BINDIR  = $(GITROOT)/sources/bin
-PROBLEM = $(CURDIR:$(GITROOT)/tests/%=%)
-LABEL   = $(subst /,_,$(PROBLEM))
+GITROOT   = $(shell git rev-parse --show-toplevel)
+bindir    = $(GITROOT)/sources/bin
+problem   = $(CURDIR:$(GITROOT)/tests/%=%)
+label     = $(subst /,_,$(problem))
+cpp_flags = -P -DGITROOT=$(GITROOT) -imacros config.h
 
 #########################
 #  Include ssh targets  #
@@ -12,23 +13,18 @@ LABEL   = $(subst /,_,$(PROBLEM))
 include $(GITROOT)/sources/ssh.mk
 
 
+############################################
+#  Read variables from configuration file  #
+############################################
+
+
 ###################################
-#  Include PROBLEM configuration  #
+#  Include problem configuration  #
 ###################################
+config.mk : config.h
+	cpp $(cpp_flags) $(GITROOT)/sources/defaults.mk > $@
+
 include config.mk
-
-# Default values (configurable in command line or via config.mk)
-DIMENSION    ?= 3
-SOLVER       ?= $(GITROOT)/sources/solver.pde
-CPP_FLAGS    ?= -P -DGITROOT=$(GITROOT) -DDIMENSION=$(DIMENSION) -imacros config.mk
-
-FF_COMMAND   ?= FreeFem++
-FF_FLAGS     ?= -ne -v 0
-PLOT_FLAGS   ?= --parallel --extension "png"
-VIDEO_FPS    ?= 10
-VIEW_FIELD   ?= all
-VIEW_STARTAT ?= 0
-VIEW_STEP    ?= 1
 
 
 ###############################
@@ -37,10 +33,10 @@ VIEW_STEP    ?= 1
 mesh : output/mesh.msh
 
 output/mesh.msh : geometry.geo
-	gmsh $< -$(DIMENSION) -o $@ | tee logs/gmsh.log
+	gmsh $< -$(dimension) -o $@ | tee logs/gmsh.log
 
-geometry.geo : $(GEOMETRY) config.mk
-	cpp $(CPP_FLAGS) $< > $@
+geometry.geo : config.mk
+	cpp $(cpp_flags) $(geometry) > $@
 
 
 ###################
@@ -48,10 +44,10 @@ geometry.geo : $(GEOMETRY) config.mk
 ###################
 
 solver.pde : $(SOLVER) config.mk output/mesh.msh
-	cpp -C -w $(CPP_FLAGS) $(SOLVER) > $@
+	cpp -C -w $(cpp_flags) $(solver) > $@
 
 run : solver.pde
-	$(FF_COMMAND) solver.pde $(FF_FLAGS) | tee logs/freefem.log
+	$(ff_command) solver.pde $(ff_flags) | tee logs/freefem.log
 
 rebuild :
 	rm -f geometry.geo solver.pde
@@ -61,26 +57,26 @@ rebuild :
 #  Graphics  #
 ##############
 plots :
-ifeq ($(DIMENSION), 3)
+ifeq ($(dimension), 3)
 	gmsh -display :0 $(VIEW) -setnumber video 1
 else
-	python $(BINDIR)/python/plot.py $(PLOT_FLAGS) $(LABEL)
+	python $(bindir)/python/plot.py $(plot_flags) $(label)
 endif
 
 view.geo:
-	cpp -C -P -w -imacros config.mk $(VIEW) > $@
+	cpp -C -P -w -imacros config.h $(view) > $@
 
 view :
 	gmsh \
 	    -v 1000 \
-		-setstring field $(VIEW_FIELD) \
-		-setnumber step $(VIEW_STEP) \
-		-setnumber startAt $(VIEW_STARTAT) \
+		-setstring field $(view_field) \
+		-setnumber step $(view_step) \
+		-setnumber startAt $(view_startat) \
 		view.geo
 
 video :
 	find pictures -mindepth 1 -type d -printf '%P\n' | while read l; \
-		do mencoder "mf://pictures/$${l}/*.png" -mf fps=$(VIDEO_FPS):type=png -o pictures/$${l}.avi \
+		do mencoder "mf://pictures/$${l}/*.png" -mf fps=$(video_fps):type=png -o pictures/$${l}.avi \
 		-ovc copy -oac copy; done
 		# -ovc lavc -lavcopts vcodec=mpeg4:vhq; done
 
@@ -101,7 +97,7 @@ graphs :
 	grep "Integrated diffusive free energy flux: " logs/freefem.log | awk '{ print $$NF }' > output/macros/diffFree.txt
 	grep "Increase in free energy: "               logs/freefem.log | awk '{ print $$NF }' > output/macros/incFree.txt
 	grep "Free energy balance"                     logs/freefem.log | awk '{ print $$NF }' > output/macros/freeBal.txt
-	python $(BINDIR)/python/graphs.py $(LABEL)
+	python $(bindir)/python/graphs.py $(label)
 
 
 ###################
@@ -116,10 +112,10 @@ clean :
 ###########################
 report :
 	find pictures -mindepth 1 -type d -printf '%P\n' | while read l; \
-		do pdfunite $$(ls -v pictures/$${l}/*.pdf) report-$(LABEL)-$${l}.pdf; \
+		do pdfunite $$(ls -v pictures/$${l}/*.pdf) report-$(label)-$${l}.pdf; \
 		done
 
 status :
-	@echo "Problem $(PROBLEM) reporting for duty"; \
+	@echo "Problem $(problem) reporting for duty"; \
 	echo "  Number of iterations calculated: $$(ls output/done/done-*.txt 2>/dev/null | wc -l)"; \
 	echo ""
