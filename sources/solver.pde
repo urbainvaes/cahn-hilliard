@@ -35,17 +35,17 @@ string ssparams="nprow=1, npcol="+mpisize;
 
 // Create output directories
 system("mkdir -p" + " output/done"
+                  + " output/mesh"
                   + " output/phi"
                   + " output/mu"
-                  + " output/muGradPhi"
+                  + " output/iso"
+                  #ifdef NS
                   + " output/velocity"
                   + " output/u"
                   + " output/v"
                   + " output/w"
                   + " output/pressure"
-                  + " output/iso"
-                  + " output/interface "
-                  + " output/mesh"
+                  #endif
                   #ifdef ELECTRO
                   + " output/potential"
                   #endif
@@ -294,39 +294,6 @@ varf varP(p,test) =
 #if DIMENSION == 3
 #endif
 //}}}
-// Adapt mesh before starting computation {{{
-#ifdef ADAPT
-  #if DIMENSION == 2
-  for(int i = 0; i < 3; i++)
-  {
-      Th = adaptmesh(anisomax = aniso, Th, phi, hmax = hmax, hmin = hmin, nbvx = 1e6 ARGPERIODIC);
-      [phi, mu] = [phi0, mu0];
-  }
-  #endif
-  #if DIMENSION == 3
-  system("cp output/mesh.msh output/mesh/mesh-init-0.msh");
-  for(int i = 0; i < 2; i++)
-  {
-      Vh metricField;
-      metricField[] = mshmet(Th, phi, aniso = aniso, hmin = hmin, hmax = hmax, nbregul = 1, verbosity = 0);
-      Th=tetgreconstruction(Th,switch="raAQ",sizeofvolume=metricField*metricField*metricField/6.);
-      [phi, mu] = [phi0, mu0];
-
-      #ifdef PLOT
-          medit("Phi", Th, phi, wait = false);
-      #endif
-  }
-  #endif
-  #ifdef NS
-  u = u;
-  v = v;
-  p = p;
-  #if DIMENSION == 3
-  w = w;
-  #endif
-  #endif
-#endif
-//}}}
 // Loop in time {{{
 
 // CLear and create output file
@@ -573,58 +540,31 @@ for(int i = 0; i <= nIter; i++)
   // }}}
   // Save data to files and stdout {{{
   #if DIMENSION == 2
-      // Isoline
       real[int,int] xy(3,1);
       isoline(Th, phi, xy, close=false, iso=0.0, smoothing=0.1, file="output/iso/contactLine"+i+".dat");
-      // vtk (paraview format)
-      #if SAVEVTK == 1
-          savevtk("output/phi/phi."+i+".vtk", Th, phi, dataname="Phase");
-          savevtk("output/mu/mu."+i+".vtk",  Th, mu,  dataname="ChemicalPotential");
-          #ifdef NS
-          savevtk("output/velocity/velocity."+i+".vtk", Th, [u,v,0], dataname="Velocity");
-          savevtk("output/pressure/pressure."+i+".vtk", Th, p, dataname="Pressure");
-          #endif
-          #ifdef ELECTRO
-          savevtk("output/potential/potential."+i+".vtk",Th,theta, dataname="Potential");
-          #endif
-      #endif
-      // gmsh
-      savegmsh("output/phi/phi-" + i + ".msh", "Cahn-Hilliard", i*dt, i, phiOld);
-      savegmsh("output/mu/mu-" + i + ".msh", "Chemical potential", i*dt, i, muOld);
-      #ifdef NS
-      savegmsh("output/pressure/pressure-" + i + ".msh", "Pressure", i*dt, i, p);
-      SAVEGMSHVEC(DIMENSION)("output/velocity/velocity-" + i + ".msh", "Velocity field", i*dt, i, UVEC);
-      #endif
-      #ifdef ADAPT
-      savemesh("output/mesh/mesh-" + i + ".msh", Vh, Th);
-      system("./bin/msh2pos output/mesh/mesh-" + i + ".msh"
-                  + " output/phi/phi-" + i + ".msh"
-                  + " output/mu/mu-" + i + ".msh"
-                  #ifdef NS
-                  + " output/pressure/pressure-" + i + ".msh"
-                  + " output/velocity/velocity-" + i + ".msh"
-                  #endif
-            );
-      #endif
   #endif
 
-  #if DIMENSION == 3
-  {
-      #ifdef ADAPT
-      ofstream currentMesh("output/mesh/mesh-" + i + ".msh");
-      writeHeader(currentMesh);
-      writeNodes(currentMesh, Vh);
-      writeElements(currentMesh, Vh, Th);
-      #endif
-      ofstream data("output/phi/phi-" + i + ".msh");
-      writeHeader(data);
-      write1dData(data, "Cahn-Hilliard", i*dt, i, phiOld);
-  }
+  savegmsh("output/phi/phi-" + i + ".msh", "Cahn-Hilliard", i*dt, i, phiOld);
+  savegmsh("output/mu/mu-" + i + ".msh", "Chemical potential", i*dt, i, muOld);
+
+  #ifdef NS
+  savegmsh("output/pressure/pressure-" + i + ".msh", "Pressure", i*dt, i, p);
+  SAVEGMSHVEC(DIMENSION)("output/velocity/velocity-" + i + ".msh", "Velocity field", i*dt, i, UVEC);
+  #endif
+
   #ifdef ADAPT
-  system("./bin/msh2pos output/mesh/mesh-" + i + ".msh output/phi/phi-" + i + ".msh");
+  savemesh("output/mesh/mesh-" + i + ".msh", Vh, Th);
+  system(xstr(GITROOT) + "/sources/bin/msh2pos output/mesh/mesh-" + i + ".msh"
+              + " output/phi/phi-" + i + ".msh"
+              + " output/mu/mu-" + i + ".msh"
+              #ifdef NS
+              + " output/pressure/pressure-" + i + ".msh"
+              + " output/velocity/velocity-" + i + ".msh"
+              #endif
+        );
   #endif
   // ! phi[]
-  #endif
+
   cout << "Save data to files and stdout: " << tic() << endl;
   //}}}
   // Visualize solution at current time step {{{
