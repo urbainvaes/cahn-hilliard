@@ -606,17 +606,6 @@ for(int i = 0; i <= nIter; i++)
                   #endif
             );
       #endif
-      // gnuplot
-      savegnuplot("output/phi/phi."+i+".gnuplot", Th, phiOld);
-      savegnuplot("output/mu/mu."+i+".gnuplot", Th, muOld);
-      Vh muGradPhi = sqrt(mu*mu*Grad(phi)'*Grad(phi));
-      savegnuplot("output/muGradPhi/muGradPhi."+i+".gnuplot", Th, muGradPhi);
-      #ifdef NS
-      savegnuplot("output/pressure/pressure."+i+".gnuplot", Th, p);
-      savegnuplot("output/u/u."+i+".gnuplot", Th, u);
-      savegnuplot("output/v/v."+i+".gnuplot", Th, v);
-      savegnuplot2("output/velocity/velocity."+i+".gnuplot", Th, Vh, u, v);
-      #endif
   #endif
 
   #if DIMENSION == 3
