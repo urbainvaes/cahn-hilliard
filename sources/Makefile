@@ -13,11 +13,6 @@ cpp_flags = -P -DGITROOT=$(GITROOT) -imacros config.h
 include $(GITROOT)/sources/ssh.mk
 
 
-############################################
-#  Read variables from configuration file  #
-############################################
-
-
 ###################################
 #  Include problem configuration  #
 ###################################
@@ -52,6 +47,7 @@ run : solver.pde
 rebuild :
 	rm -f geometry.geo solver.pde
 	make geometry.geo solver.pde
+
 
 ##############
 #  Graphics  #

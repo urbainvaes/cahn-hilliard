@@ -16,10 +16,10 @@ bunch :
 #  Install and uninstall a test to the current bunch  #
 #######################################################
 list_inputs = $(shell find inputs -name "*.h" | sed 's!inputs/!!;s!\(-\|/\)config.h!!')
-choose_input = $(shell echo $(list_inputs) | tr " " "\n" | $(fzf) -m --bind=ctrl-t:toggle)
+choose_input = $(shell echo "$(list_inputs)" | tr " " "\n" | $(fzf) -m --bind=ctrl-t:toggle)
 
 install :
-	@echo $(choose_input) >> .bunches/$(bunch) || echo "No change";
+	@echo "$(choose_input)" | tr " " "\n" >> .bunches/$(bunch) || echo "No change";
 	@sed -i "/^$$/d" .bunches/$(bunch)
 
 uninstall :
