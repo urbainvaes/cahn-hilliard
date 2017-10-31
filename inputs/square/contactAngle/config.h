@@ -1,5 +1,5 @@
 #define GEOMETRY GITROOT/sources/geometries/square/simple-square.geo
-#define VIEW GITROOT/sources/views/squareCH.geo
+#define VIEW GITROOT/sources/views/2D.geo
 #define DIMENSION 2
 
 #define LX 2

@@ -7,7 +7,8 @@ Pe = 10000;
 Cn = 0.02;
 
 // Parameters for adaptation
-hmin = 0.005;
+/* hmin = 0.005; */
+hmin = 0.01;
 hmax = 0.05;
 
 // INITIAL CONDITION

@@ -584,7 +584,7 @@ for(int i = 0; i <= nIter; i++)
   //}}}
   // After iteration {{{
   #ifdef AFTER
-      #include "after.pde"
+  #include xstr(AFTER)
   #endif
   {
       ofstream fdone("output/done/done-"+i+".txt");
@@ -596,7 +596,7 @@ for(int i = 0; i <= nIter; i++)
   //}}}
   // Before iteration {{{
   #ifdef BEFORE
-      #include "before.pde"
+  #include xstr(BEFORE)
   #endif
 
   if(i == 0) {

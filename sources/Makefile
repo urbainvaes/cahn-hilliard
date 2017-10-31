@@ -22,6 +22,24 @@ config.mk : config.h
 include config.mk
 
 
+######################
+#  Files to process  #
+######################
+
+geometry.geo : $(geometry) config.h
+	cpp $(cpp_flags) $(geometry) > $@
+
+solver.pde : $(solver) config.h
+	cpp -C -w $(cpp_flags) $(solver) > $@
+
+view.geo : $(view) config.h
+	cpp $(cpp_flags) $(view) > $@
+
+rebuild :
+	rm -f geometry.geo solver.pde view.geo
+	make geometry.geo solver.pde view.geo
+
+
 ###############################
 #  Create mesh from geometry  #
 ###############################
@@ -30,23 +48,13 @@ mesh : output/mesh.msh
 output/mesh.msh : geometry.geo
 	gmsh $< -$(dimension) -o $@ | tee logs/gmsh.log
 
-geometry.geo : config.mk
-	cpp $(cpp_flags) $(geometry) > $@
-
 
 ###################
 #  Run FreeFem++  #
 ###################
 
-solver.pde : $(SOLVER) config.mk output/mesh.msh
-	cpp -C -w $(cpp_flags) $(solver) > $@
-
 run : solver.pde
 	$(ff_command) solver.pde $(ff_flags) | tee logs/freefem.log
-
-rebuild :
-	rm -f geometry.geo solver.pde
-	make geometry.geo solver.pde
 
 
 ##############
@@ -59,10 +67,7 @@ else
 	python $(bindir)/python/plot.py $(plot_flags) $(label)
 endif
 
-view.geo:
-	cpp -C -P -w -imacros config.h $(view) > $@
-
-view :
+view : view.geo
 	gmsh \
 	    -v 1000 \
 		-setstring field $(view_field) \

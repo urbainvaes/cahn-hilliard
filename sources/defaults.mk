@@ -19,7 +19,7 @@
 #endif
 
 #ifndef VIEW_FIELD
-#define VIEW_FIELD all
+#define VIEW_FIELD phi
 #endif
 
 #ifndef VIEW_STARTAT
@@ -42,4 +42,3 @@ video_fps    = VIDEO_FPS
 view_field   = VIEW_FIELD
 view_startat = VIEW_STARTAT
 view_step    = VIEW_STEP
-
