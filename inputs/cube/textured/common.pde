@@ -1,5 +1,6 @@
 // CONTACT ANGLE VISUALIZATION
-mesh ThSquare; ThSquare = gmshload("square.msh");
+
+mesh ThSquare; ThSquare = gmshload(xstr(HERE/square.msh));
 fespace VhSquare(ThSquare,P1);
 VhSquare contactAngleVh = contactAngles * 180 / pi;
 {
@@ -16,12 +17,15 @@ VhSquare contactAngleVh = contactAngles * 180 / pi;
   }
 }
 
-system("./bin/msh2pos square.msh contactAngle.msh");
+system(xstr(GITROOT/sources/bin/msh2pos HERE/square.msh contactAngle.msh));
 
 // PRINT OF DROPLET
 VhSquare printPlane;
-system("mkdir -p" + " output/print");
+system("mkdir -p" + " output/print output/cubeDynamics");
 
 {
-    ofstream dummy("output/print/lengthPrint.txt");
+    ofstream dummy1("output/cubeDynamics/lengthPrint.txt");
+    ofstream dummy2("output/cubeDynamics/massPhi1.txt");
+    ofstream dummy3("output/cubeDynamics/positionX.txt");
+    ofstream dummy4("output/cubeDynamics/positionY.txt");
 };

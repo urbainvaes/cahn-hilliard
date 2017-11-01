@@ -7,4 +7,4 @@ VIEW = views/view-2d.py
 NS = 1
 ADAPT = 1
 PLOT = 0
-BEFORE = 1
+SOLVER_BEFORE = 1

@@ -5,5 +5,5 @@
 #define ADAPT
 #define NS
 
-#define BEFORE GITROOT/inputs/med/simple/before.pde
+#define SOLVER_BEFORE GITROOT/inputs/med/simple/before.pde
 #define SOLVER_CONF GITROOT/inputs/med/simple/problem.pde

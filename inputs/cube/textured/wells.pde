@@ -7,13 +7,14 @@ Pe = 10000;
 Cn = 0.02;
 
 // Parameters for adaptation
-hmin = 0.005;
+/* hmin = 0.005; */
+hmin = 0.05;
 hmax = 0.05;
 
 // INITIAL CONDITION
-real radius = 0.24*Lx;
-real x1 = 0.5*Lx;
-real y1 = 0.5*Ly;
+real radius = 0.24*CONFIG_Lx;
+real x1 = 0.5*CONFIG_Lx;
+real y1 = 0.5*CONFIG_Ly;
 real z1 = 0;
 func droplet1 = - tanh((sqrt((x - x1)^2 + (y - y1)^2 + (z - z1)^2) - radius)/Cn);
 func phi0 = droplet1;
@@ -35,11 +36,16 @@ real frequencyY = 4;
 real amplitude = pi/6;
 real biasX = 0.0;
 real biasY = 0.0;
+
+// Stripes
+// func contactAngles = theta0 + amplitude * cos(frequency*pi*(x - biasX)) * ((label == 1) + (label == 2));
+
+// Wells
 func contactAngles = theta0 + amplitude * cos(frequencyX*pi*(x - biasX)) * cos(frequencyY*pi*(y - biasY)) * ((label == 1) + (label == 2));
 
 // Parameters for input boundary
-real massInputByIteration = 0.00;
-real absMassFlux = massInputByIteration/(dt*pi*r^2);
+real massInputByIteration = 0;
+real absMassFlux = massInputByIteration/(dt*pi*CONFIG_r^2);
 real massFlux = absMassFlux;
 
 varf varPhiBoundary([phi1,mu1], [phi2,mu2]) =
