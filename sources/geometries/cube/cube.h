@@ -1,26 +1,32 @@
-Include "../macros-gmsh/square.geo";
-Include "../macros-gmsh/circle.geo";
-Include "../macros-gmsh/cube.geo";
+#ifndef CONFIG_Lx
+#define CONFIG_Lx 1
+#endif
 
-If (!Exists(Lx))
-  Lx = 1;
-EndIf
+#ifndef CONFIG_Ly
+#define CONFIG_Ly 1
+#endif
 
-If (!Exists(Ly))
-  Ly = 1;
-EndIf
 
-If (!Exists(Lz))
-  Lz = 1;
-EndIf
+#ifndef CONFIG_Lz
+#define CONFIG_Lz 1
+#endif
 
-If (!Exists(s))
-  s = 0.07;
-EndIf
+#ifndef CONFIG_s
+#define CONFIG_s 0.04
+#endif
 
-If (!Exists(r))
-  r = 0.1*Lx;
-EndIf
+#ifndef CONFIG_r
+#define CONFIG_r 0.1*Lx
+#endif
+
+Lx = CONFIG_Lx;
+Ly = CONFIG_Ly;
+Lz = CONFIG_Lz;
+s  = CONFIG_s;
+r  = CONFIG_r;
+
+#include "../macros-gmsh/circle.geo"
+#include "../macros-gmsh/cube.geo"
 
 // Outer cube
   dx   = Lx;
@@ -91,3 +97,5 @@ Color Gray
     Physical Surface{2}
   };
 }
+
+// vim:ft=gmsh:

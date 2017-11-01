@@ -583,8 +583,8 @@ for(int i = 0; i <= nIter; i++)
   #endif
   //}}}
   // After iteration {{{
-  #ifdef AFTER
-  #include xstr(AFTER)
+  #ifdef SOLVER_AFTER
+  #include xstr(SOLVER_AFTER)
   #endif
   {
       ofstream fdone("output/done/done-"+i+".txt");
@@ -595,8 +595,8 @@ for(int i = 0; i <= nIter; i++)
   if (i == nIter) break;
   //}}}
   // Before iteration {{{
-  #ifdef BEFORE
-  #include xstr(BEFORE)
+  #ifdef SOLVER_SOLVER_BEFORE
+  #include xstr(SOLVER_SOLVER_BEFORE)
   #endif
 
   if(i == 0) {

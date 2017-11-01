@@ -1,23 +1,31 @@
 ######################
 #  Useful variables  #
 ######################
-GITROOT   = $(shell git rev-parse --show-toplevel)
-bindir    = $(GITROOT)/sources/bin
-problem   = $(CURDIR:$(GITROOT)/tests/%=%)
+
+ # Root of repository
+git_root = $(shell git rev-parse --show-toplevel)
+
+# Directory of configuration file
+input_dir  = $(shell readlink -f config.h | xargs dirname)
+
+# Preprocessor flags
+cpp_flags = -P -DGITROOT=$(git_root) -DHERE=$(input_dir) -imacros config.h
+
+bindir    = $(git_root)/sources/bin
+problem   = $(CURDIR:$(git_root)/tests/%=%)
 label     = $(subst /,_,$(problem))
-cpp_flags = -P -DGITROOT=$(GITROOT) -imacros config.h
 
 #########################
 #  Include ssh targets  #
 #########################
-include $(GITROOT)/sources/ssh.mk
+include $(git_root)/sources/ssh.mk
 
 
 ###################################
 #  Include problem configuration  #
 ###################################
 config.mk : config.h
-	cpp $(cpp_flags) $(GITROOT)/sources/defaults.mk > $@
+	cpp $(cpp_flags) $(git_root)/sources/defaults.mk > $@
 
 include config.mk
 
@@ -53,7 +61,7 @@ output/mesh.msh : geometry.geo
 #  Run FreeFem++  #
 ###################
 
-run : solver.pde
+run : solver.pde output/mesh.msh
 	$(ff_command) solver.pde $(ff_flags) | tee logs/freefem.log
 
 
