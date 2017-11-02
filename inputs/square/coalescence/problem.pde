@@ -2,8 +2,8 @@ dt    = 1e-3;
 nIter = 1e4;
 // muGradPhi = 1;
 
-hmin = 0.005;
-hmax = 0.05;
+hmin = SOLVER_HMIN;
+hmax = SOLVER_HMAX;
 
 Pe = 500;
 Cn = 5e-3;

@@ -7,3 +7,5 @@
 #define LY 0.5
 
 #define SOLVER_CONF HERE/problem.pde
+#define SOLVER_HMIN 0.004
+#define SOLVER_HMAX 10*0.004
