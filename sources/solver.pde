@@ -89,9 +89,6 @@ V2h [phi, mu];
 Vh phiOld, muOld;
 VhOut phiOut, muOut;
 
-// Adaptation
-Vh adaptField;
-
 #ifdef NS
 Vh u = 0, v = 0, w = 0, p = 0;
 Vh uOld, vOld, wOld;
@@ -546,10 +543,18 @@ for(int i = 0; i <= nIter; i++)
 
   savegmsh("output/phi/phi-" + i + ".msh", "Cahn-Hilliard", i*dt, i, phiOld);
   savegmsh("output/mu/mu-" + i + ".msh", "Chemical potential", i*dt, i, muOld);
+  savefreefem("output/phi/phi-" + i + ".txt", phiOld);
+  savefreefem("output/mu/mu-" + i + ".txt", muOld);
 
   #ifdef NS
   savegmsh("output/pressure/pressure-" + i + ".msh", "Pressure", i*dt, i, p);
   SAVEGMSHVEC(DIMENSION)("output/velocity/velocity-" + i + ".msh", "Velocity field", i*dt, i, UVEC);
+  savefreefem("output/pressure/pressure-" + i + ".txt", p);
+  savefreefem("output/u/u-" + i + ".txt", u);
+  savefreefem("output/v/v-" + i + ".txt", v);
+  #if DIMENSION == 3
+  savefreefem("output/w/w-" + i + ".txt", w);
+  #endif
   #endif
 
   #ifdef ADAPT
@@ -719,8 +724,5 @@ for(int i = 0; i <= nIter; i++)
   cout << "Solve Navier-Stokes system: " << tic() << endl;
   #endif
   //}}}
-// Iteration variables {{{
-
-// }}}
 }
 //}}}

@@ -109,7 +109,7 @@ For i In {startAt:maxIters}
      EndIf
 
      For j In {0:viewsPerStep-1}
-       View[viewsBefore + (i-startAt)*viewsPerStep + j].Visible = 0;
+       View[baseIndex + j].Visible = 0;
      EndFor
   EndIf
 EndFor

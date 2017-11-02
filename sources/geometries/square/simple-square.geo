@@ -8,9 +8,11 @@
 #define LY 1
 #endif
 
-If (!Exists(s))
-  s = 0.03;
-EndIf
+#ifndef GEOMETRY_S
+#define GEOMETRY_S 0.03
+#endif
+
+s = GEOMETRY_S;
 
 // Define domain
 Point(1) = {0,  0,  0, s};

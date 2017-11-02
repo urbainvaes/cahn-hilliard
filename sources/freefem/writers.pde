@@ -22,3 +22,13 @@ macro savemesh(filename, vh, th) {
   writeNodes(currentMesh, vh);
   writeElements(currentMesh, vh, th);
 } //EOM
+
+macro savefreefem(filename, field) {
+    ofstream data(filename);
+    data << field[];
+} //EOM
+
+macro readfreefem(filename, field) {
+    ifstream data(filename);
+    data >> field[];
+} //EOM
