@@ -15,7 +15,8 @@ bunch :
 #######################################################
 #  Install and uninstall a test to the current bunch  #
 #######################################################
-list_inputs = $(shell find inputs -name "*.h" | sed 's!inputs/!!;s!\(-\|/\)config.h!!')
+regex ?= ".*"
+list_inputs = $(shell find inputs -name "*.h" -regex $(regex) | sed 's!inputs/!!;s!\(-\|/\)config.h!!')
 choose_input = $(shell echo "$(list_inputs)" | tr " " "\n" | $(fzf) -m --bind=ctrl-t:toggle)
 
 install :
@@ -36,7 +37,7 @@ select :
 #################################
 link :
 	mkdir -p $(addprefix tests/$(problem)/, output pictures logs);
-	ln -srf $(PWD)/$(shell find inputs -name "*.h" | grep $(problem)) tests/$(problem)/config.h
+	ln -srf $(PWD)/$(shell find inputs -name "*.h" | grep "$(problem)[.-]") tests/$(problem)/config.h
 	ln -srft tests/$(problem) sources/Makefile
 
 unlink :

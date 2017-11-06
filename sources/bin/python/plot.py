@@ -164,5 +164,3 @@ if args.parallel:
 else:
     for iteration in iterations:
         plot_iteration(iteration)
-
-# vim:ts=2:sts=2:sw=2

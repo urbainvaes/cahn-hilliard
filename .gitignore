@@ -5,7 +5,6 @@
 /media
 
 /.vifm*
-/.bunches/*
 
 *.backup
 !*.gitkeep

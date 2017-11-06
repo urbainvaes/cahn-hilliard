@@ -1,3 +1,5 @@
+OUTDATED
+
 # Cahn-Hilliard solver
 This repository contains the code we developped to simulate the Cahn-Hilliard equation in 2 and 3 dimensions.
 

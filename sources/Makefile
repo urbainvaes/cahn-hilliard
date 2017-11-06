@@ -8,8 +8,8 @@ git_root = $(shell git rev-parse --show-toplevel)
 # Directory of configuration file
 input_dir  = $(shell readlink -f config.h | xargs dirname)
 
-# Preprocessor flags
-cpp_flags = -P -DGITROOT=$(git_root) -DHERE=$(input_dir) -imacros config.h
+# Preprocessor f lags
+cpp_flags = -P -DGITROOT=$(git_root) -DHERE=$(input_dir) -imacros $(git_root)/sources/macros.h -imacros config.h
 
 bindir    = $(git_root)/sources/bin
 problem   = $(CURDIR:$(git_root)/tests/%=%)
@@ -24,7 +24,7 @@ include $(git_root)/sources/ssh.mk
 ###################################
 #  Include problem configuration  #
 ###################################
-config.mk : config.h
+config.mk : config.h $(git_root)/sources/defaults.mk 
 	cpp $(cpp_flags) $(git_root)/sources/defaults.mk > $@
 
 include config.mk
@@ -69,11 +69,7 @@ run : solver.pde output/mesh.msh
 #  Graphics  #
 ##############
 plots :
-ifeq ($(dimension), 3)
-	gmsh -display :0 $(VIEW) -setnumber video 1
-else
-	python $(bindir)/python/plot.py $(plot_flags) $(label)
-endif
+	$(plot_exec) $(plot_program) $(plot_flags)
 
 view : view.geo
 	gmsh \

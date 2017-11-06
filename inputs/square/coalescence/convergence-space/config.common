@@ -6,4 +6,4 @@
 #define LX 2
 #define LY 0.5
 
-#define SOLVER_CONF HERE/problem.pde
+#define SOLVER_CONF HERE/../problem.pde

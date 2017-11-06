@@ -142,6 +142,7 @@ real dtMax = dt;
 
 // Mesh parameters
 int aniso = 0;
+#ifdef ADAPT
 #if DIMENSION == 2
 real hmax = 0.01;
 real hmin = 0.001;
@@ -150,6 +151,7 @@ real hmin = 0.001;
 #if DIMENSION == 3
 real hmax = 0.1;
 real hmin = hmax/20;
+#endif
 #endif
 
 //}}}
