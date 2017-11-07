@@ -44,8 +44,8 @@ view.geo : $(view) config.h
 	cpp $(cpp_flags) $(view) > $@
 
 rebuild :
-	rm -f geometry.geoo soolver.pde view.geo config.mk
-	make config.mk goeometry.geo solver.pde view.geo
+	rm -f geometry.geo solver.pde view.geo config.mk
+	make config.mk geometry.geo solver.pde view.geo
 
 
 ###############################
