@@ -7,4 +7,4 @@
 #define ADAPT
 #define OD2
 
-#define SOLVER_CONF GITROOT/inputs/square/contactAngle/problem.pde
+#define SOLVER_CONF HERE/problem.pde
