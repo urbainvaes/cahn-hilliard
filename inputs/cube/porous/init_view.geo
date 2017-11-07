@@ -1,4 +1,4 @@
-Merge "fineMesh.msh";
+Merge xstr(HERE/fineMesh.msh);
 
 Hide {
   Surface {
@@ -11,4 +11,3 @@ Hide {
     Physical Surface{11}
   };
 }
-
