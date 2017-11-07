@@ -24,7 +24,7 @@ include $(git_root)/sources/ssh.mk
 ###################################
 #  Include problem configuration  #
 ###################################
-config.mk : config.h $(git_root)/sources/defaults.mk 
+config.mk : config.h $(git_root)/sources/defaults.mk
 	cpp $(cpp_flags) $(git_root)/sources/defaults.mk > $@
 
 include config.mk
@@ -44,8 +44,8 @@ view.geo : $(view) config.h
 	cpp $(cpp_flags) $(view) > $@
 
 rebuild :
-	rm -f geometry.geo solver.pde view.geo
-	make geometry.geo solver.pde view.geo
+	rm -f geometry.geoo soolver.pde view.geo config.mk
+	make config.mk goeometry.geo solver.pde view.geo
 
 
 ###############################
