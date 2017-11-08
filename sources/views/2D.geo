@@ -36,18 +36,19 @@ For i In {0:maxIters}
   iteration = startAt + i*step;
   If (FileExists(Sprintf("output/done/done-%g.txt", iteration)))
     If (adapt == 1)
+      If (i != 0)
+        View[i-1].Visible = 0;
+      EndIf
       Merge StrCat("output/", field, "/", field, Sprintf("-%g.pos", iteration));
       View[i].Visible = 1;
     EndIf
     If (adapt == 0)
       Merge StrCat("output/", field, "/", field, Sprintf("-%g.msh", iteration));
+      View[0].TimeStep += 1;
     EndIf
     Draw;
     If(video == 1)
       Print StrCat("pictures/", field, "/", field, Sprintf("-%04g.png", iteration));
-    EndIf
-    If (adapt == 1)
-      View[i].Visible = 0;
     EndIf
   EndIf
   If (!FileExists(Sprintf("output/done/done-%g.txt", iteration)))
