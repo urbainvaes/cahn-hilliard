@@ -145,84 +145,6 @@ class mesh() :
           self.maxeid = max(self.maxeid, j)
       l = fin.readline()
 
-  def read_data(self, filename):
-    fin = open(filename, "r");
-    l = fin.readline()
-    vmap = {}
-    entitymap = {}
-    while l != "" :
-      w = l.split()
-      if w[0] == "$MeshFormat":
-        l = fin.readline().split()
-        if float(l[0]) == 3.:
-          self.useFormat3 = True
-        elif int(float(l[0])) == 2 :
-          self.useFormat3 = False
-        else :
-          print("error : cannot read mesh format " + l[0])
-        l = fin.readline()
-      elif w[0] == "$PhysicalNames" :
-        n = int(fin.readline())
-        for i in range(n) :
-          dim, tag, name = fin.readline().split()
-          self.physicals[int(dim)][name[1:-1]] = int(tag)
-        fin.readline()
-      elif w[0] == "$Entities" and self.useFormat3:
-        n = int(fin.readline())
-        for i in range(n) :
-          l = fin.readline().split()
-          j, dim, nphys = int(l[0]), int(l[1]), int(l[2])
-          self.entities.append(mesh.entity(j, dim, [int(ip) for ip in l[3:3+nphys]]))
-          entitymap[(dim, j)] = self.entities[-1]
-        fin.readline()
-      elif w[0] == "$Nodes" :
-        n = int(fin.readline())
-        for i in range(n) :
-          if self.useFormat3 :
-            (j, x, y, z, t) = fin.readline().split()
-          else :
-            (j, x, y, z) = fin.readline().split()
-          self.vertices.append([float(x), float(y), float(z), int(j)])
-          vmap[int(j)] = self.vertices[-1]
-      elif w[0] == "$Elements" :
-        n = int(fin.readline())
-        for i in range(n) :
-          l = fin.readline().split()
-          if self.useFormat3 :
-            j, t, e, nf = int(l[0]), int(l[1]), int(l[2]), int(l[3])
-            nv = gmshType.Type[t].numVertices
-            vertices = [vmap[int(i)] for i in l[4:4+nv]]
-            partition = [int(i) for i in l[5 + nv : 5 + nv + int(l[4 + nv])]] if nf > nv else []
-          else :
-            j, t, nf, p, e = int(l[0]), int(l[1]), int(l[2]), int(l[3]), int(l[4])
-            vertices = [vmap[int(i)] for i in l[3 + nf:]]
-            partition = [int(i) for i in l[6 : 6 + int(l[5])]] if nf > 2 else []
-          edim = gmshType.Type[t].baseType.dimension
-          entity = entitymap.get((edim, e), None)
-          if not self.useFormat3 and not entity:
-            entity = mesh.entity(e, edim, [p])
-            self.entities.append(entity)
-            entitymap[(edim, e)] = entity
-          entity.elements.append(mesh.element(gmshType.Type[t], vertices, partition, j))
-          self.maxeid = max(self.maxeid, j)
-      elif w[0] == "$NodeData" :
-        print("Reading the data (works only in 1D)")
-        string_tags = []
-        real_tags = []
-        integer_tags = []
-        for i in range (int(fin.readline())):
-            string_tags.append(fin.readline())
-        for i in range (int(fin.readline())):
-            real_tags.append(float(fin.readline()))
-        for i in range (int(fin.readline())):
-            integer_tags.append(int(fin.readline()))
-        for i in range(len(self.vertices)):
-            l = fin.readline().split()
-            self.data.append(float(l[1]))
-      l = fin.readline()
-
-      pass
-  
   def getPhysicalNumber(self, dim, name) :
     t = self.physicals[dim].get(name, None)
     if not t :
@@ -277,7 +199,7 @@ class mesh() :
     for entity in self.entities:
       if entity.dimension == 2:
         for e in entity.elements:
-          triangles.append([v[3] - 1 for v in e.vertices]) 
+          triangles.append([v[3] - 1 for v in e.vertices])
           # -1 because gmsh starts indexing at 1
     triangulation = tri.Triangulation(x, y, triangles)
     return triangulation
