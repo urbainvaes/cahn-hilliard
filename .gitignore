@@ -9,4 +9,6 @@
 *.backup
 !*.gitkeep
 
+.bunches/.installed
+
 Session.vim
