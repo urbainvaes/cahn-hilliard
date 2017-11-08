@@ -1,6 +1,6 @@
 // Define initial conditions
 real radius = 0.2;
-real x1 = LX/2;
+real x1 = LX/2.;
 real y1 = 0.0;
 func droplet = ((x - x1)^2 + (y - y1)^2 < radius^2 ? 2 : 0);
 
