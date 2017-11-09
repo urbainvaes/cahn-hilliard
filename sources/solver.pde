@@ -608,7 +608,9 @@ for(int i = 0; i <= nIter; i++)
 
   if(i == 0) {
       ofstream file("parameters.txt",append);
+      #ifndef TIMEADAPT
       file << "dt = " << dt << endl;
+      #endif
       file << "Pe = " << Pe << endl;
       file << "Cn = " << Cn << endl;
       #ifdef ADAPT
@@ -621,7 +623,9 @@ for(int i = 0; i <= nIter; i++)
       #endif
   }
   else {
+      #ifndef TIMEADAPT
       if (doesMatch("parameters.txt","dt")) dt = getMatch("parameters.txt","dt =");
+      #endif
       if (doesMatch("parameters.txt","Pe")) Pe = getMatch("parameters.txt","Pe =");
       if (doesMatch("parameters.txt","Cn")) Cn = getMatch("parameters.txt","Cn =");
       #ifdef ADAPT
@@ -650,6 +654,7 @@ for(int i = 0; i <= nIter; i++)
   bool recalculate = true;
   while(recalculate) {
   #endif
+
   matrix matPhiBulk = varPhi(V2h, V2h);
   matrix matPhiBoundary = varPhiBoundary(V2h, V2h);
   matrix matPhi = matPhiBulk + matPhiBoundary;
