@@ -37,7 +37,7 @@ select :
 #################################
 link :
 	mkdir -p $(addprefix tests/$(problem)/, output pictures logs);
-	ln -srf $(PWD)/$(shell find inputs -name "*.h" | grep "$(problem)[.-]") tests/$(problem)/config.h
+	ln -srf $(PWD)/$(shell find inputs -name "*.h" | grep "$(problem)[/-]") tests/$(problem)/config.h
 	ln -srft tests/$(problem) sources/Makefile
 
 unlink :
@@ -55,6 +55,7 @@ fetch :
 ################################
 
 # Execute command for all problems in individual directories
+# e.g. make all command='rm -rf tests/$${p}/pictures
 all :
 	for p in $$(cat .bunches/$(bunch)); do $(command); done
 

@@ -2603,11 +2603,8 @@ Plane Surface(9)  = {1302};
 Plane Surface(10) = {1304};
 Plane Surface(11) = {1306};
 Plane Surface(12) = {1308};
-Plane Surface(13) = {1310};
-Plane Surface(14) = {1312};
-Plane Surface(15) = {1314};
-Plane Surface(16) = {1317};
-Plane Surface(17) = {1316, 1310, 1312, 1314};
+Plane Surface(13) = {1317};
+Plane Surface(14) = {1316, 1310, 1312, 1314};
 
 Physical Line(1) = {
   1,    2,    3,    4,    5,    6,    7,    8,    9,    10,   11,   12,   13,
@@ -2712,4 +2709,4 @@ Physical Line(1) = {
   1281, 1282, 1283, 1284, 1285
 };
 
-Physical Surface(1) = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17};
+Physical Surface(1) = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14};

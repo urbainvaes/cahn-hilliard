@@ -19,7 +19,7 @@ varf varPhiBoundary([phi1,mu1], [phi2,mu2]) =
 dt = 1e-3;
 
 // Number of iterations
-nIter = 3000;
+nIter = 500;
 
 // Dimensionless numbers
 Pe = 1;
