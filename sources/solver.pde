@@ -133,8 +133,17 @@ real dt = 8.0*Pe*Cn^4;
 real nIter = 300;
 real time = 0;
 #ifdef TIMEADAPT
-real maxDeltaE = 0.005;
-real minDeltaE = 0.001;
+
+#ifndef SOLVER_MAX_DELTA_E
+#define SOLVER_MAX_DELTA_E  0.005
+#endif
+real maxDeltaE = SOLVER_MAX_DELTA_E;
+
+#ifndef SOLVER_MIN_DELTA_E
+#define SOLVER_MIN_DELTA_E  0.001
+#endif
+real minDeltaE = SOLVER_MIN_DELTA_E;
+
 real factor = 2;
 real dtMin = dt/20;
 real dtMax = dt;

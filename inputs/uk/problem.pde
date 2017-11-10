@@ -19,7 +19,7 @@
 #endif
 
 dt    = SOLVER_DT;
-nIter = 1e3;
+nIter = 100e3;
 
 #ifdef ADAPT
 hmin = SOLVER_HMIN;
@@ -32,7 +32,7 @@ Cn = SOLVER_CN;
 real r = 0.25;
 real x1 = 0.65;
 real x2 = 1.35;
-func phi0 = 0;
+func phi0 = 0.1;
 func mu0  = 0;
 [phi, mu] = [phi0, mu0];
 

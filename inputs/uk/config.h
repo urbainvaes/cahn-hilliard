@@ -7,3 +7,5 @@
 #define DIMENSION 2
 
 #define SOLVER_CONF HERE/problem.pde
+#define SOLVER_MAX_DELTA_E 0.05
+#define SOLVER_MIN_DELTA_E 0.01
