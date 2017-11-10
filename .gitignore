@@ -10,5 +10,6 @@
 !*.gitkeep
 
 .bunches/.installed
+.bunches/default
 
 Session.vim
