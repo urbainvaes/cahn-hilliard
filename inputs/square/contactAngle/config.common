@@ -5,5 +5,10 @@
 #define LX 1
 #define LY 0.5
 #define ADAPT
+#define OD2
 
 #define SOLVER_CONF HERE/problem.pde
+
+#define TIMEADAPT
+#define SOLVER_MAX_DELTA_E 0.05
+#define SOLVER_MIN_DELTA_E 0.01

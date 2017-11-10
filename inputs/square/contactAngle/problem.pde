@@ -15,12 +15,14 @@ varf varPhiBoundary([phi1,mu1], [phi2,mu2]) =
   + int1d(Th,1) (wetting(contactAngles) * phi1 * phiOld * mu2)
 ;
 
-// Time step
-dt = 1e-3;
-
-// Number of iterations
-nIter = 500;
-
 // Dimensionless numbers
 Pe = 1;
 Cn = 5e-3;
+
+// Time adatpation
+dt = 2*Cn^4*Pe;
+dtMin = dt/2^6;
+dtMax = dt*2^6;
+
+// Number of iterations
+nIter = 10000;

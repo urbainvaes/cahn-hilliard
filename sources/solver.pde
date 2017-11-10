@@ -129,9 +129,10 @@ real epsilonR2 = 2;
 #endif
 
 // Time parameters
-real dt = 8.0*Pe*Cn^4;
+real dt = 2.0*Pe*Cn^4;
 real nIter = 300;
 real time = 0;
+
 #ifdef TIMEADAPT
 
 #ifndef SOLVER_MAX_DELTA_E
@@ -145,8 +146,8 @@ real maxDeltaE = SOLVER_MAX_DELTA_E;
 real minDeltaE = SOLVER_MIN_DELTA_E;
 
 real factor = 2;
-real dtMin = dt/20;
-real dtMax = dt;
+real dtMin = dt/2^4;
+real dtMax = dt*2^4;
 #endif
 
 // Mesh parameters
@@ -672,15 +673,23 @@ for(int i = 0; i <= nIter; i++)
   real[int] rhsPhi = rhsPhiBulk + rhsPhiBoundary;
   set(matPhi,solver=sparsesolver SPARAMS);
   phi[] = matPhi^-1*rhsPhi;
+
   #ifdef TIMEADAPT
   real dissipationFreeEnergy = dt*INTEGRAL(DIMENSION)(Th) ((1/Pe)*(Grad(mu)'*Grad(mu)));
-  real dtTooLarge = (dissipationFreeEnergy > maxDeltaE && dt > dtMin);
-  real dtTooLow   = (dissipationFreeEnergy < minDeltaE && dt < dtMax);
+  bool dtTooLarge = (dissipationFreeEnergy > maxDeltaE && dt > dtMin);
+  bool dtTooLow   = (dissipationFreeEnergy < minDeltaE && dt < dtMax);
 
   cout << "Dissipations of free energy: " << dissipationFreeEnergy << endl;
   recalculate = dtTooLarge;
-  if (dtTooLarge) dt = dt/factor;
-  if (dtTooLow) dt = dt*factor;
+  if (dtTooLarge) {
+    dt = dt/factor;
+    cout << "Dissipations of free energy is too large (" << dissipationFreeEnergy << ") : " 
+      << "refining time step." << endl;
+  }
+  if (dtTooLow) {
+    cout << "Time step is too small, increasing..." << endl;
+    dt = dt*factor;
+  }
   if (recalculate) {
     cout << "Dissipations of free energy is too large (" << dissipationFreeEnergy << ") : refining time step." << endl;
     cout << "Recalculating solution with dt=" << dt << endl; }
