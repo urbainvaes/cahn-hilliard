@@ -2,6 +2,102 @@
 #define xstr(s) str(s)
 #define str(s) #s
 // }}}
+// Define default values for variables {{{
+
+// Cahn-Hilliard parameters
+#ifndef SOLVER_PE
+#define SOLVER_PE 1
+#endif
+
+#ifndef SOLVER_CN
+#define SOLVER_CN 1e-2
+#endif
+
+#ifndef SOLVER_ENERGYB
+#define SOLVER_ENERGYB Cn
+#endif
+
+#ifndef SOLVER_ENERGYA
+#define SOLVER_ENERGYA 1/Cn
+#endif
+
+
+// Navier-Stokes parameters
+#ifndef SOLVER_RE
+#define SOLVER_RE 1
+#endif
+
+#ifndef SOLVER_WE
+#define SOLVER_WE 100
+#endif
+
+#ifndef SOLVER_MUGRADPHI
+#define SOLVER_MUGRADPHI 1
+#endif
+
+
+// Mesh adaptation
+#if DIMENSION == 2
+  #ifndef SOLVER_HMIN
+  #define SOLVER_HMIN 0.001
+  #endif
+
+  #ifndef SOLVER_HMAX
+  #define SOLVER_HMAX 0.01
+  #endif
+#endif
+
+#if DIMENSION == 3
+  #ifndef SOLVER_HMIN
+  #define SOLVER_HMIN 0.01
+  #endif
+
+  #ifndef SOLVER_HMAX
+  #define SOLVER_HMAX 0.1
+  #endif
+#endif
+
+#ifndef SOLVER_ANISO
+#define SOLVER_ANISO 1
+#endif
+
+
+// Time parameters
+#ifndef SOLVER_DT
+#define 2.0*Pe*Cn^4
+#endif
+
+#ifndef SOLVER_TIME
+#define SOLVER_TIME 0
+#endif
+
+#ifndef SOLVER_NITER
+#define SOLVER_NITER 300
+#endif
+
+
+// Time adaptation
+#ifndef SOLVER_DTMIN
+#define SOLVER_DTMIN dt/2^4
+#endif
+
+#ifndef SOLVER_DTMAX
+#define SOLVER_DTMAX dt*2^4
+#endif
+
+#ifndef SOLVER_FACTOR
+#define SOLVER_FACTOR 2
+#endif
+
+#ifndef SOLVER_MAX_DELTA_E
+#define SOLVER_MAX_DELTA_E  0.005
+#endif
+
+#ifndef SOLVER_MIN_DELTA_E
+#define SOLVER_MIN_DELTA_E  0.001
+#endif
+
+// }}}
 // Include auxiliary files and load modules {{{
 #include "freefem/write-mesh.pde"
 #include "freefem/writers.pde"
@@ -102,16 +198,16 @@ Vh theta;
 // Declare default parameters {{{
 
 // Cahn-Hilliard parameters
-real Pe = 1;
-real Cn = 0.01;
-func energyA = 1/Cn;
-func energyB = Cn;
+real Pe = SOLVER_PE;
+real Cn = SOLVER_CN;
+func energyA = SOLVER_ENERGYA;
+func energyB = SOLVER_ENERGYB;
 
 // Navier-Stokes parameters
 #ifdef NS
-real Re = 1;
-real We = 100;
-real muGradPhi = 1;
+real Re = SOLVER_RE;
+real We = SOLVER_WE;
+real muGradPhi = SOLVER_MUGRADPHI;
 #endif
 
 #ifdef GRAVITY
@@ -129,39 +225,23 @@ real epsilonR2 = 2;
 #endif
 
 // Time parameters
-real dt = 2.0*Pe*Cn^4;
-real nIter = 300;
-real time = 0;
+real dt = SOLVER_DT;
+real nIter = SOLVER_NITER;
+real time = SOLVER_TIME;
 
 #ifdef TIMEADAPT
-
-#ifndef SOLVER_MAX_DELTA_E
-#define SOLVER_MAX_DELTA_E  0.005
-#endif
 real maxDeltaE = SOLVER_MAX_DELTA_E;
-
-#ifndef SOLVER_MIN_DELTA_E
-#define SOLVER_MIN_DELTA_E  0.001
-#endif
 real minDeltaE = SOLVER_MIN_DELTA_E;
-
-real factor = 2;
-real dtMin = dt/2^4;
-real dtMax = dt*2^4;
+real factor = SOLVER_FACTOR;
+real dtMin = SOLVER_DTMIN;
+real dtMax = SOLVER_DTMAX;
 #endif
 
 // Mesh parameters
-int aniso = 0;
 #ifdef ADAPT
-#if DIMENSION == 2
-real hmax = 0.01;
-real hmin = 0.001;
-#endif
-
-#if DIMENSION == 3
-real hmax = 0.1;
-real hmin = hmax/20;
-#endif
+int aniso = SOLVER_ANISO;
+real hmax = SOLVER_HMIN;
+real hmin = SOLVER_HMAX;
 #endif
 
 //}}}
@@ -683,7 +763,7 @@ for(int i = 0; i <= nIter; i++)
   recalculate = dtTooLarge;
   if (dtTooLarge) {
     dt = dt/factor;
-    cout << "Dissipations of free energy is too large (" << dissipationFreeEnergy << ") : " 
+    cout << "Dissipations of free energy is too large (" << dissipationFreeEnergy << ") : "
       << "refining time step." << endl;
   }
   if (dtTooLow) {

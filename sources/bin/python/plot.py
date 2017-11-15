@@ -82,9 +82,6 @@ for f in fields:
     if not os.path.isdir(directory):
         os.makedirs(directory)
 
-# for iteration in iterations:
-
-
 def plot_iteration(iteration):
     # Load mesh
     print("Generating plots for iteration " + str(iteration) + ".")
