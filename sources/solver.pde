@@ -142,9 +142,6 @@ system("mkdir -p" + " output/done"
                   + " output/w"
                   + " output/pressure"
                   #endif
-                  #ifdef ELECTRO
-                  + " output/potential"
-                  #endif
                  );
 //}}}
 // Import the mesh {{{
@@ -191,9 +188,6 @@ Vh uOld, vOld, wOld;
 VhOut uOut, vOut, wOut, pOut;
 #endif
 
-#ifdef ELECTRO
-Vh theta;
-#endif
 //}}}
 // Declare default parameters {{{
 
@@ -208,20 +202,6 @@ func energyB = SOLVER_ENERGYB;
 real Re = SOLVER_RE;
 real We = SOLVER_WE;
 real muGradPhi = SOLVER_MUGRADPHI;
-#endif
-
-#ifdef GRAVITY
-real rho1 = -1;
-real rho2 = 1;
-
-real gx = 1e8;
-real gy = 0;
-#endif
-
-// Electric parameters
-#ifdef ELECTRO
-real epsilonR1 = 1;
-real epsilonR2 = 2;
 #endif
 
 // Time parameters
@@ -272,27 +252,7 @@ macro Normal [N.x, N.y, N.z] //EOM
 // Include problem file {{{
 #include xstr(SOLVER_CONF)
 //}}}
-// Calculate dependent parameters {{{
-// real Re1 = 1;
-// real Re2 = 1;
-// #ifdef NS
-// Vh Re = 0.5*(Re1*(1 - phi) + Re2*(1 + phi));
-// #endif
-#ifdef GRAVITY
-Vh rho = 0.5*(rho1*(1 - phi) + rho2*(1 + phi));
-#endif
-//}}}
 // Define variational formulations {{{
-// Poisson for electric potential {{{
-#ifdef ELECTRO
-varf varPotential(theta,test) =
-  INTEGRAL(DIMENSION)(Th)(
-    0.5*(epsilonR1*(1 - phi) + epsilonR2*(1 + phi))
-    * Grad(theta)'*Grad(test)
-    )
-  ;
-#endif
-//}}}
 // Cahn-Hilliard {{{
 varf varPhi([phi1,mu1], [phi2,mu2]) =
   // Bilinear form
@@ -320,9 +280,6 @@ varf varPhi([phi1,mu1], [phi2,mu2]) =
     #ifdef OD2
     - 0.5 * energyB * (Grad(phiOld)'*Grad(mu2))
     #endif
-    #ifdef ELECTRO
-    + 0.25 * (epsilonR2 - epsilonR1) * (Grad(theta)'*Grad(theta)) * mu2
-    #endif
     )
 ;
 //}}}
@@ -336,9 +293,6 @@ varf varU(u,test) =
         (convect([UOLDVEC],-dt,uOld)/dt)*test
         + muGradPhi     * (1/We)*mu*dx(phi)*test
         - (1-muGradPhi) * (1/We)*phi*dx(mu)*test
-        #ifdef GRAVITY
-        + gx*phi*test
-        #endif
         )
 ;
 varf varV(v,test) =
@@ -349,9 +303,6 @@ varf varV(v,test) =
         (convect([UOLDVEC],-dt,vOld)/dt)*test
         + muGradPhi     * (1/We)*mu*dy(phi)*test
         - (1-muGradPhi) * (1/We)*phi*dy(mu)*test
-        #ifdef GRAVITY
-        + gy*phi*test
-        #endif
         )
 ;
 #if DIMENSION == 3
@@ -363,9 +314,6 @@ varf varW(w,test) =
       (convect([UOLDVEC],-dt,wOld)/dt)*test
       + muGradPhi     * (1/We)*mu*dz(phi)*test
       - (1-muGradPhi) * (1/We)*mu*dz(phi)*test
-      #ifdef GRAVITY
-      + gz*phi*test
-      #endif
     )
 ;
 #endif
@@ -453,9 +401,6 @@ for(int i = 0; i <= nIter; i++)
       #endif
     #endif
 
-    #ifdef ELECTRO
-      theta = theta;
-    #endif
     cout << "Adapt mesh: " << tic() << endl;
   #endif
   // }}}
@@ -500,9 +445,6 @@ for(int i = 0; i <= nIter; i++)
   real bulkFreeEnergy  = INTEGRAL(DIMENSION)(Th) (
       Cn * 0.5 * (Grad(phi)'*Grad(phi))
       + (1/Cn) * 0.25 * (phi^2 - 1)^2
-      #ifdef ELECTRO
-      - 0.25 * (epsilonR1*(1 - phi) + epsilonR2*(1 + phi)) * Grad(theta)'*Grad(theta)
-      #endif
       );
   real wallFreeEnergy = INTEGRAL(BOUNDARYDIM)(Th,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20) (wetting(contactAngles) * (phi - phi^3/3));
   real freeEnergyOld = freeEnergy;
@@ -728,17 +670,6 @@ for(int i = 0; i <= nIter; i++)
       #endif
   }
   // }}}
-  // Poisson for electric potential {{{
-  #ifdef ELECTRO
-  matrix matPotentialBulk = varPotential(Vh, Vh);
-  matrix matPotentialBoundary = varBoundaryPotential(Vh, Vh);
-  matrix matPotential = matPotentialBulk + matPotentialBoundary;
-  real[int] rhsPotential = varBoundaryPotential(0, Vh);
-  set(matPotential,solver=sparsesolver SPARAMS);
-  theta[] = matPotential^-1*rhsPotential;
-  cout << "Solve Poisson equation for electric potential: " << tic() << endl;
-  #endif
-  //}}}
   // Cahn-Hilliard equation {{{
   #ifdef TIMEADAPT
   bool recalculate = true;
