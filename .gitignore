@@ -12,4 +12,6 @@
 .bunches/.installed
 .bunches/default
 
+__pycache__
+
 Session.vim
