@@ -195,14 +195,22 @@ class mesh() :
   def export_matplotlib_triangulation(self):
     x = [v[0] for v in self.vertices]
     y = [v[1] for v in self.vertices]
-    triangles = []
+    triangles_data = []
+    triangles_mesh = []
     for entity in self.entities:
       if entity.dimension == 2:
         for e in entity.elements:
-          triangles.append([v[3] - 1 for v in e.vertices])
-          # -1 because gmsh starts indexing at 1
-    triangulation = tri.Triangulation(x, y, triangles)
-    return triangulation
+          triangles_mesh.append([e.vertices[i][3] - 1 for i in [0, 1, 2]])
+          if e.etype.name == 'MSH_TRI_3':
+            triangles_data.append([v[3] - 1 for v in e.vertices])
+          if e.etype.name == 'MSH_TRI_6':
+            tri4 = [[0, 3, 5], [3, 1, 4], [3, 4, 5], [5, 4, 2]]  # See gmsh manual
+            for t in tri4:
+              triangles_data.append([e.vertices[i][3] - 1 for i in t])
+            # -1 because gmsh starts indexing at 1
+    triangulation_data = tri.Triangulation(x, y, triangles_data)
+    triangulation_mesh = tri.Triangulation(x, y, triangles_mesh)
+    return triangulation_data, triangulation_mesh
 
   def get_matplotlib_triangulation_edges(self):
     edges = []

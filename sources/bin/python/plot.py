@@ -35,7 +35,7 @@ args = parser.parse_args()
 # Extract boundary of domain
 initial_mesh = mesh.mesh(args.input + '/mesh.msh')
 edges = initial_mesh.get_matplotlib_triangulation_edges()
-initial_triangulation = initial_mesh.export_matplotlib_triangulation()
+initial_triangulation, nil = initial_mesh.export_matplotlib_triangulation()
 
 # Calculate limits size of domain
 x = initial_triangulation.x
@@ -82,11 +82,39 @@ for f in fields:
     if not os.path.isdir(directory):
         os.makedirs(directory)
 
+# Guess if file exist
+adaptation = os.path.isfile(args.input + '/mesh/mesh-0.msh')
+
+# Guess if high order elements were used
+file_ho = args.input + '/high-order-mesh.msh'
+high_order = os.path.isfile(file_ho)
+
+# Set triangulation for data in plots
+if adaptation:
+    print('Detected mesh adaptation\n')
+else:
+    if high_order:
+        print('Detected a high order mesh\n')
+        triangulation_data, triangulation_mesh = \
+            mesh.mesh(file_ho).export_matplotlib_triangulation()
+    else:
+        print('Using initial gmsh mesh for plots\n')
+        triangulation_mesh = initial_triangulation
+        triangulation_data = initial_triangulation
+
+
 def plot_iteration(iteration):
-    # Load mesh
+
     print("Generating plots for iteration " + str(iteration) + ".")
-    file_mesh = args.input + '/mesh/mesh-' + str(iteration) + '.msh'
-    triangulation = mesh.mesh(file_mesh).export_matplotlib_triangulation()
+
+    # Load mesh if needed
+    if adaptation:
+        file_mesh = args.input + '/mesh/mesh-' + str(iteration) + '.msh'
+        tri_data, tri_mesh = \
+            mesh.mesh(file_mesh).export_matplotlib_triangulation()
+    else:
+        tri_data = triangulation_data
+        tri_data = triangulation_mesh
 
     # Load data files
     data = {}
@@ -116,27 +144,28 @@ def plot_iteration(iteration):
 
     # Mesh
     if args.mesh:
-        plt.triplot(triangulation, lw=1, color='k')
+        plt.triplot(tri_mesh, lw=1, color='k')
 
     # Interface
-    plt.tricontour(triangulation, data['phi'], levels=[0], colors='k')
+    plt.tricontour(tri_data, data['phi'], levels=[0], colors='k')
 
     for f in fields:
         if f == 'phi':
             tricontourf = plt.tricontourf(
-                triangulation, data[f], 40, cmap='blue_green', extend='both')
+                tri_data, data[f], 40,
+                cmap='blue_green', extend='both')
         elif f == 'mu':
             tricontourf = plt.tricontourf(
-                triangulation, data[f], 40, cmap='jet')
+                tri_data, data[f], 40, cmap='jet')
         elif f == 'pressure':
             tricontourf = plt.tricontourf(
-                triangulation, data[f], 40, cmap='jet')
+                tri_data, data[f], 40, cmap='jet')
         elif f == 'velocity':
             vx = [data[f][i][0] for i in range(len(data[f]))]
             vy = [data[f][i][1] for i in range(len(data[f]))]
             abs_v = [np.sqrt(vx[i] * vx[i] + vy[i] * vy[i])
                      for i in range(len(data[f]))]
-            tricontourf = plt.tricontourf(triangulation, abs_v, 40)
+            tricontourf = plt.tricontourf(tri_data, abs_v, 40)
         colorbar = plt.colorbar(
             tricontourf, orientation=c_orientation, fraction=0.05, pad=0.05)
         for c in tricontourf.collections:

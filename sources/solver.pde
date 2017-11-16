@@ -4,6 +4,12 @@
 // }}}
 // Define default values for variables {{{
 
+// Parameters of finite element space
+#ifndef SOLVER_POLYNOMIAL_ORDER
+#define SOLVER_POLYNOMIAL_ORDER P1
+#endif
+
+
 // Cahn-Hilliard parameters
 #ifndef SOLVER_PE
 #define SOLVER_PE 1
@@ -77,16 +83,16 @@
 
 
 // Time adaptation
+#ifndef SOLVER_FACTOR
+#define SOLVER_FACTOR 2
+#endif
+
 #ifndef SOLVER_DTMIN
-#define SOLVER_DTMIN dt/2^4
+#define SOLVER_DTMIN dt/SOLVER_FACTOR^4
 #endif
 
 #ifndef SOLVER_DTMAX
-#define SOLVER_DTMAX dt*2^4
-#endif
-
-#ifndef SOLVER_FACTOR
-#define SOLVER_FACTOR 2
+#define SOLVER_DTMAX dt*SOLVER_FACTOR^4
 #endif
 
 #ifndef SOLVER_MAX_DELTA_E
@@ -166,16 +172,16 @@ MESH ThOut; ThOut = GMSHLOAD("output/mesh.msh");
 #else
 #define ARGPERIODIC
 #endif
-fespace Vh(Th,P1 ARGPERIODIC);
-fespace V2h(Th,[P1,P1] ARGPERIODIC);
+fespace Vh(Th,SOLVER_POLYNOMIAL_ORDER ARGPERIODIC);
+fespace V2h(Th,[SOLVER_POLYNOMIAL_ORDER,SOLVER_POLYNOMIAL_ORDER] ARGPERIODIC);
 #endif
 
 #if DIMENSION == 3
-fespace Vh(Th,P1), V2h(Th,[P1,P1]);
+fespace Vh(Th,SOLVER_POLYNOMIAL_ORDER), V2h(Th,[SOLVER_POLYNOMIAL_ORDER,SOLVER_POLYNOMIAL_ORDER]);
 #endif
 
 // Mesh on which to project solution for visualization
-fespace VhOut(ThOut,P1);
+fespace VhOut(ThOut,SOLVER_POLYNOMIAL_ORDER);
 
 // Phase field
 V2h [phi, mu];
@@ -186,6 +192,10 @@ VhOut phiOut, muOut;
 Vh u = 0, v = 0, w = 0, p = 0;
 Vh uOld, vOld, wOld;
 VhOut uOut, vOut, wOut, pOut;
+#endif
+
+#if SOLVER_POLYNOMIAL_ORDER == P2
+savemesh("output/high-order-mesh.msh", Vh, Th);
 #endif
 
 //}}}
