@@ -8,6 +8,7 @@
 #ifndef SOLVER_POLYNOMIAL_ORDER
 #define SOLVER_POLYNOMIAL_ORDER 1
 #endif
+
 #define AUX_AUX_SOLVER_ELEMENTS(order) P ## order
 #define AUX_SOLVER_ELEMENTS(order) AUX_AUX_SOLVER_ELEMENTS(order)
 #define SOLVER_ELEMENTS AUX_SOLVER_ELEMENTS(SOLVER_POLYNOMIAL_ORDER)
@@ -42,6 +43,12 @@
 
 #ifndef SOLVER_MUGRADPHI
 #define SOLVER_MUGRADPHI 1
+#endif
+
+
+// Solver method
+#ifndef SOLVER_METHOD
+#define SOLVER_METHOD 1
 #endif
 
 
@@ -273,9 +280,10 @@ varf varPhi([phi1,mu1], [phi2,mu2]) =
     phi1*phi2/dt
     + (1/Pe)*(Grad(mu1)'*Grad(phi2))
     - mu1*mu2
-    #ifdef OD2
+    #if SOLVER_METHOD == OD2
     + 0.5 * energyB * (Grad(phi1)'*Grad(mu2))
-    #else
+    #endif
+    #if SOLVER_METHOD == OD1
     + energyB * (Grad(phi1)'*Grad(mu2))
     #endif
     + energyA * 0.5*3*phiOld*phiOld*phi1*mu2
@@ -290,7 +298,7 @@ varf varPhi([phi1,mu1], [phi2,mu2]) =
     #endif
     + energyA * 0.5*phiOld*phiOld*phiOld*mu2
     + energyA * 0.5*phiOld*mu2
-    #ifdef OD2
+    #if SOLVER_METHOD == OD2
     - 0.5 * energyB * (Grad(phiOld)'*Grad(mu2))
     #endif
     )

@@ -10,7 +10,7 @@
 #define GEOMETRY GITROOT/sources/geometries/square/simple-square.geo
 
 // Solver
-#define OD2
+#define SOLVER_METHOD OD1
 #define SOLVER_CONF HERE/problem.pde
 #define SOLVER_POLYNOMIAL_ORDER 1
 
