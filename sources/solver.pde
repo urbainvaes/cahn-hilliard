@@ -6,8 +6,11 @@
 
 // Parameters of finite element space
 #ifndef SOLVER_POLYNOMIAL_ORDER
-#define SOLVER_POLYNOMIAL_ORDER P1
+#define SOLVER_POLYNOMIAL_ORDER 1
 #endif
+#define AUX_AUX_SOLVER_ELEMENTS(order) P ## order
+#define AUX_SOLVER_ELEMENTS(order) AUX_AUX_SOLVER_ELEMENTS(order)
+#define SOLVER_ELEMENTS AUX_SOLVER_ELEMENTS(SOLVER_POLYNOMIAL_ORDER)
 
 
 // Cahn-Hilliard parameters
@@ -172,16 +175,16 @@ MESH ThOut; ThOut = GMSHLOAD("output/mesh.msh");
 #else
 #define ARGPERIODIC
 #endif
-fespace Vh(Th,SOLVER_POLYNOMIAL_ORDER ARGPERIODIC);
-fespace V2h(Th,[SOLVER_POLYNOMIAL_ORDER,SOLVER_POLYNOMIAL_ORDER] ARGPERIODIC);
+fespace Vh(Th,SOLVER_ELEMENTS ARGPERIODIC);
+fespace V2h(Th,[SOLVER_ELEMENTS,SOLVER_ELEMENTS] ARGPERIODIC);
 #endif
 
 #if DIMENSION == 3
-fespace Vh(Th,SOLVER_POLYNOMIAL_ORDER), V2h(Th,[SOLVER_POLYNOMIAL_ORDER,SOLVER_POLYNOMIAL_ORDER]);
+fespace Vh(Th,SOLVER_ELEMENTS), V2h(Th,[SOLVER_ELEMENTS,SOLVER_ELEMENTS]);
 #endif
 
 // Mesh on which to project solution for visualization
-fespace VhOut(ThOut,SOLVER_POLYNOMIAL_ORDER);
+fespace VhOut(ThOut,SOLVER_ELEMENTS);
 
 // Phase field
 V2h [phi, mu];
@@ -194,7 +197,7 @@ Vh uOld, vOld, wOld;
 VhOut uOut, vOut, wOut, pOut;
 #endif
 
-#if SOLVER_POLYNOMIAL_ORDER == P2
+#if SOLVER_POLYNOMIAL_ORDER == 2
 savemesh("output/high-order-mesh.msh", Vh, Th);
 #endif
 
