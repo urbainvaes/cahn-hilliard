@@ -348,7 +348,8 @@ varf varP(p,test) =
 
 // CLear and create output file
 {
-    ofstream file("output/thermodynamics.txt");
+    ofstream thermodynamics("output/thermodynamics.txt");
+    thermodynamics << "iteration time time_step mass wall_free_energy interior_free_energy total_free_energy diffusive_mass_increment diffusive_free_energy_increment" << endl;
     ofstream params("parameters.txt");
 };
 
@@ -579,6 +580,18 @@ for(int i = 0; i <= nIter; i++)
        << "We = "            << We   << endl
        #endif
        << endl;
+  {
+      ofstream thermodynamics("output/thermodynamics.txt", append);
+      thermodynamics << i << " "
+                     << time << " "
+                     << dt << " "
+                     << massPhi << " "
+                     << wallFreeEnergy << " "
+                     << bulkFreeEnergy << " "
+                     << freeEnergy << " "
+                     << diffusiveFluxMass * dt << " "
+                     << diffusiveFluxFreeEnergy * dt << endl;
+  }
   // }}}
   cout << "Calculate macroscopic variables: " << tic() << endl;
   // }}}
