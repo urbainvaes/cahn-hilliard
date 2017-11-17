@@ -230,8 +230,8 @@ real dtMax = SOLVER_DTMAX;
 // Mesh parameters
 #ifdef ADAPT
 int aniso = SOLVER_ANISO;
-real hmax = SOLVER_HMIN;
-real hmin = SOLVER_HMAX;
+real hmin = SOLVER_HMIN;
+real hmax = SOLVER_HMAX;
 #endif
 
 //}}}
