@@ -73,7 +73,7 @@
 
 // Time parameters
 #ifndef SOLVER_DT
-#define 2.0*Pe*Cn^4
+#define SOLVER_DT 2.0*Pe*Cn^4
 #endif
 
 #ifndef SOLVER_TIME
@@ -91,11 +91,11 @@
 #endif
 
 #ifndef SOLVER_DTMIN
-#define SOLVER_DTMIN dt/SOLVER_FACTOR^4
+#define SOLVER_DTMIN SOLVER_DT/SOLVER_FACTOR^4
 #endif
 
 #ifndef SOLVER_DTMAX
-#define SOLVER_DTMAX dt*SOLVER_FACTOR^4
+#define SOLVER_DTMAX SOLVER_DT*SOLVER_FACTOR^4
 #endif
 
 #ifndef SOLVER_MAX_DELTA_E
