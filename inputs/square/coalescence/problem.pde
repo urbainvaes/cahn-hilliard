@@ -22,7 +22,7 @@ dt    = SOLVER_DT;
 nIter = SOLVER_NITER;
 // muGradPhi = 1;
 
-#ifdef ADAPT
+#ifdef SOLVER_ADAPT
 hmin = SOLVER_HMIN;
 hmax = SOLVER_HMAX;
 #endif

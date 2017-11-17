@@ -11,7 +11,7 @@
 
 // Solver
 #define SOLVER_METHOD OD1
-#define SOLVER_CONF HERE/problem.pde
+#define PROBLEM_CONF HERE/problem.pde
 #define SOLVER_POLYNOMIAL_ORDER 1
 
 // Dimensionless numbers
@@ -19,12 +19,12 @@
 #define SOLVER_CN 5e-3
 
 // Mesh adaptation
-#define ADAPT
+#define SOLVER_ADAPT
 #define SOLVER_HMIN 0.001
 #define SOLVER_HMAX 0.01
 
 // Time adatpation
-#define TIMEADAPT
+#define SOLVER_TIMEADAPT
 #define SOLVER_FACTOR 2
 #define SOLVER_MAX_DELTA_E 0.05
 #define SOLVER_MIN_DELTA_E 0.01

@@ -1,4 +1,4 @@
-#ifndef ADAPT
+#ifndef SOLVER_ADAPT
 adapt = 0;
 #else
 adapt = 1;

@@ -229,7 +229,7 @@ real dt = SOLVER_DT;
 real nIter = SOLVER_NITER;
 real time = SOLVER_TIME;
 
-#ifdef TIMEADAPT
+#ifdef SOLVER_TIMEADAPT
 real maxDeltaE = SOLVER_MAX_DELTA_E;
 real minDeltaE = SOLVER_MIN_DELTA_E;
 real factor = SOLVER_FACTOR;
@@ -238,7 +238,7 @@ real dtMax = SOLVER_DTMAX;
 #endif
 
 // Mesh parameters
-#ifdef ADAPT
+#ifdef SOLVER_ADAPT
 int aniso = SOLVER_ANISO;
 real hmin = SOLVER_HMIN;
 real hmax = SOLVER_HMAX;
@@ -270,7 +270,7 @@ macro Normal [N.x, N.y, N.z] //EOM
 #define SAVEGMSHVEC(dim) AUX_SAVEGMSHVEC(dim)
 //}}}
 // Include problem file {{{
-#include xstr(SOLVER_CONF)
+#include xstr(PROBLEM_CONF)
 //}}}
 // Define variational formulations {{{
 // Cahn-Hilliard {{{
@@ -388,7 +388,7 @@ for(int i = 0; i <= nIter; i++)
 {
   tic();
   // Adapt mesh {{{
-  #ifdef ADAPT
+  #ifdef SOLVER_ADAPT
     int nAdapts = ((i == 0) ? 3 : 1);
 
     for(int iAdapt = 0; iAdapt < nAdapts; iAdapt++)
@@ -579,7 +579,7 @@ for(int i = 0; i <= nIter; i++)
        << "dt = "            << dt   << endl
        << "Pe = "            << Pe   << endl
        << "Cn = "            << Cn   << endl
-       #ifdef ADAPT
+       #ifdef SOLVER_ADAPT
        << "hmin = "          << hmin << endl
        << "hmax = "          << hmax << endl
        #endif
@@ -625,7 +625,7 @@ for(int i = 0; i <= nIter; i++)
   #endif
   #endif
 
-  #ifdef ADAPT
+  #ifdef SOLVER_ADAPT
   savemesh("output/mesh/mesh-" + i + ".msh", Vh, Th);
   system(xstr(GITROOT) + "/sources/bin/msh2pos output/mesh/mesh-" + i + ".msh"
               + " output/phi/phi-" + i + ".msh"
@@ -674,12 +674,12 @@ for(int i = 0; i <= nIter; i++)
 
   if(i == 0) {
       ofstream file("parameters.txt",append);
-      #ifndef TIMEADAPT
+      #ifndef SOLVER_TIMEADAPT
       file << "dt = " << dt << endl;
       #endif
       file << "Pe = " << Pe << endl;
       file << "Cn = " << Cn << endl;
-      #ifdef ADAPT
+      #ifdef SOLVER_ADAPT
       file << "hmin = " << hmin << endl;
       file << "hmax = " << hmax << endl;
       #endif
@@ -689,12 +689,12 @@ for(int i = 0; i <= nIter; i++)
       #endif
   }
   else {
-      #ifndef TIMEADAPT
+      #ifndef SOLVER_TIMEADAPT
       if (doesMatch("parameters.txt","dt")) dt = getMatch("parameters.txt","dt =");
       #endif
       if (doesMatch("parameters.txt","Pe")) Pe = getMatch("parameters.txt","Pe =");
       if (doesMatch("parameters.txt","Cn")) Cn = getMatch("parameters.txt","Cn =");
-      #ifdef ADAPT
+      #ifdef SOLVER_ADAPT
       if (doesMatch("parameters.txt","hmin")) hmin = getMatch("parameters.txt","hmin =");
       if (doesMatch("parameters.txt","hmax")) hmax = getMatch("parameters.txt","hmax =");
       #endif
@@ -705,7 +705,7 @@ for(int i = 0; i <= nIter; i++)
   }
   // }}}
   // Cahn-Hilliard equation {{{
-  #ifdef TIMEADAPT
+  #ifdef SOLVER_TIMEADAPT
   bool recalculate = true;
   while(recalculate) {
   #endif
@@ -719,7 +719,7 @@ for(int i = 0; i <= nIter; i++)
   set(matPhi,solver=sparsesolver SPARAMS);
   phi[] = matPhi^-1*rhsPhi;
 
-  #ifdef TIMEADAPT
+  #ifdef SOLVER_TIMEADAPT
   real dissipationFreeEnergy = dt*INTEGRAL(DIMENSION)(Th) ((1/Pe)*(Grad(mu)'*Grad(mu)));
   bool dtTooLarge = (dissipationFreeEnergy > maxDeltaE && dt > dtMin);
   bool dtTooLow   = (dissipationFreeEnergy < minDeltaE && dt < dtMax);

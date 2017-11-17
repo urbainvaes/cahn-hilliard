@@ -3,8 +3,8 @@
 #define VIEW GITROOT/sources/views/3D.geo
 
 #define OD2
-#define ADAPT
-#define TIMEADAPT
+#define SOLVER_ADAPT
+#define SOLVER_TIMEADAPT
 #define DIMENSION 3
 
-#define SOLVER_CONF HERE/problem.pde
+#define PROBLEM_CONF HERE/problem.pde

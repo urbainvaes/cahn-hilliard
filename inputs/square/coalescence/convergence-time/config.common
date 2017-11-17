@@ -6,7 +6,7 @@
 
 #define LX 2
 #define LY 0.5
-##define ADAPT
+##define SOLVER_ADAPT
 
 #define SOLVER_CN 0.1
-#define SOLVER_CONF HERE/../problem.pde
+#define PROBLEM_CONF HERE/../problem.pde

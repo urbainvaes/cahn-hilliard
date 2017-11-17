@@ -9,14 +9,14 @@ load "isoline"
 // Load fine mesh
 mesh Th;
 
-#ifdef ADAPT
+#ifdef SOLVER_ADAPT
 Th = gmshload("output/mesh.msh");
 #else
 Th = gmshload("../0/output/mesh.msh");
 #endif
 
 // Meshes for each of the meshsizes
-#ifdef ADAPT
+#ifdef SOLVER_ADAPT
 mesh Th0  = gmshload("output/mesh.msh");
 mesh Th1  = gmshload("output/mesh.msh");
 mesh Th2  = gmshload("output/mesh.msh");
@@ -28,7 +28,7 @@ mesh Th5  = gmshload("output/mesh.msh");
 // Define functional spaces on fine mesh
 fespace Vh(Th,P1);
 
-#ifdef ADAPT
+#ifdef SOLVER_ADAPT
 fespace Vh0  (Th0,  P1);
 fespace Vh1  (Th1,  P1);
 fespace Vh2  (Th2,  P1);
@@ -38,7 +38,7 @@ fespace Vh5  (Th5,  P1);
 #endif
 
 // Define fields
-#ifdef ADAPT
+#ifdef SOLVER_ADAPT
 Vh0 phi0; Vh1 phi1; Vh2 phi2; Vh3 phi3; Vh4 phi4; Vh5 phi5;
 #else
 Vh phi0, phi1, phi2, phi3, phi4, phi5;
@@ -69,7 +69,7 @@ for(int index = 0; index <= nIndex; index++)
 {
     cout << "Calculating errors for iteration " + index + " on the coarsest mesh." << endl;
 
-    #ifdef ADAPT
+    #ifdef SOLVER_ADAPT
     Th0  = gmshload("../0/output/mesh/mesh-" + index * (2^5) + ".msh"); phi0 = phi0;
     Th1  = gmshload("../1/output/mesh/mesh-" + index * (2^4) + ".msh"); phi1 = phi1;
     Th2  = gmshload("../2/output/mesh/mesh-" + index * (2^3) + ".msh"); phi2 = phi2;

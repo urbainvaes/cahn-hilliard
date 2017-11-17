@@ -2,8 +2,8 @@
 #define VIEW GITROOT/sources/views/2D.geo
 #define DIMENSION 2
 
-#define ADAPT
+#define SOLVER_ADAPT
 #define LX 2
 #define LY 0.5
 
-#define SOLVER_CONF HERE/../problem.pde
+#define PROBLEM_CONF HERE/../problem.pde

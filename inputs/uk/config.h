@@ -2,12 +2,12 @@
 #define VIEW GITROOT/sources/views/2D.geo
 
 #define OD2
-/* #define ADAPT */
-#define TIMEADAPT
+/* #define SOLVER_ADAPT */
+#define SOLVER_TIMEADAPT
 #define DIMENSION 2
 
 #define SOLVER_POLYNOMIAL_ORDER 2
-#define SOLVER_CONF HERE/problem.pde
+#define PROBLEM_CONF HERE/problem.pde
 #define SOLVER_MAX_DELTA_E 0.1
 #define SOLVER_MIN_DELTA_E 0.05
 #define SOLVER_NITER 100e3
