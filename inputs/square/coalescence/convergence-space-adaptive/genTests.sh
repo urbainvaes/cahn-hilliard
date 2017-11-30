@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 
-minMeshSize="0.001"
+minMeshSize="0.002"
 ratio="sqrt(2)"
-quotient=10
+quotient=5
 
-for (( i = 0; i < 12; i++ )); do
+for (( i = 0; i < 10; i++ )); do
     problem_name="${i}-config.h"
     h_min="${minMeshSize}*pow(${ratio},${i})"
     cat > ${problem_name} \

@@ -10,26 +10,6 @@
 #define SOLVER_HMAX 10*SOLVER_HMIN
 #endif
 
-#ifndef SOLVER_NITER
-#define SOLVER_NITER 10
-#endif
-
-#ifndef SOLVER_CN
-#define SOLVER_CN 5e-3
-#endif
-
-dt    = SOLVER_DT;
-nIter = SOLVER_NITER;
-// muGradPhi = 1;
-
-#ifdef SOLVER_ADAPT
-hmin = SOLVER_HMIN;
-hmax = SOLVER_HMAX;
-#endif
-
-Pe = 500;
-Cn = SOLVER_CN;
-
 real r = 0.25;
 real x1 = 0.65;
 real x2 = 1.35;
