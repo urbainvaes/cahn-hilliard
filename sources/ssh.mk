@@ -15,7 +15,7 @@ endif
 
 script-% :
 	echo "#!/bin/bash"                       >  $@
-	echo "#PBS -m ae"                        >> $@
+	echo "#PBS -m a"                         >> $@
 	echo "#PBS -q standard"                  >> $@
 	echo "#PBS -N $(problem)-$*"             >> $@
 	echo "$(initCommand)"                    >> $@
