@@ -2,7 +2,7 @@ DIMENSION = 2
 GEOMETRY = problem.geo
 VIEW = views/view-2d.py
 
-ADAPT = 1
+SOLVER_ADAPT = 1
 PLOT = 0
 
 SOLVER_BEFORE = 1

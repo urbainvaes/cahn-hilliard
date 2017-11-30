@@ -1,5 +1,5 @@
 #define OD2
-#define ADAPT
+#define SOLVER_ADAPT
 #define DIMENSION 3
 
 #define INIT_VIEW HERE/init_view.geo
@@ -11,7 +11,7 @@
 #define CONFIG_r 0.1*CONFIG_Lx
 #define CONFIG_s 0.05
 
-#define   SOLVER_CONF     HERE/wells.pde
+#define   PROBLEM_CONF     HERE/wells.pde
 #define   SOLVER_BEFORE   HERE/before.pde
 #define   SOLVER_AFTER    HERE/after.pde
 

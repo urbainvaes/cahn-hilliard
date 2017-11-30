@@ -5,5 +5,5 @@ VIEW = view-cube-med.geo
 
 # Flags
 NS = 1
-ADAPT = 1
+SOLVER_ADAPT = 1
 PLOT = 0

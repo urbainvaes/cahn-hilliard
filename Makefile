@@ -3,7 +3,7 @@
 
 live     = .bunches/.installed
 bunch   ?= $(shell test -s $(live) && cat $(live) || echo default)
-problem ?= $(shell cat .bunches/$(bunch) | tail -1)
+problem ?= $(shell cat .bunches/.installed-$(bunch))
 fzf     ?= sources/bin/fzf-0.16.3-linux_386
 
 ###################
@@ -28,9 +28,7 @@ uninstall :
 
 # Select in bunch
 select :
-	@p=$$(cat .bunches/$(bunch) | $(fzf)); \
-	  test -n "$${p}" && sed -i "\#$${p}#d" .bunches/$(bunch) && \
-	  echo $${p} >> .bunches/$(bunch) || echo "No change";
+	cat .bunches/$(bunch) | $(fzf) > .bunches/.installed-$(bunch)
 
 #################################
 #  Set up environment for test  #

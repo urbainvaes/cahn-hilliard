@@ -3,4 +3,4 @@ GEOMETRY = square.geo
 PERIODICITY = spaces.pde
 PROBLEM = nucleation.pde
 VIEW = views/view-2d.py
-ADAPT = 1
+SOLVER_ADAPT = 1

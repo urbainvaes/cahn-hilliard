@@ -24,16 +24,20 @@ matplotlib.rc('text', usetex=True)
 
 # Load data from files
 titles = {'time': 'Time',
-          'iter': 'Iteration',
-          'timeStep': 'Time step',
+          'iteration': 'Iteration',
+          'time_step': 'Time step',
           'mass': 'Mass',
-          'bulkFree': 'Free energy',
-          'wallFree': 'Wall free energy',
-          'diffMass': 'Diffusive mass flux',
-          'diffFree': 'Diffusive free energy flux'}
+          'wall_free_energy': 'Wall free energy',
+          'interior_free_energy': 'Mixing energy',
+          'total_free_energy': 'Total free energy',
+          'diffusive_mass_increment': 'Diffusive mass increment',
+          'diffusive_free_energy_increment': 'Diffusive free energy increment'}
 
-data = {key: np.genfromtxt(args.input + '/macros/' + key + '.txt')
-        for key in titles}
+data_file = args.input + '/thermodynamics.txt'
+with open(data_file, 'r') as f:
+    keys = f.readline().strip().split(" ")
+data_aux = np.loadtxt(data_file, skiprows=1)
+data = {keys[i]: data_aux[:, i] for i in range(len(titles))}
 
 # Create figures
 output_dir = args.output + '/macros'
@@ -45,13 +49,14 @@ line_format = 'k.-'
 # vs iteration
 for key in data:
     plt.figure()
-    if key == 'timeStep':
-        plt.semilogy(data['iter'], data[key], line_format)
+    if key == 'time_step':
+        plt.plot(data['iteration'], data[key], line_format)
+        plt.yscale('log', basey=2)
     else:
-        plt.plot(data['iter'], data[key], line_format)
+        plt.plot(data['iteration'], data[key], line_format)
     plt.title(titles[key])
     plt.xlabel('Iteration')
-    plt.savefig(args.output + '/macros/iter-' + key + '.pdf',
+    plt.savefig(args.output + '/macros/iteration-' + key + '.pdf',
                 bbox_inches='tight')
     plt.close()
 

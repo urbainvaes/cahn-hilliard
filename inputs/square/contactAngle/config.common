@@ -1,14 +1,37 @@
-#define GEOMETRY GITROOT/sources/geometries/square/simple-square.geo
-#define VIEW GITROOT/sources/views/2D.geo
+// General
 #define DIMENSION 2
 
-#define LX 1
-#define LY 0.5
-#define ADAPT
-#define OD2
+// View
+#define VIEW GITROOT/sources/views/2D.geo
 
-#define SOLVER_CONF HERE/problem.pde
+// Geometry
+#define GEOMETRY_LX 1
+#define GEOMETRY_LY 0.5
+#define GEOMETRY GITROOT/sources/geometries/square/simple-square.geo
 
-#define TIMEADAPT
-#define SOLVER_MAX_DELTA_E 0.05
-#define SOLVER_MIN_DELTA_E 0.01
+// Solver
+#define SOLVER_METHOD OD1
+#define PROBLEM_CONF HERE/problem.pde
+#define SOLVER_POLYNOMIAL_ORDER 2
+
+// Dimensionless numbers
+#define SOLVER_PE 1
+#define SOLVER_CN 5e-3
+
+// Mesh adaptation
+#define SOLVER_ADAPT
+#define SOLVER_HMIN 0.001
+#define SOLVER_HMAX 0.01
+
+// Time adatpation
+#define SOLVER_TIMEADAPT
+#define SOLVER_FACTOR 2
+#define SOLVER_MAX_DELTA_E 0.005
+#define SOLVER_MIN_DELTA_E 0.001
+#define SOLVER_DTMIN SOLVER_DT/SOLVER_FACTOR^6
+#define SOLVER_DTMAX SOLVER_DT*SOLVER_FACTOR^6
+
+// Number of iterations
+#define SOLVER_NITER 10000
+
+// vim: ft=cpp
