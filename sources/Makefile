@@ -2,7 +2,7 @@
 #  Useful variables  #
 ######################
 
- # Root of repository
+# Root of repository
 git_root = $(shell git rev-parse --show-toplevel)
 
 # Directory of configuration file
@@ -14,6 +14,7 @@ cpp_flags = -P -DGITROOT=$(git_root) -DHERE=$(input_dir) -imacros $(git_root)/so
 bindir    = $(git_root)/sources/bin
 problem   = $(CURDIR:$(git_root)/tests/%=%)
 label     = $(subst /,_,$(problem))
+
 
 #########################
 #  Include ssh targets  #

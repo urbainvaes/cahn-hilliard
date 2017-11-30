@@ -1,11 +1,11 @@
 // Dimensions of square
 
-#ifndef LX
-#define LX 1
+#ifndef GEOMETRY_LX
+#define GEOMETRY_LX 1
 #endif
 
-#ifndef LY
-#define LY 1
+#ifndef GEOMETRY_LY
+#define GEOMETRY_LY 1
 #endif
 
 #ifndef GEOMETRY_S
@@ -16,9 +16,9 @@ s = GEOMETRY_S;
 
 // Define domain
 Point(1) = {0,  0,  0, s};
-Point(2) = {LX, 0,  0, s};
-Point(3) = {LX, LY, 0, s};
-Point(4) = {0,  LY, 0, s};
+Point(2) = {GEOMETRY_LX, 0,  0, s};
+Point(3) = {GEOMETRY_LX, GEOMETRY_LY, 0, s};
+Point(4) = {0,  GEOMETRY_LY, 0, s};
 
 Line(1) = {1,2};
 Line(2) = {2,3};
