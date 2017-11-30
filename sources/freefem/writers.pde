@@ -16,7 +16,7 @@ macro savegmsh3(filename, title, time, iteration, field1, field2, field3) {
   write3dData(data, title, time, iteration, field1, field2, field3);
 } //EOM
 
-macro savemesh(filename, vh, th) {
+macro savemeshgmsh(filename, vh, th) {
   ofstream currentMesh(filename);
   writeHeader(currentMesh);
   writeNodes(currentMesh, vh);
