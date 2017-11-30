@@ -58,7 +58,7 @@ video_fps    = VIDEO_FPS
 		#ifndef PLOT_PROGRAM
 			#define PLOT_PROGRAM GITROOT/sources/bin/python/plot.py
 			#ifndef PLOT_FLAGS
-				#define PLOT_FLAGS --parallel --extension "png" $(label)
+				#define PLOT_FLAGS --parallel --extension "png"
 			#endif
 		#endif
 	#endif

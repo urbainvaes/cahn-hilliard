@@ -17,3 +17,6 @@
 #define SOLVER_DT 2*Pe*Cn^4
 #define SOLVER_HMIN 0.05
 #define SOLVER_HMAX 0.5
+
+// Flags for plots
+#define PLOT_FLAGS --parallel --extension "png" --step 100

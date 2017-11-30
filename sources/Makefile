@@ -69,7 +69,7 @@ run : solver.pde output/mesh.msh
 #  Graphics  #
 ##############
 plots :
-	$(plot_exec) $(plot_program) $(plot_flags)
+	$(plot_exec) $(plot_program) $(plot_flags) $(label)
 
 view : view.geo
 	gmsh \
