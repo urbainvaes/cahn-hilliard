@@ -9,7 +9,12 @@ git_root = $(shell git rev-parse --show-toplevel)
 input_dir  = $(shell readlink -f config.h | xargs dirname)
 
 # Preprocessor f lags
-cpp_flags = -P -DGITROOT=$(git_root) -DHERE=$(input_dir) -imacros $(git_root)/sources/macros.h -imacros config.h
+cpp_flags = -P \
+			-DGITROOT=$(git_root) \
+			-DHERE=$(input_dir) \
+			-DHOSTNAME=$(shell hostname) \
+			-imacros $(git_root)/sources/macros.h \
+			-imacros config.h
 
 bindir    = $(git_root)/sources/bin
 problem   = $(CURDIR:$(git_root)/tests/%=%)
