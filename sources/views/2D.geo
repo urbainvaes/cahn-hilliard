@@ -44,7 +44,7 @@ For i In {0:maxIters}
     EndIf
     If (adapt == 0)
       Merge StrCat("output/", field, "/", field, Sprintf("-%g.msh", iteration));
-      View[0].TimeStep += 1;
+      View[0].TimeStep += step;
     EndIf
     Draw;
     If(video == 1)
