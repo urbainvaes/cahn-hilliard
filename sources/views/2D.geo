@@ -29,7 +29,12 @@ If(video == 1)
 EndIf
 
 If (adapt == 0)
-  Merge "output/mesh.msh";
+  If (FileExists(Sprintf("output/high-order-mesh.msh")))
+    Merge "output/high-order-mesh.msh";
+  EndIf
+  If (!FileExists(Sprintf("output/high-order-mesh.msh")))
+    Merge "output/mesh.msh";
+  EndIf
 EndIf
 
 For i In {0:maxIters}

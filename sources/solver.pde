@@ -28,7 +28,7 @@
 #endif
 
 #ifndef SOLVER_ENERGYA
-#define SOLVER_ENERGYA 1/Cn
+#define SOLVER_ENERGYA (1/Cn)
 #endif
 
 
@@ -80,7 +80,12 @@
 
 // Time parameters
 #ifndef SOLVER_DT
+#if SOLVER_METHOD == OD1
+#define SOLVER_DT 8.0*Pe*Cn^4
+#endif
+#if SOLVER_METHOD == OD2
 #define SOLVER_DT 2.0*Pe*Cn^4
+#endif
 #endif
 
 #ifndef SOLVER_TIME
@@ -138,7 +143,7 @@ load "tetgen"
 #endif
 
 #ifdef MUMPS
-load "MUMPS_FreeFem"
+load "MUMPS"
 string ssparams="nprow=1, npcol="+mpisize;
 #define SPARAMS , sparams=ssparams
 #else
@@ -184,6 +189,9 @@ MESH ThOut; ThOut = GMSHLOAD("output/mesh.msh");
 #endif
 fespace Vh(Th,SOLVER_ELEMENTS ARGPERIODIC);
 fespace V2h(Th,[SOLVER_ELEMENTS,SOLVER_ELEMENTS] ARGPERIODIC);
+#if SOLVER_POLYNOMIAL_ORDER == 2
+fespace VhLow(Th,P1 ARGPERIODIC);
+#endif
 #endif
 
 #if DIMENSION == 3
@@ -205,7 +213,7 @@ VhOut uOut, vOut, wOut, pOut;
 #endif
 
 #if SOLVER_POLYNOMIAL_ORDER == 2
-savemesh("output/high-order-mesh.msh", Vh, Th);
+savemeshgmsh("output/high-order-mesh.msh", Vh, Th);
 #endif
 
 //}}}
@@ -465,8 +473,8 @@ for(int i = 0; i <= nIter; i++)
   //}}}
   // Free energy {{{
   real bulkFreeEnergy  = INTEGRAL(DIMENSION)(Th) (
-      Cn * 0.5 * (Grad(phi)'*Grad(phi))
-      + (1/Cn) * 0.25 * (phi^2 - 1)^2
+      energyA * 0.25 * (phi^2 - 1)^2
+      + energyB * 0.5 * (Grad(phi)'*Grad(phi))
       );
   real wallFreeEnergy = INTEGRAL(BOUNDARYDIM)(Th,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20) (wetting(contactAngles) * (phi - phi^3/3));
   real freeEnergyOld = freeEnergy;
@@ -626,7 +634,10 @@ for(int i = 0; i <= nIter; i++)
   #endif
 
   #ifdef SOLVER_ADAPT
-  savemesh("output/mesh/mesh-" + i + ".msh", Vh, Th);
+  savemeshgmsh("output/mesh/mesh-" + i + ".msh", Vh, Th);
+  #if SOLVER_POLYNOMIAL_ORDER == 2
+    savemeshgmsh("output/mesh/low-order-mesh-" + i + ".msh", VhLow, Th);
+  #endif
   system(xstr(GITROOT) + "/sources/bin/msh2pos output/mesh/mesh-" + i + ".msh"
               + " output/phi/phi-" + i + ".msh"
               + " output/mu/mu-" + i + ".msh"
