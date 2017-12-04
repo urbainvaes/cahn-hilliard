@@ -28,7 +28,7 @@ uninstall :
 
 # Select in bunch
 select :
-	cat .bunches/$(bunch) | $(fzf) > .bunches/.installed-$(bunch)
+	cat .bunches/$(bunch) | $(fzf) > .bunches/.installed-$(bunch) || echo "No test selected"
 
 #################################
 #  Set up environment for test  #
