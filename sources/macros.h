@@ -1,8 +1,14 @@
 #define xstr(s) str(s)
 #define str(s) #s
 
-#define OD1 1
-#define OD2 2
+// Methods for solution
+#define E1 1
+#define E1MOD 2
+#define OD1 3
+#define OD2 4
+#define OD2MOD 5
+#define LM1 6
+#define LM2 7
 
 #define LOOP_1_1(BODY)
 #define LOOP_1_2(BODY) BODY(1)

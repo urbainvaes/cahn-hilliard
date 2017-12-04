@@ -204,7 +204,6 @@ fespace VhOut(ThOut,SOLVER_ELEMENTS);
 // Phase field
 V2h [phi, mu];
 Vh phiOld, muOld;
-VhOut phiOut, muOut;
 
 #ifdef NS
 Vh u = 0, v = 0, w = 0, p = 0;
@@ -279,6 +278,9 @@ macro Normal [N.x, N.y, N.z] //EOM
 //}}}
 // Include problem file {{{
 #include xstr(PROBLEM_CONF)
+#if SOLVER_METHOD == LM1 || SOLVER_METHOD == LM2
+Vh qOld = (phi*phi - 1);
+#endif
 //}}}
 // Define variational formulations {{{
 // Cahn-Hilliard {{{
@@ -288,14 +290,29 @@ varf varPhi([phi1,mu1], [phi2,mu2]) =
     phi1*phi2/dt
     + (1/Pe)*(Grad(mu1)'*Grad(phi2))
     - mu1*mu2
+    + energyA * mu2 *
+    #if SOLVER_METHOD == OD1 || SOLVER_METHOD == OD2 || SOLVER_METHOD == OD2MOD
+    (3*0.5*phiOld*phiOld*phi1 - 0.5*phi1)
+    #endif
+    #if SOLVER_METHOD == E1
+    (2*phi1)
+    #endif
+    #if SOLVER_METHOD == E1MOD
+    (phi1)
+    #endif
+    #if SOLVER_METHOD == LM1
+    (2*phiOld*phiOld*phi1)
+    #endif
+    + energyB *
     #if SOLVER_METHOD == OD2
-    + 0.5 * energyB * (Grad(phi1)'*Grad(mu2))
+    (0.5 * (Grad(phi1)'*Grad(mu2)))
     #endif
-    #if SOLVER_METHOD == OD1
-    + energyB * (Grad(phi1)'*Grad(mu2))
+    #if SOLVER_METHOD == OD2MOD
+    (0.5 + OD2MOD_THETA) * (Grad(phi1)'*Grad(mu2))
     #endif
-    + energyA * 0.5*3*phiOld*phiOld*phi1*mu2
-    - energyA *0.5*phi1*mu2
+    #if SOLVER_METHOD == OD1 || SOLVER_METHOD == LM1 || SOLVER_METHOD == E1 || SOLVER_METHOD == E1MOD
+    (Grad(phi1)'*Grad(mu2))
+    #endif
     )
   // Right-hand side
   + INTEGRAL(DIMENSION)(Th)(
@@ -304,10 +321,24 @@ varf varPhi([phi1,mu1], [phi2,mu2]) =
     #else
     phiOld*phi2/dt
     #endif
-    + energyA * 0.5*phiOld*phiOld*phiOld*mu2
-    + energyA * 0.5*phiOld*mu2
+    + energyA * mu2 *
+    #if SOLVER_METHOD == OD1 || SOLVER_METHOD == OD2 || SOLVER_METHOD == OD2MOD
+    (0.5*phiOld*phiOld*phiOld + 0.5*phiOld)
+    #endif
+    #if SOLVER_METHOD == E1
+    (-phiOld*phiOld*phiOld + 3*phiOld)
+    #endif
+    #if SOLVER_METHOD == E1MOD
+    (-phiOld*phiOld*phiOld + 2*phiOld)
+    #endif
+    #if SOLVER_METHOD == LM1
+    (2*phiOld*phiOld*phiOld - qOld*phiOld) // ! No multiplication by energyA of qOld term
+    #endif
     #if SOLVER_METHOD == OD2
-    - 0.5 * energyB * (Grad(phiOld)'*Grad(mu2))
+    + energyB * (- 0.5 * (Grad(phiOld)'*Grad(mu2)))
+    #endif
+    #if SOLVER_METHOD == OD2MOD
+    + energyB * (- (0.5 - OD2MOD_THETA) *  (Grad(phiOld)'*Grad(mu2)))
     #endif
     )
 ;
@@ -435,9 +466,6 @@ for(int i = 0; i <= nIter; i++)
   #endif
   // }}}
   // Update previous solution {{{
-  if (i != 0) {
-      time += dt;
-  }
   phiOld = phi;
   muOld = mu;
   #ifdef NS
@@ -804,6 +832,12 @@ for(int i = 0; i <= nIter; i++)
   #endif
   cout << "Solve Navier-Stokes system: " << tic() << endl;
   #endif
-  //}}}
+  // }}}
+  // Things to do at all iterations but the 0-th {{{
+  time += dt;
+  #if SOLVER_METHOD == LM1
+  qOld = qOld + 2 * (phi*phiOld - phiOld*phiOld);
+  #endif
+  // }}}
 }
 //}}}
