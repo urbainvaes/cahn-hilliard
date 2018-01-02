@@ -1,20 +1,7 @@
-// Iteration
-dt = 0.0008;
-nIter = 1000;
-
-// Dimensionless numbers
-Pe = 10000;
-Cn = 0.02;
-
-// Parameters for adaptation
-/* hmin = 0.005; */
-hmin = 0.05;
-hmax = 0.05;
-
 // INITIAL CONDITION
-real radius = 0.24*CONFIG_Lx;
-real x1 = 0.5*CONFIG_Lx;
-real y1 = 0.5*CONFIG_Ly;
+real radius = 0.24*GEOMETRY_LX;
+real x1 = 0.5*GEOMETRY_LX;
+real y1 = 0.5*GEOMETRY_LY;
 real z1 = 0;
 func droplet1 = - tanh((sqrt((x - x1)^2 + (y - y1)^2 + (z - z1)^2) - radius)/Cn);
 func phi0 = droplet1;
@@ -45,7 +32,7 @@ func contactAngles = theta0 + amplitude * cos(frequencyX*pi*(x - biasX)) * cos(f
 
 // Parameters for input boundary
 real massInputByIteration = 0;
-real absMassFlux = massInputByIteration/(dt*pi*CONFIG_r^2);
+real absMassFlux = massInputByIteration/(dt*pi*GEOMETRY_R^2);
 real massFlux = absMassFlux;
 
 varf varPhiBoundary([phi1,mu1], [phi2,mu2]) =

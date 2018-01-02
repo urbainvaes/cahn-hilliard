@@ -1,16 +1,3 @@
-// Iteration
-dt = 1e-3;
-nIter = 100000;
-
-// Dimensionless numbers
-Pe = 10000;
-Cn = 0.02;
-
-// Parameters for adaptation
-/* hmin = 0.005; */
-hmin = 0.01;
-hmax = 0.05;
-
 // INITIAL CONDITION
 real radius = 0.2;
 real x1 = 0.5;
