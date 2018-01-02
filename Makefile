@@ -64,6 +64,12 @@ all-% :
 clean-all :
 	rm -rf tests
 
+####################
+#  Push to remote  #
+####################
+push:
+	rsync -r --delete --exclude='/.git' --filter="dir-merge,- .gitignore" . uv113@macomp001.ma.ic.ac.uk:cahn-hilliard
+
 #################################
 #  Acts on last installed test  #
 #################################
