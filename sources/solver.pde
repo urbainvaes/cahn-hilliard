@@ -607,7 +607,7 @@ for(int i = 0; i <= nIter; i++)
       energyA * 0.25 * (phi^2 - 1)^2
       + energyB * 0.5 * (Grad(phi)'*Grad(phi))
       );
-  real wallFreeEnergy = INTEGRAL(BOUNDARYDIM)(Th,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20) (wetting(contactAngles) * (phi - phi^3/3));
+  real wallFreeEnergy = INTEGRAL(BOUNDARYDIM)(Th,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20) (wetting(contactAngles) * (phi^3/3 - phi));
   real freeEnergyOld = freeEnergy;
   freeEnergy = bulkFreeEnergy + wallFreeEnergy;
   real deltaFreeEnergy = freeEnergy - freeEnergyOld;
