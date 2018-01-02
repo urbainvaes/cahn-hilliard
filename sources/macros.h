@@ -10,6 +10,13 @@
 #define LM1 6
 #define LM2 7
 
+// Types of boundary condition
+#define MANUAL 0 // Default
+#define LINEAR 1
+#define CUBIC 2
+#define MODIFIED 3
+
+// Loop
 #define LOOP_1_1(BODY)
 #define LOOP_1_2(BODY) BODY(1)
 #define LOOP_1_3(BODY) LOOP_1_2(BODY) BODY(2)

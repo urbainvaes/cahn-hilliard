@@ -278,6 +278,29 @@ macro Normal [N.x, N.y, N.z] //EOM
 //}}}
 // Include problem file {{{
 #include xstr(PROBLEM_CONF)
+
+#if SOLVER_BOUNDARY_CONDITION == LINEAR
+varf varPhiBoundary([phi1,mu1], [phi2,mu2]) =
+  int1d(Th) (wetting(contactAngles) * mu2)
+  + int1d(Th) (wetting(contactAngles) * 0 * phi1 * mu2)
+;
+#endif
+
+#if SOLVER_TYPE_BOUNDARY_CONDITION == CUBIC
+varf varPhiBoundary([phi1,mu1], [phi2,mu2]) =
+  int1d(Th) (wetting(contactAngles) * mu2)
+  + int1d(Th) (wetting(contactAngles) * phiOld * phi1 * mu2)
+;
+#endif
+
+#if SOLVER_BOUNDARY_CONDITION == MODIFIED
+Vh oneVh = 1; Vh zeroVh = 0;
+varf varPhiBoundary([phi1,mu1], [phi2,mu2]) =
+  int1d(Th) (wetting(contactAngles) * (1 + min(1 - phiOld, zeroVh) + min(1 + phiOld, zeroVh)) * mu2)
+  + int1d(Th) (wetting(contactAngles) * max(-oneVh, min(phiOld, oneVh)) * phi1 * mu2)
+;
+#endif
+
 #if SOLVER_METHOD == LM1 || SOLVER_METHOD == LM2
 Vh qOld = (phi*phi - 1);
 #endif
