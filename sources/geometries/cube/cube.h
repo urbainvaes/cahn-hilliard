@@ -1,29 +1,29 @@
-#ifndef CONFIG_Lx
-#define CONFIG_Lx 1
+#ifndef GEOMETRY_LX
+#define GEOMETRY_LX 1
 #endif
 
-#ifndef CONFIG_Ly
-#define CONFIG_Ly 1
+#ifndef GEOMETRY_LY
+#define GEOMETRY_LY 1
 #endif
 
 
-#ifndef CONFIG_Lz
-#define CONFIG_Lz 1
+#ifndef GEOMETRY_LZ
+#define GEOMETRY_LZ 1
 #endif
 
-#ifndef CONFIG_s
-#define CONFIG_s 0.04
+#ifndef GEOMETRY_S
+#define GEOMETRY_S 0.04
 #endif
 
-#ifndef CONFIG_r
-#define CONFIG_r 0.1*Lx
+#ifndef GEOMETRY_R
+#define GEOMETRY_R 0.1*Lx
 #endif
 
-Lx = CONFIG_Lx;
-Ly = CONFIG_Ly;
-Lz = CONFIG_Lz;
-s  = CONFIG_s;
-r  = CONFIG_r;
+Lx = GEOMETRY_LX;
+Ly = GEOMETRY_LY;
+Lz = GEOMETRY_LZ;
+s  = GEOMETRY_S;
+r  = GEOMETRY_R;
 
 #include "../macros-gmsh/circle.geo"
 #include "../macros-gmsh/cube.geo"

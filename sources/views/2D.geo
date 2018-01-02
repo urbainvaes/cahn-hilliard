@@ -1,3 +1,5 @@
+
+
 #ifndef SOLVER_ADAPT
 adapt = 0;
 #else

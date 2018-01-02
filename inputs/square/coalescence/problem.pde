@@ -1,15 +1,3 @@
-#ifndef SOLVER_DT
-#define SOLVER_DT 0.001
-#endif
-
-#ifndef SOLVER_HMIN
-#define SOLVER_HMIN 0.005
-#endif
-
-#ifndef SOLVER_HMAX
-#define SOLVER_HMAX 10*SOLVER_HMIN
-#endif
-
 real r = 0.25;
 real x1 = 0.65;
 real x2 = 1.35;

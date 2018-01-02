@@ -9,7 +9,8 @@
 *.backup
 !*.gitkeep
 
-.bunches/.installed
+.bunches/.*
+.bunches/scratch
 .bunches/default
 
 __pycache__

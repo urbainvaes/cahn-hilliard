@@ -1,31 +1,31 @@
-#ifndef Lx
-#define Lx 1
+#ifndef GEOMETRY_LX
+#define GEOMETRY_LX 1
 #endif
 
-#ifndef Ly
-#define Ly 1
+#ifndef GEOMETRY_LY
+#define GEOMETRY_LY 1
 #endif
 
-
-#ifndef Lz
-#define Lz 1
+#ifndef GEOMETRY_LZ
+#define GEOMETRY_LZ 1
 #endif
 
-#ifndef s
-#define s 0.04
+#ifndef GEOMETRY_S
+#define GEOMETRY_S 0.04
 #endif
+s = GEOMETRY_S;
 
 #include "../macros-gmsh/circle.geo"
 #include "../macros-gmsh/cube.geo"
 #include "../macros-gmsh/sphere.geo"
 
 // Outer cube
-  dx   = Lx;
-  dy   = Ly;
-  dz   = Lz;
-  x    = 0.5*Lx;
-  y    = 0.5*Ly;
-  z    = 0.5*Lz;
+  dx   = GEOMETRY_LX;
+  dy   = GEOMETRY_LY;
+  dz   = GEOMETRY_LZ;
+  x    = 0.5*GEOMETRY_LX;
+  y    = 0.5*GEOMETRY_LY;
+  z    = 0.5*GEOMETRY_LZ;
   t    = 0.0*Pi;
   surf = 0;
 
@@ -38,9 +38,9 @@
   ny = 3;
   nz = 3;
 
-  dx = Lx/(2*nx + 1);
-  dy = Ly/(2*ny + 1);
-  dz = Lz/(2*nz + 1);
+  dx = GEOMETRY_LX/(2*nx + 1);
+  dy = GEOMETRY_LY/(2*ny + 1);
+  dz = GEOMETRY_LZ/(2*nz + 1);
 
   surf = 1;
 
@@ -65,8 +65,8 @@ For i In {0:nx-1}
 EndFor
 
 // Circle
-  x = 0.5*Lx;
-  y = 0.5*Ly;
+  x = 0.5*GEOMETRY_LX;
+  y = 0.5*GEOMETRY_LY;
   z = 0;
   r = 0.15;
 

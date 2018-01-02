@@ -1,3 +1,4 @@
+// Quote cpp variable
 #define xstr(s) str(s)
 #define str(s) #s
 

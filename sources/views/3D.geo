@@ -1,7 +1,10 @@
 Include "geometry.geo";
 
-#define xstr(s) str(s)
-#define str(s) #s
+#ifndef SOLVER_ADAPT
+adapt = 0;
+#else
+adapt = 1;
+#endif
 
 #ifdef INIT_VIEW
 #include xstr(INIT_VIEW)
@@ -56,21 +59,24 @@ View[0].RangeType = 0;
 View[0].ColormapNumber = 3;
 View[0].Light = 1;
 
-Color Gray
-{
-  Surface {
-    Physical Surface{21}
-  };
-}
-
 viewsPerStep = 1;
 
-For i In {startAt:maxIters}
-  iteration = startAt + i*step;
-  baseIndex = viewsBefore + (i-startAt)*viewsPerStep;
-  preSaved = FileExists(Sprintf("./output/cache/view%g-phi%g.pos", viewsPerStep, i));
-  newViews = 0;
+If (adapt == 1)
+  extension = "pos";
+EndIf
+If (adapt == 0)
+  extension = "msh";
+EndIf
 
+For i In {0:maxIters}
+  iteration = startAt + i*step;
+  baseIndex = viewsBefore + i*viewsPerStep;
+
+  preSaved = FileExists(Sprintf("./output/cache/view%g-phi%g.pos", viewsPerStep, i));
+  ////////////////
+  preSaved = 0; // CHANGE THIS TO USE CACHE
+  ////////////////
+  newViews = 0;
   If (preSaved)
     newViews = 1;
     For j In {1:viewsPerStep}
@@ -80,7 +86,7 @@ For i In {startAt:maxIters}
   If (!preSaved)
     If (FileExists(Sprintf("./output/done/done-%g.txt", iteration)))
       newViews = 1;
-      Merge Sprintf("./output/phi/phi-%g.pos", iteration);
+      Merge StrCat(Sprintf("./output/phi/phi-%g.", iteration), extension);
       Plugin(Isosurface).Value = 0;
       Plugin(Isosurface).View = baseIndex;
       Plugin(Isosurface).Run;
@@ -88,28 +94,28 @@ For i In {startAt:maxIters}
         Save View[baseIndex + j] Sprintf("./output/cache/view%g-phi%g.pos", j, i);
       EndFor
       Delete View[baseIndex];
-     EndIf
-   EndIf
-   If (newViews)
-     For j In {0:viewsPerStep-1}
-       View[baseIndex + j].Visible = 1;
-       View[baseIndex + j].ShowScale = 0;
-       View[baseIndex + j].RangeType = 2;
-       View[baseIndex + j].CustomMin = -1.3;
-       View[baseIndex + j].CustomMax = 1.3;
-       View[baseIndex + j].LightTwoSide = 1;
-       View[baseIndex + j].SmoothNormals = 1;
-       View[baseIndex + j].ColormapAlpha = 1;
-       View[baseIndex + j].ColormapNumber = 14;
-       View[baseIndex + j].ColormapInvert = 1;
-     EndFor
-     Draw;
-     If(video == 1)
-       Print Sprintf("./pictures/iso/isosurface-%04g.png", iteration);
-     EndIf
+    EndIf
+  EndIf
+  If (newViews)
+    For j In {0:viewsPerStep-1}
+      View[baseIndex + j].Visible = 1;
+      View[baseIndex + j].ShowScale = 0;
+      View[baseIndex + j].RangeType = 2;
+      View[baseIndex + j].CustomMin = -1.3;
+      View[baseIndex + j].CustomMax = 1.3;
+      View[baseIndex + j].LightTwoSide = 1;
+      View[baseIndex + j].SmoothNormals = 1;
+      View[baseIndex + j].ColormapAlpha = 1;
+      View[baseIndex + j].ColormapNumber = 14;
+      View[baseIndex + j].ColormapInvert = 1;
+    EndFor
+    Draw;
+    If(video == 1)
+      Print Sprintf("./pictures/iso/isosurface-%04g.png", iteration);
+    EndIf
 
-     For j In {0:viewsPerStep-1}
-       View[baseIndex + j].Visible = 0;
-     EndFor
+    For j In {0:viewsPerStep-1}
+      View[baseIndex + j].Visible = 0;
+    EndFor
   EndIf
 EndFor
