@@ -74,7 +74,7 @@
 #endif
 
 #ifndef SOLVER_ANISO
-#define SOLVER_ANISO 1
+#define SOLVER_ANISO 0
 #endif
 
 
@@ -196,6 +196,9 @@ fespace VhLow(Th,P1 ARGPERIODIC);
 
 #if DIMENSION == 3
 fespace Vh(Th,SOLVER_ELEMENTS), V2h(Th,[SOLVER_ELEMENTS,SOLVER_ELEMENTS]);
+#if SOLVER_POLYNOMIAL_ORDER == 2
+fespace VhLow(Th,P1);
+#endif
 #endif
 
 // Mesh on which to project solution for visualization
@@ -203,7 +206,13 @@ fespace VhOut(ThOut,SOLVER_ELEMENTS);
 
 // Phase field
 V2h [phi, mu];
-Vh phiOld, muOld;
+Vh phiOld, muOld, test;
+#if SOLVER_METHOD == LM1 || SOLVER_METHOD == LM2
+Vh qOld;
+#endif
+#if SOLVER_METHOD == LM2
+Vh phiOldOld, muOldOld, phiOldPlusOneHalfTilde;
+#endif
 
 #ifdef NS
 Vh u = 0, v = 0, w = 0, p = 0;
@@ -302,11 +311,35 @@ varf varPhiBoundary([phi1,mu1], [phi2,mu2]) =
 #endif
 
 #if SOLVER_METHOD == LM1 || SOLVER_METHOD == LM2
-Vh qOld = (phi*phi - 1);
+qOld = (phi*phi - 1);
 #endif
 //}}}
 // Define variational formulations {{{
 // Cahn-Hilliard {{{
+
+#if SOLVER_METHOD == LM2
+problem LagrangeM2Varf1(phiOldPlusOneHalfTilde,test) =
+INTEGRAL(DIMENSION)(Th)(phiOldPlusOneHalfTilde*test)
+    - INTEGRAL(DIMENSION)(Th) (
+            phiOld * test
+            + 0.5 * dt * (Grad(muOld)'*Grad(test)));
+
+problem LagrangeM2Varf2(phiOldPlusOneHalfTilde,test) =
+INTEGRAL(DIMENSION)(Th)(phiOldPlusOneHalfTilde*test)
+    - INTEGRAL(DIMENSION)(Th) (
+            0.5*(phiOldOld+phiOld) * test
+            + 0.5 * dt * (Grad(muOldOld)'*Grad(test))
+            + 0.5 * dt * (Grad(muOld)   '*Grad(test)));
+#endif
+
+// LM2 needs can't be started from the beginning because the
+// chemical potential at 0 tends to inf close to the boundaries if
+// the contact angle boundary condition is not satisfied by the
+// initial condition. To resolve this issue, we use a first order
+// discretization for the first iteration.
+#if SOLVER_METHOD == LM2
+int coefSwitch = 1;
+#endif
 varf varPhi([phi1,mu1], [phi2,mu2]) =
   // Bilinear form
   INTEGRAL(DIMENSION)(Th)(
@@ -326,15 +359,21 @@ varf varPhi([phi1,mu1], [phi2,mu2]) =
     #if SOLVER_METHOD == LM1
     (2*phiOld*phiOld*phi1)
     #endif
+    // q^{n+1} = q^n + 2*φ~^{n+1/2} (φ^{n+1} - φ^n)
+    // → q^{n+1/2} = q^n + φ~^{n+1/2} (φ^{n+1} - φ^n)
+    // So q^{n+1/2} φ~^{n+1/2} = (φ~^{n+1/2})^2 φ^{n+1} + (q^n φ~^{n+1/2} - φ~^{n+1/2} φ~^{n+1/2} φ^n)
+    #if SOLVER_METHOD == LM2
+    (coefSwitch*phiOldPlusOneHalfTilde*phiOldPlusOneHalfTilde*phi1)
+    #endif
     + energyB *
-    #if SOLVER_METHOD == OD2
+    #if SOLVER_METHOD == OD1 || SOLVER_METHOD == LM1 || SOLVER_METHOD == E1 || SOLVER_METHOD == E1MOD
+    (Grad(phi1)'*Grad(mu2))
+    #endif
+    #if SOLVER_METHOD == OD2 || SOLVER_METHOD == LM2
     (0.5 * (Grad(phi1)'*Grad(mu2)))
     #endif
     #if SOLVER_METHOD == OD2MOD
     (0.5 + OD2MOD_THETA) * (Grad(phi1)'*Grad(mu2))
-    #endif
-    #if SOLVER_METHOD == OD1 || SOLVER_METHOD == LM1 || SOLVER_METHOD == E1 || SOLVER_METHOD == E1MOD
-    (Grad(phi1)'*Grad(mu2))
     #endif
     )
   // Right-hand side
@@ -357,7 +396,10 @@ varf varPhi([phi1,mu1], [phi2,mu2]) =
     #if SOLVER_METHOD == LM1
     (2*phiOld*phiOld*phiOld - qOld*phiOld) // ! No multiplication by energyA of qOld term
     #endif
-    #if SOLVER_METHOD == OD2
+    #if SOLVER_METHOD == LM2
+    (coefSwitch*phiOldPlusOneHalfTilde*phiOldPlusOneHalfTilde*phiOld - qOld*phiOldPlusOneHalfTilde) // ! No multiplication by energyA of qOld term
+    #endif
+    #if SOLVER_METHOD == OD2 || SOLVER_METHOD == LM2
     + energyB * (- 0.5 * (Grad(phiOld)'*Grad(mu2)))
     #endif
     #if SOLVER_METHOD == OD2MOD
@@ -468,6 +510,11 @@ for(int i = 0; i <= nIter; i++)
       }
       else {
         [phi, mu] = [phi, mu];
+        // qOld = qOld
+        #if SOLVER_METHOD == LM2
+        // phiOld = phiOld;
+        // muOld = muOld;
+        #endif
       }
       #ifdef PLOT
         #if DIMENSION == 3
@@ -489,6 +536,10 @@ for(int i = 0; i <= nIter; i++)
   #endif
   // }}}
   // Update previous solution {{{
+  #if SOLVER_METHOD == LM2
+  phiOldOld = phiOld;
+  muOldOld = muOld;
+  #endif
   phiOld = phi;
   muOld = mu;
   #ifdef NS
@@ -498,7 +549,36 @@ for(int i = 0; i <= nIter; i++)
   wOld = w;
   #endif
   #endif
-  //}}}
+
+  // Calculate initial condition for chemical potential
+  // if (i == 0) {
+  //     varf varPhiBoundary([phi1,mu1], [phi2,mu2]) =
+  //         int1d(Th,1) (wetting(contactAngles) * mu2)
+  //         + int1d(Th,1) (wetting(contactAngles) * phi1 * phiOld * mu2)
+  //         ;
+  //     varf varfInitialCondition([phi1,mu1],[phi2,mu2]) =
+  //         INTEGRAL(DIMENSION)(Th)(phi1*phi2 + mu1*mu2)
+  //         - INTEGRAL(DIMENSION)(Th) (
+  //                 phiOld*phi2
+  //                 // + phiOld*mu2 // To REMOVE
+  //                 + energyA * (phiOld*phiOld*phiOld - phiOld) * mu2
+  //                 + energyB * (Grad(phiOld)'*Grad(mu2)));
+  //     matrix matPhiBulk = varfInitialCondition(V2h, V2h);
+  //     matrix matPhiBoundary = varPhiBoundary(V2h, V2h);
+  //     // real[int] P
+  //     matrix matPhi = matPhiBulk + matPhiBoundary;
+  //     real[int] rhsPhiBulk = varfInitialCondition(0, V2h);
+  //     real[int] rhsPhiBoundary = varPhiBoundary(0, V2h);
+  //     real[int] rhsPhi = rhsPhiBulk + rhsPhiBoundary;
+  //     set(matPhi,solver=sparsesolver SPARAMS);
+  //     phi[] = matPhiBulk^-1*rhsPhi;
+
+  //     plot(mu, wait = true, fill = true);
+  //     muOld = mu;
+  //     // phiOld = phi by construction
+  //     break;
+  // }
+  // }}}
   // Calculate macroscopic variables {{{
 
   // Dimension of the boundary
@@ -772,6 +852,17 @@ for(int i = 0; i <= nIter; i++)
   while(recalculate) {
   #endif
 
+  #if SOLVER_METHOD == LM2
+  if(i == 0) {
+      coefSwitch = 2;
+      phiOldPlusOneHalfTilde = phiOld;
+  }
+  else {
+      coefSwitch = 1;
+      LagrangeM2Varf2;
+  }
+  #endif
+
   matrix matPhiBulk = varPhi(V2h, V2h);
   matrix matPhiBoundary = varPhiBoundary(V2h, V2h);
   matrix matPhi = matPhiBulk + matPhiBoundary;
@@ -856,11 +947,16 @@ for(int i = 0; i <= nIter; i++)
   cout << "Solve Navier-Stokes system: " << tic() << endl;
   #endif
   // }}}
-  // Things to do at all iterations but the 0-th {{{
+  // Do thing after all iterations but the 0-th {{{
   time += dt;
   #if SOLVER_METHOD == LM1
-  qOld = qOld + 2 * (phi*phiOld - phiOld*phiOld);
+  qOld = qOld + 2 * (phiOld*phi - phiOld*phiOld);
+  #endif
+  #if SOLVER_METHOD == LM2
+  qOld = qOld + 2 * (phiOldPlusOneHalfTilde*phi - phiOldPlusOneHalfTilde*phiOld);
   #endif
   // }}}
 }
 //}}}
+
+// vim: ft=freefem ts=2 sw=2 sts=2
