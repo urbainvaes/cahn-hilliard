@@ -17,18 +17,21 @@ bunch :
 #######################################################
 regex ?= ".*"
 list_inputs = $(shell find inputs -name "*.h" -regex $(regex) | sed 's!inputs/!!;s!\(-\|/\)config.h!!')
-choose_input = $(shell echo "$(list_inputs)" | tr " " "\n" | $(fzf) -m --bind=ctrl-t:toggle)
+choose_input = $(shell echo "$(list_inputs)" | tr " " "\n" | $(fzf) --prompt="Select test to install: " -m --bind=ctrl-t:toggle)
 
 install :
 	@echo "$(choose_input)" | tr " " "\n" >> .bunches/$(bunch) || echo "No change";
 	@sed -i "/^$$/d" .bunches/$(bunch)
 
 uninstall :
-	cat .bunches/$(bunch) | $(fzf) -m --bind=ctrl-t:toggle | while read p; do sed -i "\#$${p}#d" .bunches/$(bunch); done;
+	@cat .bunches/$(bunch) | \
+		$(fzf) --prompt="Select test to uninstall: " -m --bind=ctrl-t:toggle | \
+		while read p; do sed -i "\#$${p}#d" .bunches/$(bunch); done;
 
 # Select in bunch
 select :
-	cat .bunches/$(bunch) | $(fzf) > .bunches/.installed-$(bunch) || echo "No test selected"
+	@cat .bunches/$(bunch) | \
+		$(fzf) --prompt="Select default test: " > .bunches/.installed-$(bunch) || echo "No test selected"
 
 #################################
 #  Set up environment for test  #
