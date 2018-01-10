@@ -17,8 +17,8 @@
 
 // Time adaptation
 #define SOLVER_TIMEADAPT
-#define SOLVER_MAX_DELTA_E 0.1
-#define SOLVER_MIN_DELTA_E 0.05
+#define SOLVER_TIME_ADAPTATION_TOL_MAX 0.1
+#define SOLVER_TIME_ADAPTATION_TOL_MIN 0.05
 
 // Mesh adaptation
 #define SOLVER_ADAPT

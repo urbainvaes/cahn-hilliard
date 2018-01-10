@@ -1,0 +1,50 @@
+// General
+#define DIMENSION 2
+
+// View
+#define VIEW GITROOT/sources/views/2D.geo
+
+// Geometry
+#define GEOMETRY_LX 1
+#define GEOMETRY_LY 0.5
+#define GEOMETRY GITROOT/sources/geometries/square/simple-square.geo
+
+// Solver
+#define SOLVER_METHOD OD2MOD
+#define OD2MOD_THETA 10*dt
+#define PROBLEM_CONF HERE/problem.pde
+#define SOLVER_POLYNOMIAL_ORDER 2
+#define SOLVER_BOUNDARY_CONDITION MODIFIED
+
+// Dimensionless numbers
+#define SOLVER_PE 1
+#define SOLVER_CN 5e-3
+
+// Mesh adaptation
+#define SOLVER_ADAPT
+#define SOLVER_HMIN 0.001
+#define SOLVER_HMAX 0.01
+
+// Time adatpation
+#define SOLVER_TIMEADAPT
+#define SOLVER_TIME_ADAPTATION_METHOD AYMARD
+#define SOLVER_TIME_ADAPTATION_FACTOR 2
+
+#if SOLVER_TIME_ADAPTATION_METHOD == GUILLEN
+#define SOLVER_TIME_ADAPTATION_TOL_MIN 1
+#define SOLVER_TIME_ADAPTATION_TOL_MAX 100
+#endif
+
+#if SOLVER_TIME_ADAPTATION_METHOD == AYMARD
+#define SOLVER_TIME_ADAPTATION_TOL_MIN 0.001
+#define SOLVER_TIME_ADAPTATION_TOL_MAX 0.1
+#endif
+
+#define SOLVER_TIME_ADAPTATION_DT_OVER_PE_MIN SOLVER_DT/SOLVER_PE/SOLVER_TIME_ADAPTATION_FACTOR^15
+#define SOLVER_TIME_ADAPTATION_DT_OVER_PE_MAX SOLVER_DT/SOLVER_PE*SOLVER_TIME_ADAPTATION_FACTOR^15
+
+// Number of iterations and initial timestep
+#define SOLVER_DT 2*SOLVER_PE*SOLVER_CN^4
+#define SOLVER_NITER 1000
+
+// vim: ft=cpp
