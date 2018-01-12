@@ -1,11 +1,3 @@
-// Mass flux in the domain
-
-// Position of center of mass
-massPhi1 = int3d(Th) ((phi + 1.)/2.);
-real positionX = int3d(Th) ((phi + 1.)/2. * x) / massPhi1 - 0.5;
-real positionY = int3d(Th) ((phi + 1.)/2. * y) / massPhi1 - 0.5;
-
-
 // Contact plane
 
 // Projection of solution on plane

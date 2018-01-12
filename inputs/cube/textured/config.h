@@ -19,11 +19,10 @@
 ************/
 #define SOLVER_METHOD OD2
 #define SOLVER_POLYNOMIAL_ORDER 1
-#define SOLVER_BOUNDARY_CONDITION MANUAL
+#define SOLVER_BOUNDARY_CONDITION CUBIC
 
 // Auxiliary files
 #define PROBLEM_CONF HERE/wells.pde
-#define SOLVER_BEFORE HERE/before.pde
 #define SOLVER_AFTER HERE/after.pde
 
 // Dimensionless numbers
@@ -33,8 +32,8 @@
 // Mesh adaptation
 #define NO_SOLVER_ADAPT
 #define SOLVER_ADAPT
-#define SOLVER_HMIN 0.1
-#define SOLVER_HMAX 0.2
+#define SOLVER_HMIN 0.01
+#define SOLVER_HMAX 0.05
 #define SOLVER_DT 0.0008
 #define SOLVER_NITER 1000
 
