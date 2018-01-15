@@ -3,7 +3,7 @@
 
 live     = .bunches/.installed
 bunch   ?= $(shell test -s $(live) && cat $(live) || echo default)
-problem ?= $(shell cat .bunches/.installed-$(bunch))
+problem ?= $(shell cat .bunches/.installed-$(bunch) &>/dev/null || head -1 .bunches/$(bunch))
 fzf     ?= sources/bin/fzf-0.16.3-linux_386
 
 ###################
