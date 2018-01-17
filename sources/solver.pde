@@ -80,10 +80,10 @@
 // Time parameters
 #ifndef SOLVER_DT
 #if SOLVER_METHOD == OD1
-#define SOLVER_DT 8.0*Pe*Cn^4
+#define SOLVER_DT 8.0*Pe*(energyB/energyA^2)
 #endif
 #if SOLVER_METHOD == OD2
-#define SOLVER_DT 2.0*Pe*Cn^4
+#define SOLVER_DT 2.0*Pe*(energyB/energyA^2)
 #endif
 #endif
 
