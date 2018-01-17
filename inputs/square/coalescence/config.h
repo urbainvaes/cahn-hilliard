@@ -5,7 +5,7 @@
 #define VIEW GITROOT/sources/views/2D.geo
 
 // Geometry
-#define GEOMETRY_LX 1
+#define GEOMETRY_LX 2
 #define GEOMETRY_LY 0.5
 #define GEOMETRY GITROOT/sources/geometries/square/simple-square.geo
 
@@ -14,20 +14,25 @@
 ************/
 
 #define SOLVER_METHOD OD2
-// #define OD2MOD_THETA 10*dt
+/* #define SOLVER_METHOD OD1 */
 #define PROBLEM_CONF HERE/problem.pde
-#define SOLVER_AFTER HERE/after.pde
 #define SOLVER_POLYNOMIAL_ORDER 2
-#define SOLVER_BOUNDARY_CONDITION MODIFIED
+/* #define SOLVER_POLYNOMIAL_ORDER 1 */
+
+// Time step and number of iterations
+#define SOLVER_NITER 1e5
+#define SOLVER_DT 2*Pe*Cn^4 * 10
 
 // Dimensionless numbers
-#define SOLVER_PE 1
-#define SOLVER_CN 5e-3
+#define SOLVER_PE 1e4
+/* #define SOLVER_CN 0.01 */
+#define SOLVER_CN 0.05
 
 // Mesh adaptation
 #define SOLVER_ADAPT
-#define SOLVER_HMIN 0.001
-#define SOLVER_HMAX 0.01
+/* #define SOLVER_HMIN 0.001 */
+#define SOLVER_HMIN 0.005
+#define SOLVER_HMAX 0.05
 
 // Time adatpation
 #define SOLVER_TIMEADAPT
@@ -40,15 +45,14 @@
 #endif
 
 #if SOLVER_TIME_ADAPTATION_METHOD == AYMARD
-#define SOLVER_TIME_ADAPTATION_TOL_MIN 0.001
-#define SOLVER_TIME_ADAPTATION_TOL_MAX 0.1
+#define SOLVER_TIME_ADAPTATION_TOL_MIN 1e-5
+#define SOLVER_TIME_ADAPTATION_TOL_MAX 1e-4
 #endif
 
-#define SOLVER_TIME_ADAPTATION_DT_OVER_PE_MIN SOLVER_DT/SOLVER_PE/SOLVER_TIME_ADAPTATION_FACTOR^15
-#define SOLVER_TIME_ADAPTATION_DT_OVER_PE_MAX SOLVER_DT/SOLVER_PE*SOLVER_TIME_ADAPTATION_FACTOR^15
+#define SOLVER_TIME_ADAPTATION_DT_OVER_PE_MIN 0
+#define SOLVER_TIME_ADAPTATION_DT_OVER_PE_MAX (SOLVER_DT/Pe)
 
-// Number of iterations and initial timestep
-#define SOLVER_DT 2*SOLVER_PE*SOLVER_CN^4
-#define SOLVER_NITER 300
-
-// vim: ft=cpp
+/***********
+*  Plots  *
+***********/
+#define PLOT_FLAGS -T -e png -p -s 1 -C

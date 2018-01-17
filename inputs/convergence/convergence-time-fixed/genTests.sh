@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-minDt="1e-4"
+minDt="BASE_TIME_STEP"
 ratio="2.0"
 maxPower="5"
 minIter="100"

@@ -33,7 +33,7 @@
 #define SOLVER_CN 1e-2
 
 #define SOLVER_NITER 100e3
-#define SOLVER_DT 2*Pe*Cn^4
+#define SOLVER_DT 2*Pe*(energyB/energyA^2)
 
 // Flags for plots
 #define PLOT_FLAGS --parallel --extension "png" --step 100

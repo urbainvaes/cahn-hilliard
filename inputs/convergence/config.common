@@ -11,21 +11,11 @@
 #define GEOMETRY GITROOT/sources/geometries/square/simple-square.geo
 
 // Solver
+#define SOLVER_METHOD OD2
 #define PROBLEM_CONF HERE/../problem.pde
 #define SOLVER_POLYNOMIAL_ORDER 2
 
 // Dimensionless numbers
-#define SOLVER_PE 500
-#define SOLVER_CN 0.01
-
-// Adaptation in sapce and time
-#define NO_SOLVER_TIMEADAPT
-#define SOLVER_ADAPT
-#define SOLVER_HMIN 0.001
-#define SOLVER_HMAX 0.05
-
-// Time step and number of iterations
-#define SOLVER_NITER 1000
-#define SOLVER_DT 2*Pe*(energyB/energyA^2)
+#define SOLVER_PE 1e4
 
 // vim: ft=cpp

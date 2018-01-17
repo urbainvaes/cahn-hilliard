@@ -6,7 +6,7 @@
 #define VIEW GITROOT/sources/views/3D.geo
 
 // Geometry
-#define GEOMETRY_S 0.1
+#define GEOMETRY_S 0.01
 #define GEOMETRY GITROOT/sources/geometries/cube/cube-array.h
 
 /************
@@ -24,10 +24,10 @@
 // Mesh adaptation
 #define NO_SOLVER_ADAPT
 #define SOLVER_ADAPT
-#define SOLVER_HMIN 0.1
-#define SOLVER_HMAX 0.2
+#define SOLVER_HMIN 0.01
+#define SOLVER_HMAX 0.1
 #define SOLVER_DT 1e-3
-#define SOLVER_NITER 10000
+#define SOLVER_NITER 1000
 
 // Time adaptation
 #define SOLVER_NOTIMEADAPT

@@ -1,26 +1,12 @@
-// General
-#define DIMENSION 2
-
-// View
-#define VIEW GITROOT/sources/views/2D.geo
-
-// Geometry
-#define GEOMETRY_LX 2
-#define GEOMETRY_LY 0.5
-#define GEOMETRY_S 0.03
-#define GEOMETRY GITROOT/sources/geometries/square/simple-square.geo
-
-// Solver
-#define SOLVER_METHOD OD2
-#define PROBLEM_CONF HERE/../problem.pde
-#define SOLVER_POLYNOMIAL_ORDER 2
+#include "../config.common"
 
 // Dimensionless numbers
-#define SOLVER_PE 500
 #define SOLVER_CN 0.1
 
 // Adaptation in sapce and time
 #define NO_SOLVER_TIMEADAPT
 #define NO_SOLVER_ADAPT
+
+#define BASE_TIME_STEP Pe/500*1e-4
 
 // vim: ft=cpp
