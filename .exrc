@@ -10,5 +10,5 @@ function! Go_to_test_dir()
     execute "edit tests/" . l:test
 endfunction
 
-nnoremap gi :call Go_to_input()<cr>
-nnoremap go :call Go_to_test_dir()<cr>
+nnoremap ,i :call Go_to_input()<cr>
+nnoremap ,o :call Go_to_test_dir()<cr>
