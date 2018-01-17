@@ -73,6 +73,12 @@ clean-all :
 push:
 	rsync -r --delete --exclude='/.git' --filter="dir-merge,- .gitignore" . uv113@macomp001.ma.ic.ac.uk:cahn-hilliard
 
+sync:
+	inotifywait -r -m -q -e modify --format '%w%f' -- inputs sources Makefile .bunches |\
+		while read file; do echo "Pushing file $$file"; \
+		rsync -r $$file uv113@macomp001.ma.ic.ac.uk:cahn-hilliard/$$file;\
+		done
+
 #################################
 #  Acts on last installed test  #
 #################################
