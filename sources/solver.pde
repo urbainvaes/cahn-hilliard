@@ -31,7 +31,6 @@
 #define SOLVER_ENERGYA (1/Cn)
 #endif
 
-
 // Navier-Stokes parameters
 #ifndef SOLVER_RE
 #define SOLVER_RE 1
@@ -98,24 +97,42 @@
 
 
 // Time adaptation
-#ifndef SOLVER_FACTOR
-#define SOLVER_FACTOR 2
+#ifdef SOLVER_TIME_ADAPTATION_METHOD
+#define SOLVER_TIMEADAPT
+#endif // If adaptation method is specified, use adaptation
+
+#ifndef SOLVER_TIME_ADAPTATION_METHOD
+#define SOLVER_TIME_ADAPTATION_METHOD AYMARD
 #endif
 
-#ifndef SOLVER_DTMIN
-#define SOLVER_DTMIN SOLVER_DT/SOLVER_FACTOR^4
+#ifndef SOLVER_TIME_ADAPTATION_FACTOR
+#define SOLVER_TIME_ADAPTATION_FACTOR 2
 #endif
 
-#ifndef SOLVER_DTMAX
-#define SOLVER_DTMAX SOLVER_DT*SOLVER_FACTOR^4
+#ifndef SOLVER_TIME_ADAPTATION_DT_OVER_PE_MIN
+#define SOLVER_TIME_ADAPTATION_DT_OVER_PE_MIN (SOLVER_DT/Pe)/SOLVER_TIME_ADAPTATION_FACTOR^4
 #endif
 
-#ifndef SOLVER_MAX_DELTA_E
-#define SOLVER_MAX_DELTA_E  0.005
+#ifndef SOLVER_TIME_ADAPTATION_DT_OVER_PE_MAX
+#define SOLVER_TIME_ADAPTATION_DT_OVER_PE_MAX (SOLVER_DT/Pe)*SOLVER_TIME_ADAPTATION_FACTOR^4
 #endif
 
-#ifndef SOLVER_MIN_DELTA_E
-#define SOLVER_MIN_DELTA_E  0.001
+#ifndef SOLVER_TIME_ADAPTATION_TOL_MAX
+#define SOLVER_TIME_ADAPTATION_TOL_MAX  0.005
+#endif
+
+#ifndef SOLVER_TIME_ADAPTATION_TOL_MIN
+#define SOLVER_TIME_ADAPTATION_TOL_MIN  0.001
+#endif
+
+
+// Dimension of the boundary
+#if DIMENSION == 2
+#define BOUNDARYDIM 1
+#endif
+
+#if DIMENSION == 3
+#define BOUNDARYDIM 2
 #endif
 
 // }}}
@@ -246,11 +263,11 @@ real nIter = SOLVER_NITER;
 real time = SOLVER_TIME;
 
 #ifdef SOLVER_TIMEADAPT
-real maxDeltaE = SOLVER_MAX_DELTA_E;
-real minDeltaE = SOLVER_MIN_DELTA_E;
-real factor = SOLVER_FACTOR;
-real dtMin = SOLVER_DTMIN;
-real dtMax = SOLVER_DTMAX;
+real tolMax = SOLVER_TIME_ADAPTATION_TOL_MAX;
+real tolMin = SOLVER_TIME_ADAPTATION_TOL_MIN;
+real factor = SOLVER_TIME_ADAPTATION_FACTOR;
+real dtOverPeMin = SOLVER_TIME_ADAPTATION_DT_OVER_PE_MIN;
+real dtOverPeMax = SOLVER_TIME_ADAPTATION_DT_OVER_PE_MAX;
 #endif
 
 // Mesh parameters
@@ -287,26 +304,25 @@ macro Normal [N.x, N.y, N.z] //EOM
 //}}}
 // Include problem file {{{
 #include xstr(PROBLEM_CONF)
-
 #if SOLVER_BOUNDARY_CONDITION == LINEAR
 varf varPhiBoundary([phi1,mu1], [phi2,mu2]) =
-  int1d(Th) (wetting(contactAngles) * mu2)
-  + int1d(Th) (wetting(contactAngles) * 0 * phi1 * mu2)
+  INTEGRAL(BOUNDARYDIM)(Th) (wetting(contactAngles) * mu2)
+  +  INTEGRAL(BOUNDARYDIM)(Th) (wetting(contactAngles) * 0 * phi1 * mu2)
 ;
 #endif
 
-#if SOLVER_TYPE_BOUNDARY_CONDITION == CUBIC
+#if SOLVER_BOUNDARY_CONDITION == CUBIC
 varf varPhiBoundary([phi1,mu1], [phi2,mu2]) =
-  int1d(Th) (wetting(contactAngles) * mu2)
-  + int1d(Th) (wetting(contactAngles) * phiOld * phi1 * mu2)
+  INTEGRAL(BOUNDARYDIM)(Th) (wetting(contactAngles) * mu2)
+  +  INTEGRAL(BOUNDARYDIM)(Th) (wetting(contactAngles) * phiOld * phi1 * mu2)
 ;
 #endif
 
 #if SOLVER_BOUNDARY_CONDITION == MODIFIED
 Vh oneVh = 1; Vh zeroVh = 0;
 varf varPhiBoundary([phi1,mu1], [phi2,mu2]) =
-  int1d(Th) (wetting(contactAngles) * (1 + min(1 - phiOld, zeroVh) + min(1 + phiOld, zeroVh)) * mu2)
-  + int1d(Th) (wetting(contactAngles) * max(-oneVh, min(phiOld, oneVh)) * phi1 * mu2)
+  INTEGRAL(BOUNDARYDIM)(Th) (wetting(contactAngles) * (1 + min(1 - phiOld, zeroVh) + min(1 + phiOld, zeroVh)) * mu2)
+  +  INTEGRAL(BOUNDARYDIM)(Th) (wetting(contactAngles) * max(-oneVh, min(phiOld, oneVh)) * phi1 * mu2)
 ;
 #endif
 
@@ -550,44 +566,8 @@ for(int i = 0; i <= nIter; i++)
   #endif
   #endif
 
-  // Calculate initial condition for chemical potential
-  // if (i == 0) {
-  //     varf varPhiBoundary([phi1,mu1], [phi2,mu2]) =
-  //         int1d(Th,1) (wetting(contactAngles) * mu2)
-  //         + int1d(Th,1) (wetting(contactAngles) * phi1 * phiOld * mu2)
-  //         ;
-  //     varf varfInitialCondition([phi1,mu1],[phi2,mu2]) =
-  //         INTEGRAL(DIMENSION)(Th)(phi1*phi2 + mu1*mu2)
-  //         - INTEGRAL(DIMENSION)(Th) (
-  //                 phiOld*phi2
-  //                 // + phiOld*mu2 // To REMOVE
-  //                 + energyA * (phiOld*phiOld*phiOld - phiOld) * mu2
-  //                 + energyB * (Grad(phiOld)'*Grad(mu2)));
-  //     matrix matPhiBulk = varfInitialCondition(V2h, V2h);
-  //     matrix matPhiBoundary = varPhiBoundary(V2h, V2h);
-  //     // real[int] P
-  //     matrix matPhi = matPhiBulk + matPhiBoundary;
-  //     real[int] rhsPhiBulk = varfInitialCondition(0, V2h);
-  //     real[int] rhsPhiBoundary = varPhiBoundary(0, V2h);
-  //     real[int] rhsPhi = rhsPhiBulk + rhsPhiBoundary;
-  //     set(matPhi,solver=sparsesolver SPARAMS);
-  //     phi[] = matPhiBulk^-1*rhsPhi;
-
-  //     plot(mu, wait = true, fill = true);
-  //     muOld = mu;
-  //     // phiOld = phi by construction
-  //     break;
-  // }
   // }}}
   // Calculate macroscopic variables {{{
-
-  // Dimension of the boundary
-  #if DIMENSION == 2
-  #define BOUNDARYDIM 1
-  #endif
-  #if DIMENSION == 3
-  #define BOUNDARYDIM 2
-  #endif
 
   // Mass {{{
   real massPhiOld = massPhi;
@@ -603,12 +583,12 @@ for(int i = 0; i <= nIter; i++)
   #endif
   //}}}
   // Free energy {{{
+  real freeEnergyOld = freeEnergy;
   real bulkFreeEnergy  = INTEGRAL(DIMENSION)(Th) (
       energyA * 0.25 * (phi^2 - 1)^2
       + energyB * 0.5 * (Grad(phi)'*Grad(phi))
       );
   real wallFreeEnergy = INTEGRAL(BOUNDARYDIM)(Th,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20) (wetting(contactAngles) * (phi^3/3 - phi));
-  real freeEnergyOld = freeEnergy;
   freeEnergy = bulkFreeEnergy + wallFreeEnergy;
   real deltaFreeEnergy = freeEnergy - freeEnergyOld;
   real dissipationFreeEnergy = INTEGRAL(DIMENSION)(Th) ((1/Pe)*(Grad(mu)'*Grad(mu)));
@@ -874,23 +854,62 @@ for(int i = 0; i <= nIter; i++)
 
   #ifdef SOLVER_TIMEADAPT
   real dissipationFreeEnergy = dt*INTEGRAL(DIMENSION)(Th) ((1/Pe)*(Grad(mu)'*Grad(mu)));
-  bool dtTooLarge = (dissipationFreeEnergy > maxDeltaE && dt > dtMin);
-  bool dtTooLow   = (dissipationFreeEnergy < minDeltaE && dt < dtMax);
+  real newFreeEnergy  = INTEGRAL(DIMENSION)(Th) ( energyA * 0.25 * (phi^2 - 1)^2 + energyB * 0.5 * (Grad(phi)'*Grad(phi)))
+      + INTEGRAL(BOUNDARYDIM)(Th,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20) (wetting(contactAngles) * (phi^3/3 - phi));
+  real increaseFreeEnergy = newFreeEnergy - freeEnergy;
+  real numericalDissipation = - increaseFreeEnergy - dissipationFreeEnergy;
 
-  cout << "Dissipations of free energy: " << dissipationFreeEnergy << endl;
-  recalculate = dtTooLarge;
-  if (dtTooLarge) {
+
+  #if SOLVER_TIME_ADAPTATION_METHOD == AYMARD
+  real parameterAdaptation = dissipationFreeEnergy;
+  bool additionalCondition = (increaseFreeEnergy > 0);
+  #endif
+
+  #if SOLVER_TIME_ADAPTATION_METHOD == GUILLEN
+  real parameterAdaptation = abs(numericalDissipation)/(dt/Pe); // Use normalized time!
+  bool additionalCondition = false; // No additional condition
+  #endif
+
+  bool dtTooLarge = (parameterAdaptation > tolMax && dt/Pe > dtOverPeMin) || (dt/Pe > dtOverPeMax);
+  bool dtTooLow   = (parameterAdaptation < tolMin && dt/Pe < dtOverPeMax) || (dt/Pe < dtOverPeMin);
+
+  recalculate = (dtTooLarge || additionalCondition);
+
+  real dtOld = dt;
+  if(recalculate) {
     dt = dt/factor;
-    cout << "Dissipations of free energy is too large (" << dissipationFreeEnergy << ") : "
-      << "refining time step." << endl;
   }
-  if (dtTooLow) {
-    cout << "Time step is too small, increasing..." << endl;
+  else if (dtTooLow) {
     dt = dt*factor;
   }
+
+  // Output {{{
+  cout << endl << "** Time adaptation **" << endl;
+  cout << "Normalized time step:  " << (dtOld/Pe)  << "." << endl;
+  cout << "--> Admissible range for normalized time step: [" << dtOverPeMin << ", " << dtOverPeMax << "]" << endl;
+  cout << "Normalized time step:  " << (dt/Pe)  << "." << endl;
+  cout << "Free energy increase:  " << increaseFreeEnergy  << "." << endl;
+  cout << "Physical dissipation:  " << dissipationFreeEnergy << "." << endl;
+  cout << "Numerical dissipation: " << numericalDissipation  << "." << endl;
+  cout << "Normalized rate of Numerical dissipation: " << numericalDissipation/(dt/Pe) << "." << endl;
+  cout << "--> Adaptation parameter: " << parameterAdaptation << endl
+    << "--> Admissible range for parameter: [" << tolMin << ", " << tolMax << "]" << endl;
   if (recalculate) {
-    cout << "Dissipations of free energy is too large (" << dissipationFreeEnergy << ") : refining time step." << endl;
-    cout << "Recalculating solution with dt=" << dt << endl; }
+    if(dtTooLarge) {
+      cout << "Adaptation parameter out of adimssible range:" << endl;
+    }
+    else {
+      cout << "Additional condition is met!" << endl;
+    }
+    cout << "Recalculating solution with dt = " << dt << endl;
+  }
+  else if (dtTooLow) {
+    cout << "Time step is too small, increasing to dt = " << dt << "." << endl;
+  }
+  else {
+    cout << "Continuing with the same time step ..." << endl;
+  }
+  // }}}
   }
   #endif
   cout << "Solve Cahn-Hilliard system: " << tic() << endl;
@@ -947,7 +966,7 @@ for(int i = 0; i <= nIter; i++)
   cout << "Solve Navier-Stokes system: " << tic() << endl;
   #endif
   // }}}
-  // Do thing after all iterations but the 0-th {{{
+  // Do thing for all time steps but the 0-th {{{
   time += dt;
   #if SOLVER_METHOD == LM1
   qOld = qOld + 2 * (phiOld*phi - phiOld*phiOld);
