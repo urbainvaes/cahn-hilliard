@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 # Import packages
 import argparse  # parse options
@@ -22,6 +22,8 @@ parser.add_argument('-p', '--parallel', action='store_true',
                     help='run in parallel')
 parser.add_argument('-e', '--extension', type=str, default='pdf',
                     help='extension of output files')
+parser.add_argument('-C', '--nocolorbar', action='store_false',
+                    help='draw colorbar')
 parser.add_argument('-i', '--iteration', type=str,
                     help='iteration number')
 parser.add_argument('-s', '--step', type=int, default=1,
@@ -30,6 +32,8 @@ parser.add_argument('--input', type=str, default="output",
                     help='directory of data files')
 parser.add_argument('--output', type=str, default="pictures",
                     help='directory for figure files')
+parser.add_argument('-T', '--notitle', action='store_true',
+                    help='do not print title')
 args = parser.parse_args()
 
 # Extract boundary of domain
@@ -45,11 +49,15 @@ dy = max(y) - min(y)
 padding = 0.1 * min(dx, dy)
 xlim = (min(x) - padding, max(x) + padding)
 ylim = (min(y) - padding, max(y) + padding)
-c_orientation = "vertical" if (dy > dx) else "horizontal"
+
+# Parameters for colorbar
+lim_aspect_ratio = 2.1
+c_orientation = "vertical" if (lim_aspect_ratio*dy > dx) else "horizontal"
+c_fraction = 0.045 if dx < dy or dx > lim_aspect_ratio*dy else 0.045*dy/dx
 
 # Define colormaps
-c1 = (0.5, 1, 0.5)
-c2 = (0.5, 0.5, 1)
+c1 = (0.6, 1, 0.6)
+c2 = (0.6, 0.6, 1)
 color_dict = {'red':   ((0, c1[0], c1[0]), (1, c2[0], c2[0])),
               'green': ((0, c1[1], c1[1]), (1, c2[1], c2[1])),
               'blue':  ((0, c1[2], c1[2]), (1, c2[2], c2[2]))}
@@ -61,7 +69,7 @@ colormaps['pressure'] = 'jet'
 
 # Set canvas and font sizes
 inch_size = 20
-font_size = inch_size / 10 * 20
+font_size = inch_size * 2
 matplotlib.rc('font', size=font_size)
 matplotlib.rc('font', family='serif')
 matplotlib.rc('text', usetex=False)
@@ -102,6 +110,13 @@ else:
         triangulation_mesh = initial_triangulation
         triangulation_data = initial_triangulation
 
+# Define titles
+titles = {}
+titles['phi'] = r'Phase field ($\phi$)'
+titles['mu'] = r'Chemical potential ($\mu$)'
+titles['pressure'] = r'Pressure ($p$)'
+titles['velocity'] = r'Velocity ($\mathbf u$)'
+
 
 def plot_iteration(iteration):
 
@@ -122,17 +137,10 @@ def plot_iteration(iteration):
         data[f] = mesh.read_data(
             args.input + '/' + f + '/' + f + '-' + str(iteration) + '.msh')
 
-    # Define titles
-    titles = {}
-    titles['phi'] = r'Phase field ($\phi$)'
-    titles['mu'] = r'Chemical potential ($\mu$)'
-    titles['pressure'] = r'Pressure ($p$)'
-    titles['velocity'] = r'Velocity ($\mathbf u$)'
-
     # Set figure size and padding
     plt.figure(figsize=(inch_size, inch_size))
-    plt.xlim(min(x) - padding, max(x) + padding)
-    plt.ylim(min(y) - padding, max(y) + padding)
+    plt.xlim(xlim)
+    plt.ylim(ylim)
 
     # Edges
     for entity in edges:
@@ -144,7 +152,7 @@ def plot_iteration(iteration):
 
     # Mesh
     if args.mesh:
-        plt.triplot(tri_mesh, lw=1, color='k')
+        plt.triplot(tri_mesh, lw=0.5, color='gray')
 
     # Interface
     plt.tricontour(tri_data, data['phi'], levels=[0], colors='k')
@@ -166,21 +174,31 @@ def plot_iteration(iteration):
             abs_v = [np.sqrt(vx[i] * vx[i] + vy[i] * vy[i])
                      for i in range(len(data[f]))]
             tricontourf = plt.tricontourf(tri_data, abs_v, 40)
-        colorbar = plt.colorbar(
-            tricontourf, orientation=c_orientation, fraction=0.05, pad=0.05)
+        if not args.nocolorbar:
+            if f == 'phi':
+                colorbar = plt.colorbar(
+                        tricontourf, orientation=c_orientation,
+                        fraction=c_fraction, pad=0.01, ticks=[-1, -.5, 0, .5, 1])
+            else:
+                colorbar = plt.colorbar(
+                        tricontourf, orientation=c_orientation,
+                        fraction=c_fraction, pad=0.01)
         for c in tricontourf.collections:
             c.set_edgecolor("face")  # Fix for white lines between levels
         if f == 'Velocity':
             plt.quiver(x, y, vx, vy)
-        plt.title(titles[f], y=1.02)
+        if not args.notitle:
+            plt.title(titles[f], y=1.02)
         output = args.output + '/' + f + '/' + args.label + '-' + f + '-' + \
             '%05d' % (iteration) + '.' + args.extension
         plt.xticks([])
         plt.yticks([])
+        plt.tight_layout()
         plt.savefig(output, bbox_inches='tight')
         for c in tricontourf.collections:
             c.remove()
-        colorbar.remove()
+        if not args.nocolorbar:
+            colorbar.remove()
     plt.close()
 
 
