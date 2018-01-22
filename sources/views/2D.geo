@@ -1,6 +1,4 @@
-
-
-#ifndef SOLVER_ADAPT
+#ifndef SOLVER_MESH_ADAPTATION
 adapt = 0;
 #else
 adapt = 1;
@@ -45,6 +43,9 @@ For i In {0:maxIters}
     If (adapt == 1)
       If (i != 0)
         View[i-1].Visible = 0;
+      EndIf
+      If (!FileExists(StrCat("output/", field, "/", field, Sprintf("-%g.pos", iteration))))
+        System StrCat("$(git rev-parse --show-toplevel)/sources/bin/msh2pos output/mesh/mesh-", Sprintf("%g.msh ", iteration), "output/", field, "/", field, Sprintf("-%g.msh", iteration));
       EndIf
       Merge StrCat("output/", field, "/", field, Sprintf("-%g.pos", iteration));
       View[i].Visible = 1;
