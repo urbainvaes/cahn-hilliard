@@ -1,9 +1,13 @@
+ifndef VERBOSE
+.SILENT:
+endif
+
 # Bunch = file with a list of tests
 # Problem = the current test
 
 live     = .bunches/.installed
 bunch   ?= $(shell test -s $(live) && cat $(live) || echo default)
-problem ?= $(shell cat .bunches/.installed-$(bunch) &>/dev/null || head -1 .bunches/$(bunch))
+problem ?= $(shell test -s .bunches/.installed-$(bunch) && cat .bunches/.installed-$(bunch) || head -1 .bunches/$(bunch))
 fzf     ?= sources/bin/fzf-0.16.3-linux_386
 
 ###################
