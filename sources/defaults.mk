@@ -52,6 +52,8 @@ video_fps    = VIDEO_FPS
 
 
 // Plot configuration
+
+// Defaults
 #ifndef PLOT_EXEC
 	#if DIMENSION == 2
 		#define PLOT_EXEC python
@@ -72,6 +74,15 @@ video_fps    = VIDEO_FPS
 		#endif
 	#endif
 #endif
+
 plot_exec = PLOT_EXEC
+
+#ifndef PLOT_PROGRAM
+#define PLOT_PROGRAM
+#endif
 plot_program = PLOT_PROGRAM
+
+#ifndef PLOT_FLAGS
+#define PLOT_FLAGS
+#endif
 plot_flags = PLOT_FLAGS

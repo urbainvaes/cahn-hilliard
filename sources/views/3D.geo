@@ -1,6 +1,6 @@
 Include "geometry.geo";
 
-#ifndef SOLVER_ADAPT
+#ifndef SOLVER_MESH_ADAPTATION
 adapt = 0;
 #else
 adapt = 1;

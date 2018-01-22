@@ -11,6 +11,10 @@
 #define LM1 6
 #define LM2 7
 
+// Methods for time adaptation
+#define GUILLEN 1
+#define AYMARD 2
+
 // Types of boundary condition
 #define MANUAL 0 // Default
 #define LINEAR 1
