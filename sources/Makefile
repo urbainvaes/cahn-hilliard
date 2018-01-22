@@ -1,3 +1,7 @@
+ifndef VERBOSE
+.SILENT:
+endif
+
 ######################
 #  Useful variables  #
 ######################
@@ -97,6 +101,13 @@ video :
 graphs :
 	python $(bindir)/python/graphs.py $(label)
 
+##################################
+#  Graphs of mass, energy, etc.  #
+##################################
+interface_step ?= 1
+interface :
+	python $(bindir)/python/interface.py --step=$(interface_step) $(label)
+
 
 ###################
 #  Clean outputs  #
@@ -115,5 +126,5 @@ report :
 
 status :
 	@echo "Problem $(problem) reporting for duty"; \
-	echo "  Number of iterations calculated: $$(ls output/done/done-*.txt 2>/dev/null | wc -l)"; \
+	echo "  Number of iterations calculated: $$(cat output/thermodynamics.txt 2>/dev/null | wc -l)"; \
 	echo ""
