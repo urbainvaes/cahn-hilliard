@@ -47,28 +47,28 @@
 
 // Solver method
 #ifndef SOLVER_METHOD
-#define SOLVER_METHOD 1
+#define SOLVER_METHOD OD2
 #endif
 
 
 // Mesh adaptation
 #if DIMENSION == 2
-  #ifndef SOLVER_HMIN
-  #define SOLVER_HMIN 0.001
+  #ifndef SOLVER_MESH_ADAPTATION_HMIN
+  #define SOLVER_MESH_ADAPTATION_HMIN 0.001
   #endif
 
-  #ifndef SOLVER_HMAX
-  #define SOLVER_HMAX 0.01
+  #ifndef SOLVER_MESH_ADAPTATION_HMAX
+  #define SOLVER_MESH_ADAPTATION_HMAX 0.01
   #endif
 #endif
 
 #if DIMENSION == 3
-  #ifndef SOLVER_HMIN
-  #define SOLVER_HMIN 0.01
+  #ifndef SOLVER_MESH_ADAPTATION_HMIN
+  #define SOLVER_MESH_ADAPTATION_HMIN 0.01
   #endif
 
-  #ifndef SOLVER_HMAX
-  #define SOLVER_HMAX 0.1
+  #ifndef SOLVER_MESH_ADAPTATION_HMAX
+  #define SOLVER_MESH_ADAPTATION_HMAX 0.1
   #endif
 #endif
 
@@ -80,25 +80,25 @@
 // Time parameters
 #ifndef SOLVER_DT
 #if SOLVER_METHOD == OD1
-#define SOLVER_DT 8.0*Pe*(energyB/energyA^2)
+#define SOLVER_DT 8.0*Pe*(energyB/energyA^2) // Could also be Cn^2/energyA
 #endif
 #if SOLVER_METHOD == OD2
 #define SOLVER_DT 2.0*Pe*(energyB/energyA^2)
 #endif
 #endif
 
-#ifndef SOLVER_TIME
-#define SOLVER_TIME 0
-#endif
-
 #ifndef SOLVER_NITER
 #define SOLVER_NITER 300
+#endif
+
+#ifndef SOLVER_TMAX
+#define SOLVER_TMAX 1e1000 // (1e1000 == inf)
 #endif
 
 
 // Time adaptation
 #ifdef SOLVER_TIME_ADAPTATION_METHOD
-#define SOLVER_TIMEADAPT
+#define SOLVER_TIME_ADAPTATION
 #endif // If adaptation method is specified, use adaptation
 
 #ifndef SOLVER_TIME_ADAPTATION_METHOD
@@ -110,11 +110,11 @@
 #endif
 
 #ifndef SOLVER_TIME_ADAPTATION_DT_OVER_PE_MIN
-#define SOLVER_TIME_ADAPTATION_DT_OVER_PE_MIN (SOLVER_DT/Pe)/SOLVER_TIME_ADAPTATION_FACTOR^4
+#define SOLVER_TIME_ADAPTATION_DT_OVER_PE_MIN 0
 #endif
 
 #ifndef SOLVER_TIME_ADAPTATION_DT_OVER_PE_MAX
-#define SOLVER_TIME_ADAPTATION_DT_OVER_PE_MAX (SOLVER_DT/Pe)*SOLVER_TIME_ADAPTATION_FACTOR^4
+#define SOLVER_TIME_ADAPTATION_DT_OVER_PE_MAX 2.*(energyB/energyA^2)
 #endif
 
 #ifndef SOLVER_TIME_ADAPTATION_TOL_MAX
@@ -260,9 +260,10 @@ real muGradPhi = SOLVER_MUGRADPHI;
 // Time parameters
 real dt = SOLVER_DT;
 real nIter = SOLVER_NITER;
-real time = SOLVER_TIME;
+real tMax = SOLVER_TMAX;
+real time = 0;
 
-#ifdef SOLVER_TIMEADAPT
+#ifdef SOLVER_TIME_ADAPTATION
 real tolMax = SOLVER_TIME_ADAPTATION_TOL_MAX;
 real tolMin = SOLVER_TIME_ADAPTATION_TOL_MIN;
 real factor = SOLVER_TIME_ADAPTATION_FACTOR;
@@ -271,10 +272,10 @@ real dtOverPeMax = SOLVER_TIME_ADAPTATION_DT_OVER_PE_MAX;
 #endif
 
 // Mesh parameters
-#ifdef SOLVER_ADAPT
+#ifdef SOLVER_MESH_ADAPTATION
 int aniso = SOLVER_ANISO;
-real hmin = SOLVER_HMIN;
-real hmax = SOLVER_HMAX;
+real hmin = SOLVER_MESH_ADAPTATION_HMIN;
+real hmax = SOLVER_MESH_ADAPTATION_HMAX;
 #endif
 
 //}}}
@@ -504,11 +505,11 @@ real intPressureFluxKineticEnergy = 0;
 #endif
 // }}}
 
-for(int i = 0; i <= nIter; i++)
+for(int i = 0; i <= nIter && time <= tMax; i++)
 {
   tic();
   // Adapt mesh {{{
-  #ifdef SOLVER_ADAPT
+  #ifdef SOLVER_MESH_ADAPTATION
     int nAdapts = ((i == 0) ? 3 : 1);
 
     for(int iAdapt = 0; iAdapt < nAdapts; iAdapt++)
@@ -698,7 +699,7 @@ for(int i = 0; i <= nIter; i++)
        << "dt = "            << dt   << endl
        << "Pe = "            << Pe   << endl
        << "Cn = "            << Cn   << endl
-       #ifdef SOLVER_ADAPT
+       #ifdef SOLVER_MESH_ADAPTATION
        << "hmin = "          << hmin << endl
        << "hmax = "          << hmax << endl
        #endif
@@ -744,7 +745,7 @@ for(int i = 0; i <= nIter; i++)
   #endif
   #endif
 
-  #ifdef SOLVER_ADAPT
+  #ifdef SOLVER_MESH_ADAPTATION
   savemeshgmsh("output/mesh/mesh-" + i + ".msh", Vh, Th);
   #if SOLVER_POLYNOMIAL_ORDER == 2
     savemeshgmsh("output/mesh/low-order-mesh-" + i + ".msh", VhLow, Th);
@@ -796,12 +797,12 @@ for(int i = 0; i <= nIter; i++)
 
   if(i == 0) {
       ofstream file("parameters.txt",append);
-      #ifndef SOLVER_TIMEADAPT
+      #ifndef SOLVER_TIME_ADAPTATION
       file << "dt = " << dt << endl;
       #endif
       file << "Pe = " << Pe << endl;
       file << "Cn = " << Cn << endl;
-      #ifdef SOLVER_ADAPT
+      #ifdef SOLVER_MESH_ADAPTATION
       file << "hmin = " << hmin << endl;
       file << "hmax = " << hmax << endl;
       #endif
@@ -811,12 +812,12 @@ for(int i = 0; i <= nIter; i++)
       #endif
   }
   else {
-      #ifndef SOLVER_TIMEADAPT
+      #ifndef SOLVER_TIME_ADAPTATION
       if (doesMatch("parameters.txt","dt")) dt = getMatch("parameters.txt","dt =");
       #endif
       if (doesMatch("parameters.txt","Pe")) Pe = getMatch("parameters.txt","Pe =");
       if (doesMatch("parameters.txt","Cn")) Cn = getMatch("parameters.txt","Cn =");
-      #ifdef SOLVER_ADAPT
+      #ifdef SOLVER_MESH_ADAPTATION
       if (doesMatch("parameters.txt","hmin")) hmin = getMatch("parameters.txt","hmin =");
       if (doesMatch("parameters.txt","hmax")) hmax = getMatch("parameters.txt","hmax =");
       #endif
@@ -827,7 +828,7 @@ for(int i = 0; i <= nIter; i++)
   }
   // }}}
   // Cahn-Hilliard equation {{{
-  #ifdef SOLVER_TIMEADAPT
+  #ifdef SOLVER_TIME_ADAPTATION
   bool recalculate = true;
   while(recalculate) {
   #endif
@@ -852,7 +853,7 @@ for(int i = 0; i <= nIter; i++)
   set(matPhi,solver=sparsesolver SPARAMS);
   phi[] = matPhi^-1*rhsPhi;
 
-  #ifdef SOLVER_TIMEADAPT
+  #ifdef SOLVER_TIME_ADAPTATION
   real dissipationFreeEnergy = dt*INTEGRAL(DIMENSION)(Th) ((1/Pe)*(Grad(mu)'*Grad(mu)));
   real newFreeEnergy  = INTEGRAL(DIMENSION)(Th) ( energyA * 0.25 * (phi^2 - 1)^2 + energyB * 0.5 * (Grad(phi)'*Grad(phi)))
       + INTEGRAL(BOUNDARYDIM)(Th,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20) (wetting(contactAngles) * (phi^3/3 - phi));
