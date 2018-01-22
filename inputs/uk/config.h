@@ -16,14 +16,18 @@
 #define SOLVER_POLYNOMIAL_ORDER 2
 
 // Time adaptation
-#define SOLVER_TIMEADAPT
-#define SOLVER_TIME_ADAPTATION_TOL_MAX 0.1
-#define SOLVER_TIME_ADAPTATION_TOL_MIN 0.05
+#define SOLVER_TIME_ADAPTATION
+#define SOLVER_TIME_ADAPTATION_METHOD AYMARD
+#define SOLVER_TIME_ADAPTATION_FACTOR sqrt(2)
+#define SOLVER_TIME_ADAPTATION_TOL_MAX 2e-2
+#define SOLVER_TIME_ADAPTATION_TOL_MIN 1e-2
+#define SOLVER_TIME_ADAPTATION_DT_OVER_PE_MIN 0
+#define SOLVER_TIME_ADAPTATION_DT_OVER_PE_MAX 2.*(energyB/energyA^2)
 
 // Mesh adaptation
-#define SOLVER_ADAPT
-#define SOLVER_HMIN 0.05
-#define SOLVER_HMAX 0.5
+#define NO_SOLVER_MESH_ADAPTATION
+#define SOLVER_MESH_ADAPTATION_HMIN 0.05
+#define SOLVER_MESH_ADAPTATION_HMAX 0.5
 
 // Boundary
 #define SOLVER_ANGLE pi/4
@@ -36,4 +40,4 @@
 #define SOLVER_DT 2*Pe*(energyB/energyA^2)
 
 // Flags for plots
-#define PLOT_FLAGS --parallel --extension "png" --step 100
+#define PLOT_FLAGS --extension "png" --step 100

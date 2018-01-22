@@ -11,9 +11,9 @@
 #define SOLVER_POLYNOMIAL_ORDER 2
 
 // Mesh adaptation
-#define SOLVER_ADAPT
-#define SOLVER_HMIN 1e-3
-#define SOLVER_HMAX .05
+#define SOLVER_MESH_ADAPTATION
+#define SOLVER_MESH_ADAPTATION_HMIN 1e-3
+#define SOLVER_MESH_ADAPTATION_HMAX .05
 
 //- Dimensionless numbers
 #define SOLVER_PE 10000

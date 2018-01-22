@@ -4,8 +4,8 @@
 #define SOLVER_CN 0.05
 
 // Mesh and time adaptation
-#define NO_SOLVER_TIMEADAPT
-#define SOLVER_ADAPT
+#define NO_SOLVER_TIME_ADAPTATION
+#define SOLVER_MESH_ADAPTATION
 
 // Time step and number of iterations
 #define SOLVER_NITER 200

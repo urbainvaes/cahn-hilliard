@@ -5,5 +5,5 @@ PROBLEM = problem.pde
 
 # Flags
 NS = 1
-SOLVER_ADAPT = 1
+SOLVER_MESH_ADAPTATION = 1
 PLOT = 0

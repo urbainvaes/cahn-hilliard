@@ -2,7 +2,7 @@
 #define VIEW GITROOT/sources/views/2D.geo
 #define DIMENSION 2
 
-#define SOLVER_ADAPT
+#define SOLVER_MESH_ADAPTATION
 #define NS
 
 #define SOLVER_METHOD OD1

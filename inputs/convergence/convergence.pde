@@ -33,7 +33,7 @@ load "gmsh"
 
 
 // If there are different meshes
-#if defined(SOLVER_ADAPT) || defined(SPACE_STEP_CONVERGENCE)
+#if defined(SOLVER_MESH_ADAPTATION) || defined(SPACE_STEP_CONVERGENCE)
   #define MESH_ERROR "output/mesh.msh"
 #else
   #define MESH_ERROR "../0/output/mesh.msh"
@@ -47,20 +47,20 @@ mesh ThError = gmshload(MESH_ERROR);
 fespace VhError(ThError,P2);
 
 // Meshes for each of the meshsizes
-#if defined(SOLVER_ADAPT) || defined(SPACE_STEP_CONVERGENCE)
+#if defined(SOLVER_MESH_ADAPTATION) || defined(SPACE_STEP_CONVERGENCE)
 #define LOOP_BODY(ITERATION) mesh Th ## ITERATION = gmshload("../" + xstr(ITERATION) + "/output/mesh.msh");
 LOOP(0,N_TESTS,LOOP_BODY)
 #endif
 
 // Define finite element spaces
-#if defined(SOLVER_ADAPT) || defined(SPACE_STEP_CONVERGENCE)
+#if defined(SOLVER_MESH_ADAPTATION) || defined(SPACE_STEP_CONVERGENCE)
 #define AUX_AUX_LOOP_BODY(ITERATION,EL_TYPE) fespace Vh ## ITERATION (Th ## ITERATION, EL_TYPE);
 #define LOOP_BODY(ITERATION) AUX_AUX_LOOP_BODY(ITERATION, EL_TYPE)
 LOOP(0,N_TESTS,LOOP_BODY)
 #endif
 
 // Define fields
-#if defined(SOLVER_ADAPT) || defined(SPACE_STEP_CONVERGENCE)
+#if defined(SOLVER_MESH_ADAPTATION) || defined(SPACE_STEP_CONVERGENCE)
 #define LOOP_BODY(ITERATION) Vh ## ITERATION phi ## ITERATION;
 #else
 #define LOOP_BODY(ITERATION) VhError phi ## ITERATION;
@@ -74,7 +74,7 @@ for(int iteration = 0; iteration <= N_MAIN_LOOP; iteration++)
 {
     cout << "Calculating errors for iteration " + iteration + "." << endl;
 
-    #ifdef SOLVER_ADAPT
+    #ifdef SOLVER_MESH_ADAPTATION
         #define LOOP_BODY(ITERATION) \
         Th ## ITERATION = gmshload("../" + xstr(ITERATION) + "/output/mesh/" + MESH_PREFIX + TEST_STEP(ITERATION) + ".msh"); \
         phi ## ITERATION = phi ## ITERATION;

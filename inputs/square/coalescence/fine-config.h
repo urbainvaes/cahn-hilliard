@@ -8,5 +8,5 @@
 
 // Mesh adaptation
 #define SOLVER_CN 0.01
-#define SOLVER_HMIN 0.001
-#define SOLVER_HMAX 0.05
+#define SOLVER_MESH_ADAPTATION_HMIN 0.001
+#define SOLVER_MESH_ADAPTATION_HMAX 0.05

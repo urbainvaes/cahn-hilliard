@@ -9,6 +9,6 @@ for (( i = 0; i < 10; i++ )); do
     h_min="${minMeshSize}*pow(${ratio},${i})"
     cat > ${problem_name} \
         <(echo "#include xstr(HERE/config.common)") \
-        <(echo "#define SOLVER_HMIN ${h_min}") \
-        <(echo "#define SOLVER_HMAX ${quotient}*${h_min}")
+        <(echo "#define SOLVER_MESH_ADAPTATION_HMIN ${h_min}") \
+        <(echo "#define SOLVER_MESH_ADAPTATION_HMAX ${quotient}*${h_min}")
 done

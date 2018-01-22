@@ -4,10 +4,10 @@
 #define SOLVER_CN 0.05
 
 // Adaptation in space and time
-#define NO_SOLVER_TIMEADAPT
-#define SOLVER_ADAPT
-#define SOLVER_HMIN 0.01
-#define SOLVER_HMAX 0.05
+#define NO_SOLVER_TIME_ADAPTATION
+#define SOLVER_MESH_ADAPTATION
+#define SOLVER_MESH_ADAPTATION_HMIN 0.01
+#define SOLVER_MESH_ADAPTATION_HMAX 0.05
 
 // Minimal time step
 #define BASE_TIME_STEP Pe/500*1e-4

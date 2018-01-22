@@ -19,10 +19,10 @@
 #define SOLVER_CN 0.01
 
 // Adaptation in sapce and time
-#define NO_SOLVER_TIMEADAPT
-#define SOLVER_ADAPT
-#define SOLVER_HMIN 0.001
-#define SOLVER_HMAX 0.05
+#define NO_SOLVER_TIME_ADAPTATION
+#define SOLVER_MESH_ADAPTATION
+#define SOLVER_MESH_ADAPTATION_HMIN 0.001
+#define SOLVER_MESH_ADAPTATION_HMAX 0.05
 
 // Time step and number of iterations
 #define SOLVER_NITER 1000
