@@ -22,7 +22,7 @@ parser.add_argument('-p', '--parallel', action='store_true',
                     help='run in parallel')
 parser.add_argument('-e', '--extension', type=str, default='pdf',
                     help='extension of output files')
-parser.add_argument('-C', '--nocolorbar', action='store_false',
+parser.add_argument('-C', '--nocolorbar', action='store_true',
                     help='draw colorbar')
 parser.add_argument('-i', '--iteration', type=str,
                     help='iteration number')
@@ -34,6 +34,8 @@ parser.add_argument('--output', type=str, default="pictures",
                     help='directory for figure files')
 parser.add_argument('-T', '--notitle', action='store_true',
                     help='do not print title')
+parser.add_argument('-l', '--latex', action='store_true',
+                    help='Use latex in matplotlib rc')
 args = parser.parse_args()
 
 # Extract boundary of domain
@@ -72,7 +74,7 @@ inch_size = 20
 font_size = inch_size * 2
 matplotlib.rc('font', size=font_size)
 matplotlib.rc('font', family='serif')
-matplotlib.rc('text', usetex=False)
+matplotlib.rc('text', usetex=args.latex)
 
 if args.iteration:
     iterations = [int(args.iteration)]
@@ -80,6 +82,9 @@ else:
     n_files = len([f for f in os.listdir(args.input + '/done')])
     n_plots = int(n_files / args.step)
     iterations = [args.step * i for i in range(n_plots)]
+
+# Time
+time = np.loadtxt(args.input + '/thermodynamics.txt', skiprows=1)[:,1]
 
 # Create directories if they are missing
 fields = ['phi', 'mu']
@@ -129,7 +134,7 @@ def plot_iteration(iteration):
             mesh.mesh(file_mesh).export_matplotlib_triangulation()
     else:
         tri_data = triangulation_data
-        tri_data = triangulation_mesh
+        tri_mesh = triangulation_mesh
 
     # Load data files
     data = {}
@@ -160,11 +165,12 @@ def plot_iteration(iteration):
     for f in fields:
         if f == 'phi':
             tricontourf = plt.tricontourf(
-                tri_data, data[f], 40,
-                cmap='blue_green', extend='both')
+                tri_data, data[f], levels=np.linspace(-1.1, 1.1, 40),
+                cmap='blue_green')
         elif f == 'mu':
             tricontourf = plt.tricontourf(
                 tri_data, data[f], 40, cmap='jet')
+                # tri_data, data[f], levels=np.linspace(-4, 2.5, 80), cmap='jet')
         elif f == 'pressure':
             tricontourf = plt.tricontourf(
                 tri_data, data[f], 40, cmap='jet')
@@ -178,7 +184,12 @@ def plot_iteration(iteration):
             if f == 'phi':
                 colorbar = plt.colorbar(
                         tricontourf, orientation=c_orientation,
-                        fraction=c_fraction, pad=0.01, ticks=[-1, -.5, 0, .5, 1])
+                        fraction=c_fraction, pad=0.01)
+                        # fraction=c_fraction, pad=0.01, ticks=[-1, -.5, 0, .5, 1])
+            # elif f == 'mu':
+            #     colorbar = plt.colorbar(
+            #             tricontourf, orientation=c_orientation,
+            #             fraction=c_fraction, pad=0.01, ticks=[-4, -3, -2, -1,  0, 1, 2])
             else:
                 colorbar = plt.colorbar(
                         tricontourf, orientation=c_orientation,
@@ -188,9 +199,10 @@ def plot_iteration(iteration):
         if f == 'Velocity':
             plt.quiver(x, y, vx, vy)
         if not args.notitle:
-            plt.title(titles[f], y=1.02)
+            # plt.title(titles[f], y=1.02)
+            plt.title("Iteration: {}, time: {:.2f}".format(iteration, time[iteration]), y=1.02)
         output = args.output + '/' + f + '/' + args.label + '-' + f + '-' + \
-            '%05d' % (iteration) + '.' + args.extension
+            '%06d' % (iteration) + '.' + args.extension
         plt.xticks([])
         plt.yticks([])
         plt.tight_layout()
