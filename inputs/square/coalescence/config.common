@@ -19,6 +19,7 @@
 
 // Time step and number of iterations
 #define SOLVER_NITER 1e5
+#define SOLVER_TMAX 1000
 #define SOLVER_DT 2*Pe*(energyB/energyA^2)
 
 
