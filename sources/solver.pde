@@ -478,7 +478,18 @@ varf varP(p,test) =
 // CLear and create output file
 {
     ofstream thermodynamics("output/thermodynamics.txt");
-    thermodynamics << "iteration time time_step mass wall_free_energy interior_free_energy total_free_energy diffusive_mass_increment diffusive_free_energy_increment" << endl;
+    thermodynamics << "iteration time "
+      << "time_step "
+      << "mass "
+      << "wall_free_energy "
+      << "interior_free_energy "
+      << "total_free_energy "
+      << "diffusive_mass_increment "
+      << "diffusive_free_energy_increment "
+      #ifndef NS
+      << "numerical_dissipation "
+      #endif
+      << endl;
     ofstream params("parameters.txt");
 };
 
@@ -492,6 +503,9 @@ real intConvectiveFluxMass = 0;
 
 real intDissipationFreeEnergy = 0;
 real intDiffusiveFluxFreeEnergy = 0;
+#ifndef NS
+real intNumericalDissipation = 0;
+#endif
 #ifdef NS
 real intTransferEnergy = 0;
 real intConvectiveFluxFreeEnergy = 0;
@@ -593,6 +607,9 @@ for(int i = 0; i <= nIter && time <= tMax; i++)
   freeEnergy = bulkFreeEnergy + wallFreeEnergy;
   real deltaFreeEnergy = freeEnergy - freeEnergyOld;
   real dissipationFreeEnergy = INTEGRAL(DIMENSION)(Th) ((1/Pe)*(Grad(mu)'*Grad(mu)));
+  #ifndef NS
+  real numericalDissipation = - deltaFreeEnergy - dissipationFreeEnergy;
+  #endif
   real diffusiveFluxFreeEnergy = - INTEGRAL(BOUNDARYDIM)(Th) ((1/Pe) * mu * Normal'*Grad(mu));
   real totalContributionsFreeEnergy = diffusiveFluxFreeEnergy + dissipationFreeEnergy;
   #ifdef NS
@@ -631,6 +648,9 @@ for(int i = 0; i <= nIter && time <= tMax; i++)
 
   intDissipationFreeEnergy += dt*dissipationFreeEnergy;
   intDiffusiveFluxFreeEnergy += dt*diffusiveFluxFreeEnergy;
+  #ifndef NS
+  intNumericalDissipation += dt*numericalDissipation;
+  #endif
   #ifdef NS
   intTransferEnergy += dt*transferEnergy;
   intConvectiveFluxFreeEnergy += dt*convectiveFluxFreeEnergy;
@@ -718,7 +738,11 @@ for(int i = 0; i <= nIter && time <= tMax; i++)
                      << bulkFreeEnergy << " "
                      << freeEnergy << " "
                      << diffusiveFluxMass * dt << " "
-                     << diffusiveFluxFreeEnergy * dt << endl;
+                     << diffusiveFluxFreeEnergy * dt << " "
+                     #ifndef NS
+                     << intNumericalDissipation << " "
+                     #endif
+                     << endl;
   }
   // }}}
   cout << "Calculate macroscopic variables: " << tic() << endl;
