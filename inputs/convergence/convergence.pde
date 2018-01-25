@@ -44,7 +44,11 @@ load "gmsh"
 mesh ThError = gmshload(MESH_ERROR);
 
 // Define finite element space (! P1 or P2 !)
+#if defined(SOLVER_MESH_ADAPTATION) || defined(SPACE_STEP_CONVERGENCE)
 fespace VhError(ThError,P2);
+#else
+fespace VhError(ThError,EL_TYPE);
+#endif
 
 // Meshes for each of the meshsizes
 #if defined(SOLVER_MESH_ADAPTATION) || defined(SPACE_STEP_CONVERGENCE)

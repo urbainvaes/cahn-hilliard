@@ -15,7 +15,7 @@
 #define SOLVER_MESH_ADAPTATION_HMIN 1e-3
 #define SOLVER_MESH_ADAPTATION_HMAX .05
 
-//- Dimensionless numbers
+// Dimensionless numbers
 #define SOLVER_PE 10000
 #define SOLVER_CN 5e-3
 #define SOLVER_RE 1
