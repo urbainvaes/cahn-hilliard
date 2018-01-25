@@ -20,16 +20,16 @@ bunch :
 #  Install and uninstall a test to the current bunch  #
 #######################################################
 regex ?= ".*"
-list_inputs = $(shell find inputs -name "*.h" -regex $(regex) | sed 's!inputs/!!;s!\(-\|/\)config.h!!')
-choose_input = $(shell echo "$(list_inputs)" | tr " " "\n" | $(fzf) --prompt="Select test to install: " -m --bind=ctrl-t:toggle)
 
+fzf-install = $(fzf) --prompt="Select test to install: " -m --bind=ctrl-t:toggle
 install :
-	echo "$(choose_input)" | tr " " "\n" >> .bunches/$(bunch) || echo "No change";
+	find inputs -name "*.h" -regex $(regex) -printf "%P\\n" | gawk -f sources/bin/list_inputs.awk | \
+		sed '/^$$/d;/^#/d' | $(fzf-install) >> .bunches/$(bunch) || echo "No change";
 	sed -i "/^$$/d" .bunches/$(bunch)
 
+fzf-uninstall = $(fzf) --prompt="Select test to uninstall: " -m --bind=ctrl-t:toggle
 uninstall :
-	@cat .bunches/$(bunch) | \
-		$(fzf) --prompt="Select test to uninstall: " -m --bind=ctrl-t:toggle | \
+	@cat .bunches/$(bunch) | $(fzf-uninstall) | \
 		while read p; do sed -i "\#$${p}#d" .bunches/$(bunch); done;
 
 # Select in bunch
@@ -42,8 +42,9 @@ select :
 #################################
 link :
 	mkdir -p $(addprefix tests/$(problem)/, output pictures logs);
-	ln -srf $(PWD)/$(shell find inputs -name "*.h" | grep "$(problem)[/-]") tests/$(problem)/config.h
 	ln -srft tests/$(problem) sources/Makefile
+	find inputs -name "*.h" -regex $(regex) -printf "%P\\n" | gawk -f sources/bin/list_inputs.awk | \
+		grep -Fx -A9 "$(problem)" | sed -n '2,/^$$/p' > tests/$(problem)/config.h
 
 unlink :
 	rm -rf tests/$(problem)

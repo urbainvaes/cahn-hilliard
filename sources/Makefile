@@ -9,13 +9,9 @@ endif
 # Root of repository
 git_root = $(shell git rev-parse --show-toplevel)
 
-# Directory of configuration file
-input_dir  = $(shell readlink -f config.h | xargs dirname)
-
 # Preprocessor f lags
 cpp_flags = -P \
 			-DGITROOT=$(git_root) \
-			-DHERE=$(input_dir) \
 			-DHOSTNAME=$(shell hostname) \
 			-imacros $(git_root)/sources/macros.h \
 			-imacros config.h
