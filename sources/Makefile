@@ -121,6 +121,5 @@ report :
 		done
 
 status :
-	@echo "Problem $(problem) reporting for duty"; \
-	echo "  Number of iterations calculated: $$(cat output/thermodynamics.txt 2>/dev/null | wc -l)"; \
-	echo ""
+	@cat output/thermodynamics.txt 2>/dev/null | tail -1 |\
+		awk '{print "Problem $(problem) reporting for duty: Iteration:", $$1, ", Time:", $$2}';
