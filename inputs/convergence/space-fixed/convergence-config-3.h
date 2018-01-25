@@ -1,5 +1,5 @@
 // Load options of tests
-#include xstr(HERE/config.common)
+#include "./config.common"
 #define SPACE_STEP_CONVERGENCE
 
 // Overwrite parameters that need to be

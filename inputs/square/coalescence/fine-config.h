@@ -1,4 +1,4 @@
-#include xstr(HERE/config.common)
+#include "./config.common"
 
 // Time adatpation
 #if SOLVER_TIME_ADAPTATION_METHOD == AYMARD

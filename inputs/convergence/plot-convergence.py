@@ -13,12 +13,14 @@ parser.add_argument('label', type=str,
                     help='label used when saving pictures')
 parser.add_argument('-c', '--convergence', type=str, default='time',
         help='variable with respect to which the convergence is studied')
+parser.add_argument('-l', '--latex', action='store_true',
+                    help='Use latex in matplotlib rc')
 args = parser.parse_args()
 
 # Matplotlib configuration
 matplotlib.rc('font', size=14)
 matplotlib.rc('font', family='serif')
-matplotlib.rc('text', usetex=True)
+matplotlib.rc('text', usetex=args.latex)
 
 # In the case of convergence with respect to the time step, remove data
 # relative to 0-th iteration, because the error would be 0 there.

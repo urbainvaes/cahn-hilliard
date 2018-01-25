@@ -1,12 +1,4 @@
 #include "../config.common"
-
-// Dimensionless numbers
-#define SOLVER_CN 0.1
-
-// Adaptation in sapce and time
-#define NO_SOLVER_TIME_ADAPTATION
-#define NO_SOLVER_MESH_ADAPTATION
-
-#define BASE_TIME_STEP Pe/500*1e-4
+#define GEOMETRY_S 0.03
 
 // vim: ft=cpp

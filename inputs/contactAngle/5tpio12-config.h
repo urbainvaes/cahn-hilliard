@@ -1,2 +1,2 @@
-#include xstr(HERE/config.common)
+#include "./config.common"
 #define CONTACT_ANGLE 5*pi/12

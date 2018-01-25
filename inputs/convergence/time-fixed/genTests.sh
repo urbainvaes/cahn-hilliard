@@ -1,15 +1,14 @@
 #!/usr/bin/env bash
 
-minDt="BASE_TIME_STEP"
+maxDt="BASE_TIME_STEP"
 ratio="2.0"
 maxPower="5"
-minIter="100"
+minIter="BASE_NITER"
 
-for (( i = 0; i <= ${maxPower}; i++ )); do
-    problem_name="${i}-config.h"
-    dt="${minDt}*pow(${ratio},${i})"
+for (( i = 0; i <= maxPower; i++ )); do
+    problem_name="${i}-config-3.h"
     cat > ${problem_name} \
-        <(echo "#include xstr(HERE/config.common)") \
+        <(echo '#include "./config.common"') \
         <(echo "#define SOLVER_NITER ${minIter}*${ratio}^(${maxPower}-${i})") \
-        <(echo "#define SOLVER_DT ${dt}")
+        <(echo "#define SOLVER_DT ${maxDt}*${ratio}^(${i}-${maxPower})")
 done

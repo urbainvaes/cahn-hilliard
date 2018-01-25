@@ -7,15 +7,25 @@
 // Geometry
 #define GEOMETRY_LX 2
 #define GEOMETRY_LY 0.5
-#define GEOMETRY_S 0.03
 #define GEOMETRY GITROOT/sources/geometries/square/simple-square.geo
 
 // Solver
-#define SOLVER_METHOD OD2
 #define PROBLEM_CONF HERE/../problem.pde
-#define SOLVER_POLYNOMIAL_ORDER 2
+
+// Initial condition of problem
+#define PROBLEM_NICE_INITIAL_CONDITION
 
 // Dimensionless numbers
 #define SOLVER_PE 1e4
+#define SOLVER_CN 0.1
+
+// Adaptation in sapce and time
+#define NO_SOLVER_TIME_ADAPTATION
+#define NO_SOLVER_MESH_ADAPTATION
+
+// Base time step (= time step for convergence with respect to space, and max
+// time step for convergence with respect to time.)
+#define BASE_TIME_STEP 1e-2*(2*Pe*energyB/energyA^2)
+#define BASE_NITER 200
 
 // vim: ft=cpp

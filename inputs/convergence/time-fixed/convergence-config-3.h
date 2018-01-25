@@ -1,5 +1,5 @@
 // Load options of tests
-#include xstr(HERE/config.common)
+#include "./config.common"
 #define TIME_STEP_CONVERGENCE
 
 #define SOLVER HERE/../convergence.pde

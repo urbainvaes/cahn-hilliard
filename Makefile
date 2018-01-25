@@ -24,8 +24,8 @@ list_inputs = $(shell find inputs -name "*.h" -regex $(regex) | sed 's!inputs/!!
 choose_input = $(shell echo "$(list_inputs)" | tr " " "\n" | $(fzf) --prompt="Select test to install: " -m --bind=ctrl-t:toggle)
 
 install :
-	@echo "$(choose_input)" | tr " " "\n" >> .bunches/$(bunch) || echo "No change";
-	@sed -i "/^$$/d" .bunches/$(bunch)
+	echo "$(choose_input)" | tr " " "\n" >> .bunches/$(bunch) || echo "No change";
+	sed -i "/^$$/d" .bunches/$(bunch)
 
 uninstall :
 	@cat .bunches/$(bunch) | \

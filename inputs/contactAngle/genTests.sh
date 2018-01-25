@@ -6,6 +6,6 @@ for angle in ${contact_angles}; do
     escaped_angle=$(echo ${angle} | tr "*" "t" | tr "/" "o")
     problem_name="${escaped_angle}-config.h"
     cat > ${problem_name} \
-        <(echo "#include xstr(HERE/config.common)") \
+        <(echo '#include "./config.common"') \
         <(echo "#define CONTACT_ANGLE ${angle}")
 done
