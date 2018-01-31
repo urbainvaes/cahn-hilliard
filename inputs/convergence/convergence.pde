@@ -3,6 +3,14 @@
 // Load package
 load "gmsh"
 
+// Set variables depending of polynomial order
+#if SOLVER_POLYNOMIAL_ORDER == 1
+  #define EL_TYPE P1
+#endif
+#if SOLVER_POLYNOMIAL_ORDER == 2
+  #define EL_TYPE P2
+#endif
+
 // Number of iterations in main loop
 #ifdef TIME_STEP_CONVERGENCE
   #define N_MAIN_LOOP N_ITERATIONS_COARSE
@@ -10,7 +18,6 @@ load "gmsh"
 #ifdef SPACE_STEP_CONVERGENCE
   #define N_MAIN_LOOP SOLVER_NITER
 #endif
-
 
 // Iteration of test to consider when iteration in main loop is 'iteration'
 #ifdef TIME_STEP_CONVERGENCE

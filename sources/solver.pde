@@ -608,7 +608,7 @@ for(int i = 0; i <= nIter && time <= tMax; i++)
   real deltaFreeEnergy = freeEnergy - freeEnergyOld;
   real dissipationFreeEnergy = INTEGRAL(DIMENSION)(Th) ((1/Pe)*(Grad(mu)'*Grad(mu)));
   #ifndef NS
-  real numericalDissipation = - deltaFreeEnergy - dissipationFreeEnergy;
+  real rateNumericalDissipation = - deltaFreeEnergy/dt - dissipationFreeEnergy;
   #endif
   real diffusiveFluxFreeEnergy = - INTEGRAL(BOUNDARYDIM)(Th) ((1/Pe) * mu * Normal'*Grad(mu));
   real totalContributionsFreeEnergy = diffusiveFluxFreeEnergy + dissipationFreeEnergy;
@@ -649,7 +649,7 @@ for(int i = 0; i <= nIter && time <= tMax; i++)
   intDissipationFreeEnergy += dt*dissipationFreeEnergy;
   intDiffusiveFluxFreeEnergy += dt*diffusiveFluxFreeEnergy;
   #ifndef NS
-  intNumericalDissipation += dt*numericalDissipation;
+  intNumericalDissipation += dt*rateNumericalDissipation;
   #endif
   #ifdef NS
   intTransferEnergy += dt*transferEnergy;

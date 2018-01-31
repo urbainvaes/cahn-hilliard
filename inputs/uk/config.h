@@ -40,4 +40,4 @@
 #define SOLVER_DT 2*Pe*(energyB/energyA^2)
 
 // Flags for plots
-#define PLOT_FLAGS --extension "png" --step 100
+#define PLOT_FLAGS --nocolorbar --extension "png" --step 1000
