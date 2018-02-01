@@ -12,13 +12,25 @@
 #define GEOMETRY_S 0.03
 #endif
 
+#ifndef GEOMETRY_CENTERED_AT_0_X
+#define GEOMETRY_OFFSET_X GEOMETRY_LX/2
+#else
+#define GEOMETRY_OFFSET_X 0
+#endif
+
+#ifndef GEOMETRY_CENTERED_AT_0_Y
+#define GEOMETRY_OFFSET_Y GEOMETRY_LY/2
+#else
+#define GEOMETRY_OFFSET_Y 0
+#endif
+
 s = GEOMETRY_S;
 
 // Define domain
-Point(1) = {0,  0,  0, s};
-Point(2) = {GEOMETRY_LX, 0,  0, s};
-Point(3) = {GEOMETRY_LX, GEOMETRY_LY, 0, s};
-Point(4) = {0,  GEOMETRY_LY, 0, s};
+Point(1) = {GEOMETRY_OFFSET_X - GEOMETRY_LX/2 , GEOMETRY_OFFSET_Y - GEOMETRY_LY/2 , 0 , s};
+Point(2) = {GEOMETRY_OFFSET_X + GEOMETRY_LX/2 , GEOMETRY_OFFSET_Y - GEOMETRY_LY/2 , 0 , s};
+Point(3) = {GEOMETRY_OFFSET_X + GEOMETRY_LX/2 , GEOMETRY_OFFSET_Y + GEOMETRY_LY/2 , 0 , s};
+Point(4) = {GEOMETRY_OFFSET_X - GEOMETRY_LX/2 , GEOMETRY_OFFSET_Y + GEOMETRY_LY/2 , 0 , s};
 
 Line(1) = {1,2};
 Line(2) = {2,3};
