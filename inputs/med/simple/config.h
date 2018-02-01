@@ -3,7 +3,7 @@
 #define DIMENSION 2
 
 #define SOLVER_MESH_ADAPTATION
-#define NS
+#define SOLVER_NAVIER_STOKES
 
 #define SOLVER_METHOD OD1
 #define SOLVER_BEFORE HERE/before.pde

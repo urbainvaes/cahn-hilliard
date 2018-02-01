@@ -260,7 +260,7 @@ but they can be changed if desired in the problem configuration file.
 When activated, the solver will display a plot of the solution at each time step.
 Note that this slows down the simulation.
 
-### Module *NS*
+### Module *SOLVER_NAVIER_STOKES*
 This modules adds Navier-Stokes equations to the sytem of equations of the simulation.
 To use this module, boundary conditions for the pressure and velocity fields have to be specified in the problem file.
 ```

@@ -2,7 +2,7 @@
 #define GEOMETRY GITROOT/sources/geometries/misc/i-shape.geo
 #define VIEW GITROOT/sources/views/2D.geo
 #define DIMENSION 2
-#define NS
+#define SOLVER_NAVIER_STOKES
 
 // General solver options
 #define SOLVER_METHOD E1
