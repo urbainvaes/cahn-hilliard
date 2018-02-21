@@ -13,7 +13,8 @@
 #define PROBLEM_CONF HERE/../problem.pde
 
 // Initial condition of problem
-#define PROBLEM_NICE_INITIAL_CONDITION
+// #define PROBLEM_INITIAL_CONDITION_NICE
+#define PROBLEM_INITIAL_CONDITION_ELLIPSE
 
 // Dimensionless numbers
 #define SOLVER_PE 1e4
