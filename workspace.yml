@@ -1,0 +1,62 @@
+---
+
+layout: main-vertical
+pane-border-status: off
+pane-border-format:
+
+windows:
+
+    - coalescence:
+        pane-border-status: off
+        panes:
+            - run: |
+                cd $(git rev-parse --show-toplevel)
+                source .localenv
+                make push
+                cd tests/square/coalescence
+                make plots
+
+    - porous:
+        pane-border-status: off
+        panes:
+            - run : |
+                source .localenv
+                cd $(git rev-parse --show-toplevel)/tests/cube/porous
+                make rebuild
+                make mesh
+
+    - bug-convergence:
+        pane-border-status: off
+        panes:
+            - run : |
+                cd $(git rev-parse --show-toplevel)
+                source .localenv
+                make link problem=convergence/convergence-time-fixed/convergence
+                cd tests/convergence/convergence-time-fixed/convergence
+                make rebuild
+                make mesh
+                make run
+
+    - pull-graphs:
+        pane-border-status: off
+        panes:
+            - pull: |
+                test_dir=tests/cube/textured
+                graphs_dir=${test_dir}/pictures
+                cd $(git rev-parse --show-toplevel)/${graphs_dir}
+                scp -r uv113@macomp001.ma.ic.ac.uk:cahn-hilliard/${graphs_dir}/macros .
+
+    - textured:
+        pane-border-status: off
+        panes:
+            - run : |
+                source .localenv
+                cd $(git rev-parse --show-toplevel)/tests/cube/textured
+                make rebuild
+                make mesh
+                make run
+
+    - ssh:
+        pane-border-status: off
+        panes:
+            - status: make status
