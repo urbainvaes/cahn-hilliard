@@ -60,3 +60,19 @@ windows:
         pane-border-status: off
         panes:
             - status: make status
+
+- scratch:
+    pane-border-status: off
+    layout: main-vertical
+    panes:
+        - run :
+            - keys: c-c
+            - source .localenv
+            - cd $(git rev-parse --show-toplevel)/tests/tests/sharpInterface/0
+            - make rebuild clean mesh run
+        - view :
+            - keys: c-c
+            - sleep: 2
+            - source .localenv
+            - cd $(git rev-parse --show-toplevel)/tests/tests/sharpInterface/0
+            - make view

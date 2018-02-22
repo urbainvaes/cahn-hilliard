@@ -4,6 +4,6 @@ PROBLEM = problem.pde
 VIEW = view-cube-med.geo
 
 # Flags
-NS = 1
+SOLVER_NAVIER_STOKES = 1
 SOLVER_MESH_ADAPTATION = 1
 PLOT = 0
