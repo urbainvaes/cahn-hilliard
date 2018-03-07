@@ -248,7 +248,7 @@ In 2D, the *FreeFem++* built-in function `adaptmesh` is use,
 with parameters `hmax = 0.1` and `hmin = hmax/64`.
 
 In 3D, the metric field used for the adaptation is used using `mshmet`,
-with parameters `hmax = 0.1` and `hmin = hmax/20`, 
+with parameters `hmax = 0.1` and `hmin = hmax/20`,
 after which the adaptation is accomplished by *Tetgen* through the *FreeFem++* function `tetgreconstruction`.
 
 In both cases,

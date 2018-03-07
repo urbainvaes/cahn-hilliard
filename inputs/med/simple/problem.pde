@@ -1,23 +1,3 @@
-// Time step
-// dt = 0.05;
-dt = 1e-2;
-
-// Number of iterations
-nIter = 1e6;
-
-// Capillary term
-muGradPhi = 1;
-
-// Parameters for adaptation
-hmin = 5e-3;
-hmax = 1e-1;
-
-// Dimensionless numbers
-Re = 1;
-We = 1;
-Pe = 100;
-Cn = 0.01;
-
 // INITIAL CONDITIONS
 // func phi0 = 1;
 func phi0 = (x > 5.71 && x < 6.51 && (y > 16 || y < 14.4) ? -1 : 1);
