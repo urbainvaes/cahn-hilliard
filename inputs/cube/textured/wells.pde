@@ -11,14 +11,22 @@ func mu0 = 0;
 [phi, mu] = [phi0, mu0];
 
 // BOUNDARY CONDITIONS
+#ifndef PROBLEM_WELLS_THETA0
+#define PROBLEM_WELLS_THETA0 (pi/2.)
+#endif
+
+#ifndef PROBLEM_WELLS_AMPLITUDE
+#define PROBLEM_WELLS_AMPLITUDE (pi/6.)
+#endif
 
 // Space-dependent contact-angle
-real theta0 = pi/2;
+real theta0 = PROBLEM_WELLS_THETA0;
 real frequencyX = 4;
 real frequencyY = 4;
-real amplitude = pi/6;
+real amplitude = PROBLEM_WELLS_AMPLITUDE;
 real biasX = 0.0;
 real biasY = 0.0;
+
 
 // Wells
 func contactAngles = theta0 + amplitude * cos(frequencyX*pi*(x - biasX)) * cos(frequencyY*pi*(y - biasY)) * ((label == 1) + (label == 2));

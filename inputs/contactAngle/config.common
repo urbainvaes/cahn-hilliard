@@ -14,7 +14,7 @@
 ************/
 
 #define SOLVER_METHOD OD2
-// #define OD2MOD_THETA 10*dt
+// #define SOLVER_OD2MOD_THETA 10*dt
 #define PROBLEM_CONF HERE/problem.pde
 #define SOLVER_AFTER HERE/after.pde
 #define SOLVER_POLYNOMIAL_ORDER 2

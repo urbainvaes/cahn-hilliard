@@ -37,7 +37,8 @@ titles = {'time': 'Time',
           'total_free_energy': 'Total free energy',
           'diffusive_mass_increment': 'Diffusive mass increment',
           'diffusive_free_energy_increment': 'Diffusive free energy increment',
-          'numerical_dissipation': 'Numerical dissipation'}
+          'numerical_dissipation': 'Numerical dissipation',
+          'rate_numerical_dissipation': 'Rate of numerical dissipation'}
 
 data_file = args.input + '/thermodynamics.txt'
 with open(data_file, 'r') as f:

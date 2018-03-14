@@ -11,10 +11,10 @@ git_root = $(shell git rev-parse --show-toplevel)
 
 # Preprocessor f lags
 cpp_flags = -P \
-			-DGITROOT=$(git_root) \
-			-DHOSTNAME=$(shell hostname) \
-			-imacros $(git_root)/sources/macros.h \
-			-imacros config.h
+	    -DGITROOT=$(git_root) \
+	    -DHOSTNAME=$(shell hostname) \
+	    -imacros $(git_root)/sources/macros.h \
+	    -imacros config.h
 
 bindir    = $(git_root)/sources/bin
 problem   = $(CURDIR:$(git_root)/tests/%=%)
@@ -33,7 +33,7 @@ include $(git_root)/sources/ssh.mk
 config.mk : config.h $(git_root)/sources/defaults.mk
 	cpp $(cpp_flags) $(git_root)/sources/defaults.mk > $@
 
-include config.mk
+-include config.mk
 
 
 ######################

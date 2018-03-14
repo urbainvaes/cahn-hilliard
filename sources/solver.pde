@@ -390,7 +390,7 @@ varf varPhi([phi1,mu1], [phi2,mu2]) =
     (0.5 * (Grad(phi1)'*Grad(mu2)))
     #endif
     #if SOLVER_METHOD == OD2MOD
-    (0.5 + OD2MOD_THETA) * (Grad(phi1)'*Grad(mu2))
+    (0.5 + SOLVER_OD2MOD_THETA) * (Grad(phi1)'*Grad(mu2))
     #endif
     )
   // Right-hand side
@@ -420,7 +420,7 @@ varf varPhi([phi1,mu1], [phi2,mu2]) =
     + energyB * (- 0.5 * (Grad(phiOld)'*Grad(mu2)))
     #endif
     #if SOLVER_METHOD == OD2MOD
-    + energyB * (- (0.5 - OD2MOD_THETA) *  (Grad(phiOld)'*Grad(mu2)))
+    + energyB * (- (0.5 - SOLVER_OD2MOD_THETA) *  (Grad(phiOld)'*Grad(mu2)))
     #endif
     )
 ;
@@ -475,7 +475,7 @@ varf varP(p,test) =
 //}}}
 // Loop in time {{{
 
-// CLear and create output file
+// Clear and create output file {{{
 {
     ofstream thermodynamics("output/thermodynamics.txt");
     thermodynamics << "iteration time "
@@ -488,14 +488,19 @@ varf varP(p,test) =
       << "diffusive_free_energy_increment "
       #ifndef SOLVER_NAVIER_STOKES
       << "numerical_dissipation "
+      << "rate_numerical_dissipation "
       #endif
       << endl;
     ofstream params("parameters.txt");
 };
-
+// }}}
 // Declare macroscopic variables {{{
-real massPhi, freeEnergy, kineticEnergy;
 
+// Quantities defined at a given point
+real massPhi, freeEnergy, kineticEnergy;
+real massPhiOld, freeEnergyOld, kineticEnergyOld;
+
+// Integral quantities
 real intDiffusiveFluxMass = 0;
 #ifdef SOLVER_NAVIER_STOKES
 real intConvectiveFluxMass = 0;
@@ -516,6 +521,15 @@ real intDissipationKineticEnergy = 0;
 real intDiffusiveFluxKineticEnergy = 0;
 real intConvectiveFluxKineticEnergy = 0;
 real intPressureFluxKineticEnergy = 0;
+#endif
+
+// Differential quantities (don't apply to 0th iteration)
+real rateNumericalDissipation = 0;
+real deltaFreeEnergy          = 0;
+real deltaMassPhi             = 0;
+
+#ifdef SOLVER_NAVIER_STOKES
+real deltaKineticEnergy       = 0;
 #endif
 // }}}
 
@@ -583,33 +597,18 @@ for(int i = 0; i <= nIter && time <= tMax; i++)
 
   // }}}
   // Calculate macroscopic variables {{{
-
   // Mass {{{
-  real massPhiOld = massPhi;
   massPhi = INTEGRAL(DIMENSION)(Th) (phi);
-  real deltaMassPhi = massPhi - massPhiOld;
 
-  // Mass fluxes outside of domain
-  real diffusiveFluxMass = - INTEGRAL(BOUNDARYDIM)(Th) ((1/Pe) * Normal'*Grad(mu));
-  real totalFluxMass = diffusiveFluxMass;
-  #ifdef SOLVER_NAVIER_STOKES
-  real convectiveFluxMass = INTEGRAL(BOUNDARYDIM)(Th) (phi * [UVEC]'*Normal);
-  totalFluxMass = totalFluxMass + convectiveFluxMass;
-  #endif
   //}}}
   // Free energy {{{
-  real freeEnergyOld = freeEnergy;
   real bulkFreeEnergy  = INTEGRAL(DIMENSION)(Th) (
       energyA * 0.25 * (phi^2 - 1)^2
       + energyB * 0.5 * (Grad(phi)'*Grad(phi))
       );
   real wallFreeEnergy = INTEGRAL(BOUNDARYDIM)(Th,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20) (wetting(contactAngles) * (phi^3/3 - phi));
   freeEnergy = bulkFreeEnergy + wallFreeEnergy;
-  real deltaFreeEnergy = freeEnergy - freeEnergyOld;
   real dissipationFreeEnergy = INTEGRAL(DIMENSION)(Th) ((1/Pe)*(Grad(mu)'*Grad(mu)));
-  #ifndef SOLVER_NAVIER_STOKES
-  real rateNumericalDissipation = - deltaFreeEnergy/dt - dissipationFreeEnergy;
-  #endif
   real diffusiveFluxFreeEnergy = - INTEGRAL(BOUNDARYDIM)(Th) ((1/Pe) * mu * Normal'*Grad(mu));
   real totalContributionsFreeEnergy = diffusiveFluxFreeEnergy + dissipationFreeEnergy;
   #ifdef SOLVER_NAVIER_STOKES
@@ -620,9 +619,7 @@ for(int i = 0; i <= nIter && time <= tMax; i++)
   // }}}
   // Kinetic energy {{{
   #ifdef SOLVER_NAVIER_STOKES
-  real kineticEnergyOld = kineticEnergy;
   kineticEnergy = INTEGRAL(DIMENSION)(Th) (u*u/2);
-  real deltaKineticEnergy = kineticEnergy - kineticEnergyOld;
   real dissipationKineticEnergy = INTEGRAL(DIMENSION)(Th) ((1/Re) * (Grad(u)'*Grad(u) + Grad(v)'*Grad(v)
       #if DIMENSION == 3
       + Grad(w)'*Grad(w)
@@ -639,6 +636,27 @@ for(int i = 0; i <= nIter && time <= tMax; i++)
   real pressureFluxKineticEnergy = INTEGRAL(BOUNDARYDIM)(Th) (p * [UVEC]'*Normal);
   real totalContributionsKineticEnergy = diffusiveFluxKineticEnergy + convectiveFluxKineticEnergy + pressureFluxKineticEnergy - transferEnergy;
   #endif
+  // }}}
+  // Update Fluxes {{{
+  // Mass fluxes outside of domain
+  real diffusiveFluxMass = - INTEGRAL(BOUNDARYDIM)(Th) ((1/Pe) * Normal'*Grad(mu));
+  real totalFluxMass = diffusiveFluxMass;
+  #ifdef SOLVER_NAVIER_STOKES
+  real convectiveFluxMass = INTEGRAL(BOUNDARYDIM)(Th) (phi * [UVEC]'*Normal);
+  totalFluxMass = totalFluxMass + convectiveFluxMass;
+  #endif
+  // }}}
+  // Update differential quantities {{{
+  if(i > 0) {
+    deltaMassPhi = massPhi - massPhiOld;
+    deltaFreeEnergy = freeEnergy - freeEnergyOld;
+    #ifndef SOLVER_NAVIER_STOKES
+    rateNumericalDissipation = - deltaFreeEnergy/dt - dissipationFreeEnergy;
+    #endif
+    #ifdef SOLVER_NAVIER_STOKES
+    deltaKineticEnergy = kineticEnergy - kineticEnergyOld;
+    #endif
+  }
   // }}}
   // Update integrated quantities {{{
   intDiffusiveFluxMass += dt*diffusiveFluxMass;
@@ -741,6 +759,7 @@ for(int i = 0; i <= nIter && time <= tMax; i++)
                      << diffusiveFluxFreeEnergy * dt << " "
                      #ifndef SOLVER_NAVIER_STOKES
                      << intNumericalDissipation << " "
+                     << rateNumericalDissipation << " "
                      #endif
                      << endl;
   }
@@ -878,7 +897,7 @@ for(int i = 0; i <= nIter && time <= tMax; i++)
   phi[] = matPhi^-1*rhsPhi;
 
   #ifdef SOLVER_TIME_ADAPTATION
-  real dissipationFreeEnergy = dt*INTEGRAL(DIMENSION)(Th) ((1/Pe)*(Grad(mu)'*Grad(mu)));
+  real dissipationFreeEnergy = (dt/Pe)*INTEGRAL(DIMENSION)(Th) ((Grad(mu)'*Grad(mu)));
   real newFreeEnergy  = INTEGRAL(DIMENSION)(Th) ( energyA * 0.25 * (phi^2 - 1)^2 + energyB * 0.5 * (Grad(phi)'*Grad(phi)))
       + INTEGRAL(BOUNDARYDIM)(Th,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20) (wetting(contactAngles) * (phi^3/3 - phi));
   real increaseFreeEnergy = newFreeEnergy - freeEnergy;
@@ -991,7 +1010,7 @@ for(int i = 0; i <= nIter && time <= tMax; i++)
   cout << "Solve Navier-Stokes system: " << tic() << endl;
   #endif
   // }}}
-  // Do thing for all time steps but the 0-th {{{
+  // Things to do for all time steps but the 0-th {{{
   time += dt;
   #if SOLVER_METHOD == LM1
   qOld = qOld + 2 * (phiOld*phi - phiOld*phiOld);
@@ -999,6 +1018,16 @@ for(int i = 0; i <= nIter && time <= tMax; i++)
   #if SOLVER_METHOD == LM2
   qOld = qOld + 2 * (phiOldPlusOneHalfTilde*phi - phiOldPlusOneHalfTilde*phiOld);
   #endif
+
+  // Update *Old variables {{{
+  massPhiOld = massPhi;
+  freeEnergyOld = freeEnergy;
+
+  #ifdef SOLVER_NAVIER_STOKES
+  kineticEnergyOld = kineticEnergy;
+  #endif
+  // }}}
+
   // }}}
 }
 //}}}
