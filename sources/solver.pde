@@ -488,6 +488,7 @@ varf varP(p,test) =
       #ifndef SOLVER_NAVIER_STOKES
       << "numerical_dissipation "
       << "rate_numerical_dissipation "
+      << "rate_physical_dissipation "
       #endif
       << endl;
     ofstream params("parameters.txt");
@@ -523,10 +524,8 @@ real intPressureFluxKineticEnergy = 0;
 #endif
 
 // Differential quantities (don't apply to 0th iteration)
-real rateNumericalDissipation = 0;
-real deltaFreeEnergy          = 0;
-real deltaMassPhi             = 0;
-real NDphilic = 0, NDphobic = 0;
+real rateMassPhi = 0, rateFreeEnergy = 0, ratePD = 0;
+real rateND = 0., rateNDphilic = 0., rateNDphobic = 0., rateNDwall = 0.;
 
 #ifdef SOLVER_NAVIER_STOKES
 real deltaKineticEnergy       = 0;
@@ -581,22 +580,6 @@ for(int i = 0; i <= nIter && time <= tMax; i++)
     cout << "Adapt mesh: " << tic() << endl;
   #endif
   // }}}
-  // Update previous solution {{{
-  #if SOLVER_METHOD == LM2
-  phiOldOld = phiOld;
-  muOldOld = muOld;
-  #endif
-  phiOld = phi;
-  muOld = mu;
-  #ifdef SOLVER_NAVIER_STOKES
-  uOld = u;
-  vOld = v;
-  #if DIMENSION == 3
-  wOld = w;
-  #endif
-  #endif
-
-  // }}}
   // Calculate macroscopic variables {{{
   // Mass {{{
   massPhi = INTEGRAL(DIMENSION)(Th) (phi);
@@ -609,9 +592,7 @@ for(int i = 0; i <= nIter && time <= tMax; i++)
       );
   real wallFreeEnergy = INTEGRAL(BOUNDARYDIM)(Th,labBoundary) (wetting(contactAngles) * (phi^3/3 - phi));
   freeEnergy = bulkFreeEnergy + wallFreeEnergy;
-  real dissipationFreeEnergy = INTEGRAL(DIMENSION)(Th) ((1/Pe)*(Grad(mu)'*Grad(mu)));
   real diffusiveFluxFreeEnergy = - INTEGRAL(BOUNDARYDIM)(Th) ((1/Pe) * mu * Normal'*Grad(mu));
-  real totalContributionsFreeEnergy = diffusiveFluxFreeEnergy + dissipationFreeEnergy;
   #ifdef SOLVER_NAVIER_STOKES
   real transferEnergy = INTEGRAL(DIMENSION)(Th) (phi*[UVEC]'*Grad(mu));
   real convectiveFluxFreeEnergy = INTEGRAL(BOUNDARYDIM)(Th) (mu * phi* [UVEC]'*Normal);
@@ -649,11 +630,8 @@ for(int i = 0; i <= nIter && time <= tMax; i++)
   // }}}
   // Update differential quantities {{{
   if(i > 0) {
-    deltaMassPhi = massPhi - massPhiOld;
-    deltaFreeEnergy = freeEnergy - freeEnergyOld;
-    #ifndef SOLVER_NAVIER_STOKES
-    rateNumericalDissipation = - deltaFreeEnergy/dt - dissipationFreeEnergy;
-    #endif
+    rateMassPhi = (massPhi - massPhiOld)/dt;
+    rateFreeEnergy = (freeEnergy - freeEnergyOld)/dt;
     #ifdef SOLVER_NAVIER_STOKES
     deltaKineticEnergy = kineticEnergy - kineticEnergyOld;
     #endif
@@ -671,30 +649,22 @@ for(int i = 0; i <= nIter && time <= tMax; i++)
 
     #if SOLVER_METHOD == OD2MOD
     #define SOLVER_OD_ALPHA 2.
-    #define SOLVER_OD_BETA dt*SOLVER_OD2MOD_THETA
+    #define SOLVER_OD_BETA SOLVER_OD2MOD_THETA
     #endif
+
+    ratePD = INTEGRAL(DIMENSION)(Th) ((1/Pe)*(Grad(mu)'*Grad(mu)));
 
     #if SOLVER_METHOD == OD1 || SOLVER_METHOD == OD2 || SOLVER_METHOD == OD2MOD
-    real alpha = SOLVER_OD_ALPHA
-    real beta = SOLVER_OD_BETA
-    NDphobic = energyA/dt * (
-        INTEGRAL(DIMENSION)(Th) (1.5*phiOld*phiOld*phi - 0.5*phiOld*phiOld*phiOld - 0.5*(phi + phiOld))*(phi -phiOld)
-        - INTEGRAL(DIMENSION)(Th)((1 - phi^2)^2 - (1 - phiOld^2)^2));
-    NDphilic = energyB/dt * (INTEGRAL(DIMENSION)(Th) ((1/alpha - 1/2. + beta)*(Grad(phi)'*Grad(phi) + Grad(phiOld)'*Grad(phiOld) - 2*Grad(Phi)'*Grad(phiOld)));
-    NDwall = INTEGRAL(BOUNDARYDIM)(Th) (wetting(contactAngles)*(phi*phiOld - 1)*(phi - phiOld)
-      - INTEGRAL(BOUNDARYDIM)(Th) (wetting(contactAngles)*(phi^3/3. - phiOld^3/3. + phiOld - phi));
+    real alpha = SOLVER_OD_ALPHA;
+    real beta = SOLVER_OD_BETA;
+    rateNDphobic = energyA/dt * INTEGRAL(DIMENSION)(Th) (-1./4.*(phi-phiOld)^4 - phiOld*(phi-phiOld)^3);
+    rateNDphilic = energyB/dt * INTEGRAL(DIMENSION)(Th) ((1./alpha - 1./2. + beta)*(Grad(phi)'*Grad(phi) + Grad(phiOld)'*Grad(phiOld) - 2*Grad(phi)'*Grad(phiOld)));
+    rateNDwall = 1/dt * INTEGRAL(BOUNDARYDIM)(Th) (wetting(contactAngles)*(-1./3.)*(phi-phiOld)^3);
 
-    cout << "--> Philic numerical dissipation: " << NDphilic << endl;
-    cout << "--> Phobic numerical dissipation: " << NDphobic << endl;
-    cout << "--> Wall numerical dissipation: " << NDwall << endl;
-
-    if(abs(NDphilic + NDphobic + NDwall - rateNumericalDissipation) > 1e-6)
-    {
-      cout << "Numerical dissipations don't match!" << endl;
-    }
+    #ifndef SOLVER_NAVIER_STOKES
+    rateND = - rateFreeEnergy - ratePD;
     #endif
-
-    // Phobic numerical dissipation
+    #endif
   }
   // }}}
   // Update integrated quantities {{{
@@ -703,10 +673,10 @@ for(int i = 0; i <= nIter && time <= tMax; i++)
   intConvectiveFluxMass += dt*convectiveFluxMass;
   #endif
 
-  intDissipationFreeEnergy += dt*dissipationFreeEnergy;
+  intDissipationFreeEnergy += dt*ratePD;
   intDiffusiveFluxFreeEnergy += dt*diffusiveFluxFreeEnergy;
   #ifndef SOLVER_NAVIER_STOKES
-  intNumericalDissipation += dt*rateNumericalDissipation;
+  intNumericalDissipation += dt*rateND;
   #endif
   #ifdef SOLVER_NAVIER_STOKES
   intTransferEnergy += dt*transferEnergy;
@@ -736,13 +706,13 @@ for(int i = 0; i <= nIter && time <= tMax; i++)
        << "Integrated convective mass flux:       " << intConvectiveFluxMass << endl
        << "Total outgoing mass flux:   "            << dt*totalFluxMass      << endl
        #endif
-       << "Increase in mass:           "                   << deltaMassPhi                    << endl
-       << "Mass balance (must be = 0): "                   << deltaMassPhi + dt*totalFluxMass << endl
+       << "Increase in mass:           "                   << rateMassPhi*dt                   << endl
+       << "Mass balance (must be = 0): "                   << rateMassPhi*dt + dt*totalFluxMass << endl
        << endl
        << "** Free energy **"                              << endl
        << "Bulk free energy:                  "            << bulkFreeEnergy                  << endl
        << "Wall free energy:                  "            << wallFreeEnergy                  << endl
-       << "Free energy dissipations:          "            << dt*dissipationFreeEnergy        << endl
+       << "Free energy dissipations:          "            << dt*ratePD         << endl
        << "Integrated free energy dissipations:          " << intDissipationFreeEnergy        << endl
        << "Diffusive free energy flux:        "            << dt*diffusiveFluxFreeEnergy      << endl
        << "Integrated diffusive free energy flux:        " << intDiffusiveFluxFreeEnergy      << endl
@@ -751,10 +721,7 @@ for(int i = 0; i <= nIter && time <= tMax; i++)
        << "Integrated convective free energy flux:       " << intConvectiveFluxFreeEnergy     << endl
        << "Transfer to kinetic energy:        "            << dt*transferEnergy               << endl
        << "Integrated transfer to kinetic energy:        " << intTransferEnergy               << endl
-       << "Sum of all contributions:          "            << dt*totalContributionsFreeEnergy << endl
        #endif
-       << "Increase in free energy:           " << deltaFreeEnergy                                   << endl
-       << "Free energy balance (must be = 0): " << deltaFreeEnergy + dt*totalContributionsFreeEnergy << endl
        #ifdef SOLVER_NAVIER_STOKES
        << endl
        << "** Kinetic energy **"                              << endl
@@ -785,6 +752,25 @@ for(int i = 0; i <= nIter && time <= tMax; i++)
        << "We = "            << We   << endl
        #endif
        << endl;
+
+  #if SOLVER_METHOD == OD1 || SOLVER_METHOD == OD2 || SOLVER_METHOD == OD2MOD
+  cout << "** Dissipations **" << endl;
+  cout << "--> Physical dissipation: " << ratePD << endl;
+  cout << "--> Philic numerical dissipation: " << rateNDphilic << endl;
+  cout << "--> Phobic numerical dissipation: " << rateNDphobic << endl;
+  cout << "--> Wall numerical dissipation: " << rateNDwall << endl;
+  cout << "--> Total rate of numerical dissipation: " << rateNDphilic + rateNDphobic + rateNDwall << endl;
+  cout << "--> Actual rate of numerical dissipation: " << rateND << endl;
+
+  #if SOLVER_BOUNDARY_CONDITION == CUBIC
+  if(abs(rateNDphilic + rateNDphobic + rateNDwall - rateND) > 1e-6)
+  {
+    cout << "Numerical dissipations don't match!" << endl;
+    exit(1);
+  }
+  #endif
+
+  #endif
   {
       ofstream thermodynamics("output/thermodynamics.txt", append);
       thermodynamics << i << " "
@@ -798,12 +784,37 @@ for(int i = 0; i <= nIter && time <= tMax; i++)
                      << diffusiveFluxFreeEnergy * dt << " "
                      #ifndef SOLVER_NAVIER_STOKES
                      << intNumericalDissipation << " "
-                     << rateNumericalDissipation << " "
+                     << rateND << " "
                      #endif
+                     << ratePD << " "
                      << endl;
   }
   // }}}
   cout << "Calculate macroscopic variables: " << tic() << endl;
+  // }}}
+  // Update previous solution {{{
+  #if SOLVER_METHOD == LM2
+  phiOldOld = phiOld;
+  muOldOld = muOld;
+  #endif
+  phiOld = phi;
+  muOld = mu;
+  #ifdef SOLVER_NAVIER_STOKES
+  uOld = u;
+  vOld = v;
+  #if DIMENSION == 3
+  wOld = w;
+  #endif
+  #endif
+
+  // Update *Old variables {{{
+  massPhiOld = massPhi;
+  freeEnergyOld = freeEnergy;
+
+  #ifdef SOLVER_NAVIER_STOKES
+  kineticEnergyOld = kineticEnergy;
+  #endif
+  // }}}
   // }}}
   // Save data to files and stdout {{{
   #if DIMENSION == 2
@@ -936,15 +947,15 @@ for(int i = 0; i <= nIter && time <= tMax; i++)
   phi[] = matPhi^-1*rhsPhi;
 
   #ifdef SOLVER_TIME_ADAPTATION
-  real dissipationFreeEnergy = (dt/Pe)*INTEGRAL(DIMENSION)(Th) ((Grad(mu)'*Grad(mu)));
+  real deltaPD = (dt/Pe)*INTEGRAL(DIMENSION)(Th) ((Grad(mu)'*Grad(mu)));
   real newFreeEnergy  = INTEGRAL(DIMENSION)(Th) ( energyA * 0.25 * (phi^2 - 1)^2 + energyB * 0.5 * (Grad(phi)'*Grad(phi)))
       + INTEGRAL(BOUNDARYDIM)(Th,labBoundary) (wetting(contactAngles) * (phi^3/3 - phi));
   real increaseFreeEnergy = newFreeEnergy - freeEnergy;
-  real numericalDissipation = - increaseFreeEnergy - dissipationFreeEnergy;
+  real numericalDissipation = - increaseFreeEnergy - deltaPD;
 
 
   #if SOLVER_TIME_ADAPTATION_METHOD == AYMARD
-  real parameterAdaptation = dissipationFreeEnergy;
+  real parameterAdaptation = deltaPD;
   bool additionalCondition = (increaseFreeEnergy > 0);
   #endif
 
@@ -972,7 +983,7 @@ for(int i = 0; i <= nIter && time <= tMax; i++)
   cout << "--> Admissible range for normalized time step: [" << dtOverPeMin << ", " << dtOverPeMax << "]" << endl;
   cout << "Normalized time step:  " << (dt/Pe)  << "." << endl;
   cout << "Free energy increase:  " << increaseFreeEnergy  << "." << endl;
-  cout << "Physical dissipation:  " << dissipationFreeEnergy << "." << endl;
+  cout << "Physical dissipation:  " << deltaPD << "." << endl;
   cout << "Numerical dissipation: " << numericalDissipation  << "." << endl;
   cout << "Normalized rate of Numerical dissipation: " << numericalDissipation/(dt/Pe) << "." << endl;
   cout << "--> Adaptation parameter: " << parameterAdaptation << endl
@@ -1057,15 +1068,6 @@ for(int i = 0; i <= nIter && time <= tMax; i++)
   #if SOLVER_METHOD == LM2
   qOld = qOld + 2 * (phiOldPlusOneHalfTilde*phi - phiOldPlusOneHalfTilde*phiOld);
   #endif
-
-  // Update *Old variables {{{
-  massPhiOld = massPhi;
-  freeEnergyOld = freeEnergy;
-
-  #ifdef SOLVER_NAVIER_STOKES
-  kineticEnergyOld = kineticEnergy;
-  #endif
-  // }}}
 
   // }}}
 }
