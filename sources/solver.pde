@@ -50,7 +50,6 @@
 #define SOLVER_METHOD OD2
 #endif
 
-
 // Mesh adaptation
 #if DIMENSION == 2
   #ifndef SOLVER_MESH_ADAPTATION_HMIN
@@ -527,12 +526,14 @@ real intPressureFluxKineticEnergy = 0;
 real rateNumericalDissipation = 0;
 real deltaFreeEnergy          = 0;
 real deltaMassPhi             = 0;
+real NDphilic = 0, NDphobic = 0;
 
 #ifdef SOLVER_NAVIER_STOKES
 real deltaKineticEnergy       = 0;
 #endif
 // }}}
 
+int[int] labBoundary = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20];
 for(int i = 0; i <= nIter && time <= tMax; i++)
 {
   tic();
@@ -606,7 +607,7 @@ for(int i = 0; i <= nIter && time <= tMax; i++)
       energyA * 0.25 * (phi^2 - 1)^2
       + energyB * 0.5 * (Grad(phi)'*Grad(phi))
       );
-  real wallFreeEnergy = INTEGRAL(BOUNDARYDIM)(Th,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20) (wetting(contactAngles) * (phi^3/3 - phi));
+  real wallFreeEnergy = INTEGRAL(BOUNDARYDIM)(Th,labBoundary) (wetting(contactAngles) * (phi^3/3 - phi));
   freeEnergy = bulkFreeEnergy + wallFreeEnergy;
   real dissipationFreeEnergy = INTEGRAL(DIMENSION)(Th) ((1/Pe)*(Grad(mu)'*Grad(mu)));
   real diffusiveFluxFreeEnergy = - INTEGRAL(BOUNDARYDIM)(Th) ((1/Pe) * mu * Normal'*Grad(mu));
@@ -656,6 +657,44 @@ for(int i = 0; i <= nIter && time <= tMax; i++)
     #ifdef SOLVER_NAVIER_STOKES
     deltaKineticEnergy = kineticEnergy - kineticEnergyOld;
     #endif
+
+    // Philic numerical dissipation
+    #if SOLVER_METHOD == OD1
+    #define SOLVER_OD_ALPHA 1.
+    #define SOLVER_OD_BETA 0.
+    #endif
+
+    #if SOLVER_METHOD == OD2
+    #define SOLVER_OD_ALPHA 2.
+    #define SOLVER_OD_BETA 0.
+    #endif
+
+    #if SOLVER_METHOD == OD2MOD
+    #define SOLVER_OD_ALPHA 2.
+    #define SOLVER_OD_BETA dt*SOLVER_OD2MOD_THETA
+    #endif
+
+    #if SOLVER_METHOD == OD1 || SOLVER_METHOD == OD2 || SOLVER_METHOD == OD2MOD
+    real alpha = SOLVER_OD_ALPHA
+    real beta = SOLVER_OD_BETA
+    NDphobic = energyA/dt * (
+        INTEGRAL(DIMENSION)(Th) (1.5*phiOld*phiOld*phi - 0.5*phiOld*phiOld*phiOld - 0.5*(phi + phiOld))*(phi -phiOld)
+        - INTEGRAL(DIMENSION)(Th)((1 - phi^2)^2 - (1 - phiOld^2)^2));
+    NDphilic = energyB/dt * (INTEGRAL(DIMENSION)(Th) ((1/alpha - 1/2. + beta)*(Grad(phi)'*Grad(phi) + Grad(phiOld)'*Grad(phiOld) - 2*Grad(Phi)'*Grad(phiOld)));
+    NDwall = INTEGRAL(BOUNDARYDIM)(Th) (wetting(contactAngles)*(phi*phiOld - 1)*(phi - phiOld)
+      - INTEGRAL(BOUNDARYDIM)(Th) (wetting(contactAngles)*(phi^3/3. - phiOld^3/3. + phiOld - phi));
+
+    cout << "--> Philic numerical dissipation: " << NDphilic << endl;
+    cout << "--> Phobic numerical dissipation: " << NDphobic << endl;
+    cout << "--> Wall numerical dissipation: " << NDwall << endl;
+
+    if(abs(NDphilic + NDphobic + NDwall - rateNumericalDissipation) > 1e-6)
+    {
+      cout << "Numerical dissipations don't match!" << endl;
+    }
+    #endif
+
+    // Phobic numerical dissipation
   }
   // }}}
   // Update integrated quantities {{{
@@ -899,7 +938,7 @@ for(int i = 0; i <= nIter && time <= tMax; i++)
   #ifdef SOLVER_TIME_ADAPTATION
   real dissipationFreeEnergy = (dt/Pe)*INTEGRAL(DIMENSION)(Th) ((Grad(mu)'*Grad(mu)));
   real newFreeEnergy  = INTEGRAL(DIMENSION)(Th) ( energyA * 0.25 * (phi^2 - 1)^2 + energyB * 0.5 * (Grad(phi)'*Grad(phi)))
-      + INTEGRAL(BOUNDARYDIM)(Th,1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20) (wetting(contactAngles) * (phi^3/3 - phi));
+      + INTEGRAL(BOUNDARYDIM)(Th,labBoundary) (wetting(contactAngles) * (phi^3/3 - phi));
   real increaseFreeEnergy = newFreeEnergy - freeEnergy;
   real numericalDissipation = - increaseFreeEnergy - dissipationFreeEnergy;
 

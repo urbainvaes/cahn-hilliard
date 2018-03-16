@@ -65,8 +65,8 @@ for key in data:
         plt.title(titles[key])
     plt.margins(0.05, 0.05)
     plt.xlabel('Iteration')
-    plt.savefig(args.output + '/macros/iteration-' + key + '.pdf',
-                bbox_inches='tight')
+    plt.savefig(args.output + '/macros/' + args.label + '-' + 'iteration-' +
+                key + '.pdf', bbox_inches='tight')
     plt.close()
 
 # vs time
@@ -79,6 +79,6 @@ for key in data:
         plt.title(titles[key])
     plt.margins(0.05, 0.05)
     plt.xlabel('Time')
-    plt.savefig(args.output + '/macros/time-' + key + '.pdf',
-                bbox_inches='tight')
+    plt.savefig(args.output + '/macros/' + args.label + '-' + 'time-' +
+                key + '.pdf', bbox_inches='tight')
     plt.close()
