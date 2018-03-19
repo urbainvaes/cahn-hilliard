@@ -34,8 +34,4 @@ func phi0 = (1-tanh((sqrt((x-x1)*(x-x1) + y*y) - r)/(sqrt(2)*Cn))) +
 #endif
 
 // Define boundary conditions
-func contactAngles = theta;
-varf varPhiBoundary([phi1,mu1], [phi2,mu2]) =
-  int1d(Th,1) (wetting(contactAngles) * mu2)
-  + int1d(Th,1) (wetting(contactAngles) * phi1 * phiOld * mu2)
-;
+func contactAngles = theta * (label == 1) + (pi/2.) * (label != 1);

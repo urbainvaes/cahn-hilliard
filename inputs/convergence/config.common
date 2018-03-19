@@ -11,6 +11,7 @@
 
 // Solver
 #define PROBLEM_CONF HERE/../problem.pde
+#define SOLVER_BOUNDARY_CONDITION CUBIC
 
 // Initial condition of problem
 #define PROBLEM_INITIAL_CONDITION_NICE
@@ -26,7 +27,7 @@
 
 // Base time step (= time step for convergence with respect to space, and max
 // time step for convergence with respect to time.)
-#define BASE_TIME_STEP 1e-2*(2*Pe*energyB/energyA^2)
+#define BASE_TIME_STEP 1e-2*(2.*Pe*energyB/energyA^2)
 #define BASE_NITER 200
 
 // vim: ft=cpp
