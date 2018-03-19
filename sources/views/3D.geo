@@ -59,13 +59,14 @@ View[0].RangeType = 0;
 View[0].ColormapNumber = 3;
 View[0].Light = 1;
 
+#ifndef SOLVER_MESH_ADAPTATION
+Mesh.SurfaceFaces  = 0;
+#endif
+
 viewsPerStep = 1;
 
-If (adapt == 1)
-  extension = "pos";
-EndIf
 If (adapt == 0)
-  extension = "msh";
+  Merge "output/mesh.msh";
 EndIf
 
 For i In {0:maxIters}
@@ -86,7 +87,12 @@ For i In {0:maxIters}
   If (!preSaved)
     If (FileExists(Sprintf("./output/done/done-%g.txt", iteration)))
       newViews = 1;
-      Merge StrCat(Sprintf("./output/phi/phi-%g.", iteration), extension);
+      If (adapt == 1)
+        Merge StrCat(Sprintf("./output/phi/phi-%g.", iteration), "pos");
+      EndIf
+      If (adapt == 0)
+        Merge StrCat(Sprintf("./output/phi/phi-%g.", iteration), "msh");
+      EndIf
       Plugin(Isosurface).Value = 0;
       Plugin(Isosurface).View = baseIndex;
       Plugin(Isosurface).Run;

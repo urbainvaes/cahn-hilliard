@@ -67,7 +67,7 @@ all :
 
 # Execute target for all problems in top directory
 all-% :
-	for p in $$(cat .bunches/$(bunch)); do make $* problem=$${p}; done
+	for p in $$(cat .bunches/$(bunch)); do echo $$p; make $* problem=$${p}; done
 
 clean-all :
 	rm -rf tests
