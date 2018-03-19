@@ -533,6 +533,10 @@ real deltaKineticEnergy       = 0;
 // }}}
 
 int[int] labBoundary = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20];
+
+// Time step at previous iteration
+real dtPrev = dt;
+
 for(int i = 0; i <= nIter && time <= tMax; i++)
 {
   tic();
@@ -581,23 +585,14 @@ for(int i = 0; i <= nIter && time <= tMax; i++)
   #endif
   // }}}
   // Calculate macroscopic variables {{{
-  // Mass {{{
+  // Instantaneous quantities {{{
   massPhi = INTEGRAL(DIMENSION)(Th) (phi);
-
-  //}}}
-  // Free energy {{{
   real bulkFreeEnergy  = INTEGRAL(DIMENSION)(Th) (
       energyA * 0.25 * (phi^2 - 1)^2
       + energyB * 0.5 * (Grad(phi)'*Grad(phi))
       );
   real wallFreeEnergy = INTEGRAL(BOUNDARYDIM)(Th,labBoundary) (wetting(contactAngles) * (phi^3/3 - phi));
   freeEnergy = bulkFreeEnergy + wallFreeEnergy;
-  real diffusiveFluxFreeEnergy = - INTEGRAL(BOUNDARYDIM)(Th) ((1/Pe) * mu * Normal'*Grad(mu));
-  #ifdef SOLVER_NAVIER_STOKES
-  real transferEnergy = INTEGRAL(DIMENSION)(Th) (phi*[UVEC]'*Grad(mu));
-  real convectiveFluxFreeEnergy = INTEGRAL(BOUNDARYDIM)(Th) (mu * phi* [UVEC]'*Normal);
-  totalContributionsFreeEnergy += convectiveFluxFreeEnergy + transferEnergy;
-  #endif
   // }}}
   // Kinetic energy {{{
   #ifdef SOLVER_NAVIER_STOKES
@@ -627,11 +622,17 @@ for(int i = 0; i <= nIter && time <= tMax; i++)
   real convectiveFluxMass = INTEGRAL(BOUNDARYDIM)(Th) (phi * [UVEC]'*Normal);
   totalFluxMass = totalFluxMass + convectiveFluxMass;
   #endif
+  real diffusiveFluxFreeEnergy = - INTEGRAL(BOUNDARYDIM)(Th) ((1/Pe) * mu * Normal'*Grad(mu));
+  #ifdef SOLVER_NAVIER_STOKES
+  real transferEnergy = INTEGRAL(DIMENSION)(Th) (phi*[UVEC]'*Grad(mu));
+  real convectiveFluxFreeEnergy = INTEGRAL(BOUNDARYDIM)(Th) (mu * phi* [UVEC]'*Normal);
+  totalContributionsFreeEnergy += convectiveFluxFreeEnergy + transferEnergy;
+  #endif
   // }}}
   // Update differential quantities {{{
   if(i > 0) {
-    rateMassPhi = (massPhi - massPhiOld)/dt;
-    rateFreeEnergy = (freeEnergy - freeEnergyOld)/dt;
+    rateMassPhi = (massPhi - massPhiOld)/dtPrev;
+    rateFreeEnergy = (freeEnergy - freeEnergyOld)/dtPrev;
     #ifdef SOLVER_NAVIER_STOKES
     deltaKineticEnergy = kineticEnergy - kineticEnergyOld;
     #endif
@@ -657,9 +658,9 @@ for(int i = 0; i <= nIter && time <= tMax; i++)
     #if SOLVER_METHOD == OD1 || SOLVER_METHOD == OD2 || SOLVER_METHOD == OD2MOD
     real alpha = SOLVER_OD_ALPHA;
     real beta = SOLVER_OD_BETA;
-    rateNDphobic = energyA/dt * INTEGRAL(DIMENSION)(Th) (-1./4.*(phi-phiOld)^4 - phiOld*(phi-phiOld)^3);
-    rateNDphilic = energyB/dt * INTEGRAL(DIMENSION)(Th) ((1./alpha - 1./2. + beta)*(Grad(phi)'*Grad(phi) + Grad(phiOld)'*Grad(phiOld) - 2*Grad(phi)'*Grad(phiOld)));
-    rateNDwall = 1/dt * INTEGRAL(BOUNDARYDIM)(Th) (wetting(contactAngles)*(-1./3.)*(phi-phiOld)^3);
+    rateNDphobic = energyA/dtPrev * INTEGRAL(DIMENSION)(Th) (-1./4.*(phi-phiOld)^4 - phiOld*(phi-phiOld)^3);
+    rateNDphilic = energyB/dtPrev * INTEGRAL(DIMENSION)(Th) ((1./alpha - 1./2. + beta)*(Grad(phi)'*Grad(phi) + Grad(phiOld)'*Grad(phiOld) - 2*Grad(phi)'*Grad(phiOld)));
+    rateNDwall = 1/dtPrev * INTEGRAL(BOUNDARYDIM)(Th) (wetting(contactAngles)*(-1./3.)*(phi-phiOld)^3);
 
     #ifndef SOLVER_NAVIER_STOKES
     rateND = - rateFreeEnergy - ratePD;
@@ -668,26 +669,26 @@ for(int i = 0; i <= nIter && time <= tMax; i++)
   }
   // }}}
   // Update integrated quantities {{{
-  intDiffusiveFluxMass += dt*diffusiveFluxMass;
+  intDiffusiveFluxMass += dtPrev*diffusiveFluxMass;
   #ifdef SOLVER_NAVIER_STOKES
-  intConvectiveFluxMass += dt*convectiveFluxMass;
+  intConvectiveFluxMass += dtPrev*convectiveFluxMass;
   #endif
 
-  intDissipationFreeEnergy += dt*ratePD;
-  intDiffusiveFluxFreeEnergy += dt*diffusiveFluxFreeEnergy;
+  intDissipationFreeEnergy += dtPrev*ratePD;
+  intDiffusiveFluxFreeEnergy += dtPrev*diffusiveFluxFreeEnergy;
   #ifndef SOLVER_NAVIER_STOKES
-  intNumericalDissipation += dt*rateND;
+  intNumericalDissipation += dtPrev*rateND;
   #endif
   #ifdef SOLVER_NAVIER_STOKES
-  intTransferEnergy += dt*transferEnergy;
-  intConvectiveFluxFreeEnergy += dt*convectiveFluxFreeEnergy;
+  intTransferEnergy += dtPrev*transferEnergy;
+  intConvectiveFluxFreeEnergy += dtPrev*convectiveFluxFreeEnergy;
   #endif
 
   #ifdef SOLVER_NAVIER_STOKES
-  intDissipationKineticEnergy += dt*dissipationKineticEnergy;
-  intDiffusiveFluxKineticEnergy += dt*diffusiveFluxKineticEnergy;
-  intConvectiveFluxKineticEnergy += dt*convectiveFluxKineticEnergy;
-  intPressureFluxKineticEnergy += dt*pressureFluxKineticEnergy;
+  intDissipationKineticEnergy += dtPrev*dissipationKineticEnergy;
+  intDiffusiveFluxKineticEnergy += dtPrev*diffusiveFluxKineticEnergy;
+  intConvectiveFluxKineticEnergy += dtPrev*convectiveFluxKineticEnergy;
+  intPressureFluxKineticEnergy += dtPrev*pressureFluxKineticEnergy;
   #endif
   // }}}
   // Print to stdout {{{
@@ -695,48 +696,48 @@ for(int i = 0; i <= nIter && time <= tMax; i++)
        << "** ITERATION **" << endl
        << "Iteration: "     << i    << endl
        << "Time:      "     << time << endl
-       << "Time step: "     << dt   << endl
+       << "Time step: "     << dtPrev   << endl
        << endl
        << "** Mass **"                        << endl
        << "Mass:                       "      << massPhi              << endl
-       << "Diffusive mass flux:        "      << dt*diffusiveFluxMass << endl
+       << "Diffusive mass flux:        "      << dtPrev*diffusiveFluxMass << endl
        << "Integrated diffusive mass flux:  " << intDiffusiveFluxMass << endl
        #ifdef SOLVER_NAVIER_STOKES
-       << "Convective mass flux:       "            << dt*convectiveFluxMass << endl
+       << "Convective mass flux:       "            << dtPrev*convectiveFluxMass << endl
        << "Integrated convective mass flux:       " << intConvectiveFluxMass << endl
-       << "Total outgoing mass flux:   "            << dt*totalFluxMass      << endl
+       << "Total outgoing mass flux:   "            << dtPrev*totalFluxMass      << endl
        #endif
-       << "Increase in mass:           "                   << rateMassPhi*dt                   << endl
-       << "Mass balance (must be = 0): "                   << rateMassPhi*dt + dt*totalFluxMass << endl
+       << "Increase in mass:           "                   << rateMassPhi*dtPrev                   << endl
+       << "Mass balance (must be = 0): "                   << rateMassPhi*dtPrev + dtPrev*totalFluxMass << endl
        << endl
        << "** Free energy **"                              << endl
        << "Bulk free energy:                  "            << bulkFreeEnergy                  << endl
        << "Wall free energy:                  "            << wallFreeEnergy                  << endl
-       << "Free energy dissipations:          "            << dt*ratePD         << endl
+       << "Free energy dissipations:          "            << dtPrev*ratePD         << endl
        << "Integrated free energy dissipations:          " << intDissipationFreeEnergy        << endl
-       << "Diffusive free energy flux:        "            << dt*diffusiveFluxFreeEnergy      << endl
+       << "Diffusive free energy flux:        "            << dtPrev*diffusiveFluxFreeEnergy      << endl
        << "Integrated diffusive free energy flux:        " << intDiffusiveFluxFreeEnergy      << endl
        #ifdef SOLVER_NAVIER_STOKES
-       << "Convective free energy flux:       "            << dt*convectiveFluxFreeEnergy     << endl
+       << "Convective free energy flux:       "            << dtPrev*convectiveFluxFreeEnergy     << endl
        << "Integrated convective free energy flux:       " << intConvectiveFluxFreeEnergy     << endl
-       << "Transfer to kinetic energy:        "            << dt*transferEnergy               << endl
+       << "Transfer to kinetic energy:        "            << dtPrev*transferEnergy               << endl
        << "Integrated transfer to kinetic energy:        " << intTransferEnergy               << endl
        #endif
        #ifdef SOLVER_NAVIER_STOKES
        << endl
        << "** Kinetic energy **"                              << endl
        << "Kinetic energy:                       "            << kineticEnergy                                           << endl
-       << "Kinetic energy dissipations:          "            << dt* dissipationKineticEnergy                            << endl
+       << "Kinetic energy dissipations:          "            << dtPrev* dissipationKineticEnergy                            << endl
        << "Integrated kinetic energy dissipations:          " << intDissipationKineticEnergy                             << endl
-       << "Diffusive kinetic energy flux:        "            << dt* diffusiveFluxKineticEnergy                          << endl
+       << "Diffusive kinetic energy flux:        "            << dtPrev* diffusiveFluxKineticEnergy                          << endl
        << "Integrated diffusive kinetic energy flux:        " << intDiffusiveFluxKineticEnergy                           << endl
-       << "Convective kinetic energy flux:       "            << dt* convectiveFluxKineticEnergy                         << endl
+       << "Convective kinetic energy flux:       "            << dtPrev* convectiveFluxKineticEnergy                         << endl
        << "Integrated convective kinetic energy flux:       " << intConvectiveFluxKineticEnergy                          << endl
-       << "Pressure-induced kinetic energy flux: "            << dt* pressureFluxKineticEnergy                           << endl
+       << "Pressure-induced kinetic energy flux: "            << dtPrev* pressureFluxKineticEnergy                           << endl
        << "Integrated pressure-induced kinetic energy flux: " << intPressureFluxKineticEnergy                            << endl
-       << "Sum of all contributions:             "            << dt* totalContributionsKineticEnergy                     << endl
+       << "Sum of all contributions:             "            << dtPrev* totalContributionsKineticEnergy                     << endl
        << "Increase in kinetic energy:           "            << deltaKineticEnergy                                      << endl
-       << "Kinetic energy balance (must be = 0): "            << deltaKineticEnergy + dt*totalContributionsKineticEnergy << endl
+       << "Kinetic energy balance (must be = 0): "            << deltaKineticEnergy + dtPrev*totalContributionsKineticEnergy << endl
        #endif
        << endl
        << "** Parameters **" << endl
@@ -766,7 +767,9 @@ for(int i = 0; i <= nIter && time <= tMax; i++)
   if(abs(rateNDphilic + rateNDphobic + rateNDwall - rateND) > 1e-6)
   {
     cout << "Numerical dissipations don't match!" << endl;
+    #ifndef SOLVER_MESH_ADAPTATION
     exit(1);
+    #endif
   }
   #endif
 
@@ -775,13 +778,13 @@ for(int i = 0; i <= nIter && time <= tMax; i++)
       ofstream thermodynamics("output/thermodynamics.txt", append);
       thermodynamics << i << " "
                      << time << " "
-                     << dt << " "
+                     << dtPrev << " "
                      << massPhi << " "
                      << wallFreeEnergy << " "
                      << bulkFreeEnergy << " "
                      << freeEnergy << " "
-                     << diffusiveFluxMass * dt << " "
-                     << diffusiveFluxFreeEnergy * dt << " "
+                     << diffusiveFluxMass * dtPrev << " "
+                     << diffusiveFluxFreeEnergy * dtPrev << " "
                      #ifndef SOLVER_NAVIER_STOKES
                      << intNumericalDissipation << " "
                      << rateND << " "
@@ -822,14 +825,14 @@ for(int i = 0; i <= nIter && time <= tMax; i++)
       isoline(Th, phi, xy, close=false, iso=0.0, smoothing=0.1, file="output/iso/contactLine"+i+".dat");
   #endif
 
-  savegmsh("output/phi/phi-" + i + ".msh", "Cahn-Hilliard", i*dt, i, phiOld);
-  savegmsh("output/mu/mu-" + i + ".msh", "Chemical potential", i*dt, i, muOld);
+  savegmsh("output/phi/phi-" + i + ".msh", "Cahn-Hilliard", time, i, phiOld);
+  savegmsh("output/mu/mu-" + i + ".msh", "Chemical potential", time, i, muOld);
   savefreefem("output/phi/phi-" + i + ".txt", phiOld);
   savefreefem("output/mu/mu-" + i + ".txt", muOld);
 
   #ifdef SOLVER_NAVIER_STOKES
-  savegmsh("output/pressure/pressure-" + i + ".msh", "Pressure", i*dt, i, p);
-  SAVEGMSHVEC(DIMENSION)("output/velocity/velocity-" + i + ".msh", "Velocity field", i*dt, i, UVEC);
+  savegmsh("output/pressure/pressure-" + i + ".msh", "Pressure", time, i, p);
+  SAVEGMSHVEC(DIMENSION)("output/velocity/velocity-" + i + ".msh", "Velocity field", time, i, UVEC);
   savefreefem("output/pressure/pressure-" + i + ".txt", p);
   savefreefem("output/u/u-" + i + ".txt", u);
   savefreefem("output/v/v-" + i + ".txt", v);
@@ -945,6 +948,7 @@ for(int i = 0; i <= nIter && time <= tMax; i++)
   real[int] rhsPhi = rhsPhiBulk + rhsPhiBoundary;
   set(matPhi,solver=sparsesolver SPARAMS);
   phi[] = matPhi^-1*rhsPhi;
+  dtPrev = dt;
 
   #ifdef SOLVER_TIME_ADAPTATION
   real deltaPD = (dt/Pe)*INTEGRAL(DIMENSION)(Th) ((Grad(mu)'*Grad(mu)));
@@ -1061,7 +1065,7 @@ for(int i = 0; i <= nIter && time <= tMax; i++)
   #endif
   // }}}
   // Things to do for all time steps but the 0-th {{{
-  time += dt;
+  time += dtPrev;
   #if SOLVER_METHOD == LM1
   qOld = qOld + 2 * (phiOld*phi - phiOld*phiOld);
   #endif
