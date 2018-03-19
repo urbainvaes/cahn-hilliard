@@ -11,5 +11,5 @@ for (( i = 0; i <= maxPower; i++ )); do
         <(echo '#include "./config.common"') \
         <(echo "#define SOLVER_NITER ${minIter}*${ratio}^(${maxPower}-${i})") \
         <(echo "#define PLOT_FLAGS --extension \"png\" --step $((ratio ** (maxPower -i)))") \
-        <(echo "#define SOLVER_DT ${maxDt}*${ratio}^(${i}-${maxPower})")
+        <(echo "#define SOLVER_DT ${maxDt}*${ratio}.0^(${i}-${maxPower})")
 done
