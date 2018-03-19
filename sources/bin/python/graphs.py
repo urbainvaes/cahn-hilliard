@@ -28,17 +28,24 @@ matplotlib.rc('font', family='serif')
 matplotlib.rc('text', usetex=args.latex)
 
 # Load data from files
-titles = {'time': 'Time',
-          'iteration': 'Iteration',
-          'time_step': 'Time step',
-          'mass': 'Mass',
-          'wall_free_energy': 'Wall free energy',
-          'interior_free_energy': 'Mixing energy',
-          'total_free_energy': 'Total free energy',
-          'diffusive_mass_increment': 'Diffusive mass increment',
-          'diffusive_free_energy_increment': 'Diffusive free energy increment',
-          'numerical_dissipation': 'Numerical dissipation',
-          'rate_numerical_dissipation': 'Rate of numerical dissipation'}
+titles = {
+ 'time': 'Time',
+ 'iteration': 'Iteration',
+ 'time_step': 'Time step',
+ 'mass': 'Mass',
+ 'wall_free_energy': 'Wall free energy',
+ 'interior_free_energy': 'Mixing energy',
+ 'total_free_energy': 'Total free energy',
+ 'rate_physical_dissipation_free_energy': 'Physical dissipation of free energy' ,
+ 'int_physical_dissipation_free_energy': 'Integrated dissipation of free energy' ,
+ 'rate_numerical_dissipation': 'Numerical dissipation of free energy',
+ 'int_numerical_dissipation': 'Integrated numerical dissipation of free energy',
+ 'rate_numerical_dissipation_philic': 'Rate of philic numerical dissipation',
+ 'int_numerical_dissipation_philic': 'Integrated philic numerical dissipation',
+ 'rate_numerical_dissipation_phobic': 'Rate of phobic numerical dissipation',
+ 'int_numerical_dissipation_phobic': 'Integrated phobic numerical dissipation',
+ 'rate_numerical_dissipation_wall': 'Rate of wall numerical dissipation',
+ 'int_numerical_dissipation_wall': 'Integrated wall numerical dissipation'}
 
 data_file = args.input + '/thermodynamics.txt'
 with open(data_file, 'r') as f:
