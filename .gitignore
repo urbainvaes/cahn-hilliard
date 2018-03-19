@@ -7,6 +7,7 @@
 /.vifm*
 
 *.backup
+*.gch
 !*.gitkeep
 
 .bunches/*
