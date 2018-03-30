@@ -29,6 +29,7 @@ real biasY = 0.0;
 
 
 // Wells
-func contactAngles = theta0 + amplitude * cos(frequencyX*pi*(x - biasX)) * cos(frequencyY*pi*(y - biasY)) * ((label == 1) + (label == 2));
+real phobicAngle = 5*pi/6;
+func contactAngles = phobicAngle * (label > 2) + amplitude * cos(frequencyX*pi*(x - biasX)) * cos(frequencyY*pi*(y - biasY)) * ((label == 1) + (label == 2));
 
 #include "common.pde"

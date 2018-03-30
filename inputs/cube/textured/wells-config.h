@@ -17,7 +17,7 @@
 /************
 *  SOLVER  *
 ************/
-#define SOLVER_METHOD OD1
+#define SOLVER_METHOD OD2
 #define SOLVER_OD2MOD_THETA dt
 #define SOLVER_POLYNOMIAL_ORDER 1
 #define SOLVER_BOUNDARY_CONDITION CUBIC
@@ -28,12 +28,12 @@
 
 // Dimensionless numbers
 #define SOLVER_PE 1e4
-#define SOLVER_CN 0.05
+#define SOLVER_CN 0.02
 
 // Mesh adaptation
-// #define SOLVER_MESH_ADAPTATION
-// #define SOLVER_MESH_ADAPTATION_HMIN 0.01
-// #define SOLVER_MESH_ADAPTATION_HMAX 0.1
+#define SOLVER_MESH_ADAPTATION
+#define SOLVER_MESH_ADAPTATION_HMIN 0.01
+#define SOLVER_MESH_ADAPTATION_HMAX 0.1
 
 // Time step and number of iterations
 #define SOLVER_DT 0.01 * (2*Pe*energyB/energyA^2)
