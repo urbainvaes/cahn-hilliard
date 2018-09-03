@@ -494,6 +494,7 @@ varf varP(p,test) =
                    << "int_numerical_dissipation_phobic "
                    << "rate_numerical_dissipation_wall "
                    << "int_numerical_dissipation_wall "
+                   << "recalculations "
                    << endl;
 
     ofstream params("parameters.txt");
@@ -520,6 +521,9 @@ real intND = 0.,  intNDphilic = 0.,   intNDphobic = 0.,  intNDwall = 0.;
 #ifdef SOLVER_NAVIER_STOKES
 real rateKE = 0;
 #endif
+
+// Number of recalculations
+int recalculations = 0;
 // }}}
 
 int[int] labBoundary = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20];
@@ -718,6 +722,7 @@ for(int i = 0; i <= nIter && time <= tMax; i++)
                      << intNDphobic << " "
                      << rateNDwall << " "
                      << intNDwall << " "
+                     << recalculations << " "
                      << endl;
   }
   // }}}
@@ -901,6 +906,7 @@ for(int i = 0; i <= nIter && time <= tMax; i++)
   real dtOld = dt;
   if(recalculate) {
     dt = dt/factor;
+    recalculations += 1;
   }
   else if (dtTooLow) {
     dt = dt*factor;
