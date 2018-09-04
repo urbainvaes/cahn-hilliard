@@ -148,7 +148,6 @@ load "isoline"
 load "UMFPACK64"
 
 #if DIMENSION == 2
-load "metis"
 load "iovtk"
 #endif
 
