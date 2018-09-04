@@ -11,6 +11,9 @@
 !*.gitkeep
 
 .bunches/*
+!.bunches/coalescence
+!.bunches/uk
+!.bunches/contact_angle
 
 __pycache__
 
