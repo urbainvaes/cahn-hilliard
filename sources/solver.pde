@@ -898,8 +898,8 @@ for(int i = 0; i <= nIter && time <= tMax; i++)
   bool additionalCondition = false; // No additional condition
   #endif
 
-  bool dtTooLarge = (parameterAdaptation > tolMax && dt/Pe > dtOverPeMin) || (dt/Pe > dtOverPeMax);
-  bool dtTooLow   = (parameterAdaptation < tolMin && dt/Pe < dtOverPeMax) || (dt/Pe < dtOverPeMin);
+  bool dtTooLarge = (parameterAdaptation > tolMax && dt/Pe > dtOverPeMin);
+  bool dtTooLow   = (parameterAdaptation < tolMin && dt/Pe < dtOverPeMax);
 
   recalculate = (dtTooLarge || additionalCondition);
 
