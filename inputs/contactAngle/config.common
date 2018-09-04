@@ -22,11 +22,11 @@
 
 // Dimensionless numbers
 #define SOLVER_PE 1
-#define SOLVER_CN 5e-3
+#define SOLVER_CN 1e-2
 
 // Mesh adaptation
 #define SOLVER_MESH_ADAPTATION
-#define SOLVER_MESH_ADAPTATION_HMIN 0.001
+#define SOLVER_MESH_ADAPTATION_HMIN 0.0005
 #define SOLVER_MESH_ADAPTATION_HMAX 0.01
 
 // Time adatpation
