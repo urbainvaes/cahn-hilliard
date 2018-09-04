@@ -22,7 +22,7 @@
 
 // Dimensionless numbers
 #define SOLVER_PE 1
-#define SOLVER_CN 1e-2
+#define SOLVER_CN 5e-3
 
 // Mesh adaptation
 #define SOLVER_MESH_ADAPTATION
