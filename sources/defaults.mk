@@ -56,7 +56,7 @@ video_fps    = VIDEO_FPS
 // Defaults
 #ifndef PLOT_EXEC
 	#if DIMENSION == 2
-		#define PLOT_EXEC python
+		#define PLOT_EXEC python3
 		#ifndef PLOT_PROGRAM
 			#define PLOT_PROGRAM GITROOT/sources/bin/python/plot.py
 			#ifndef PLOT_FLAGS
