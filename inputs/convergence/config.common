@@ -11,7 +11,7 @@
 
 // Solver
 #define PROBLEM_CONF HERE/../problem.pde
-#define SOLVER_BOUNDARY_CONDITION CUBIC
+#define SOLVER_BOUNDARY_CONDITION MODIFIED
 
 // Initial condition of problem
 #define PROBLEM_INITIAL_CONDITION_NICE

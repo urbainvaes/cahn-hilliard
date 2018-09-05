@@ -9,7 +9,3 @@ func mu0  = 0;
 // Define boundary conditions
 real theta = SOLVER_ANGLE;
 func contactAngles = theta;
-varf varPhiBoundary([phi1,mu1], [phi2,mu2]) =
-  int1d(Th,1) (wetting(contactAngles) * mu2)
-  + int1d(Th,1) (wetting(contactAngles) * phi1 * phiOld * mu2)
-;

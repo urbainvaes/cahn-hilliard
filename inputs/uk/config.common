@@ -14,6 +14,7 @@
 
 #define SOLVER_METHOD OD1
 #define SOLVER_POLYNOMIAL_ORDER 1
+#define SOLVER_BOUNDARY_CONDITION MODIFIED
 
 // Mesh adaptation
 #define SOLVER_MESH_ADAPTATION
@@ -29,6 +30,6 @@
 #define SOLVER_DT SOLVER_TMAX/1e4
 
 // Flags for plots
-#define PLOT_FLAGS --nocolorbar --extension "png" --step 100
+#define PLOT_FLAGS --nocolorbar --extension "png" --step 10
 
 // vim: ft=cpp
