@@ -14,6 +14,10 @@
 !.bunches/coalescence
 !.bunches/uk
 !.bunches/contact_angle
+!.bunches/convergence_space
+!.bunches/convergence_time
+!.bunches/convergence_space_pilots
+!.bunches/convergence_time_pilots
 
 __pycache__
 
