@@ -19,7 +19,7 @@
 
 // Time step and number of iterations
 #define SOLVER_NITER 1e6
-#define SOLVER_TMAX 500
+#define SOLVER_TMAX 400
 #define SOLVER_DT 2*Pe*(energyB/energyA^2)
 
 // Dimensionless numbers
