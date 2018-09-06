@@ -12,18 +12,18 @@
 ************/
 #define PROBLEM_CONF HERE/problem.pde
 
-#define SOLVER_METHOD OD1
-#define SOLVER_POLYNOMIAL_ORDER 1
+#define SOLVER_METHOD OD2
+#define SOLVER_POLYNOMIAL_ORDER 2
 #define SOLVER_BOUNDARY_CONDITION MODIFIED
 
 // Mesh adaptation
-#define SOLVER_MESH_ADAPTATION
+#define NO_SOLVER_MESH_ADAPTATION
 #define SOLVER_MESH_ADAPTATION_HMIN 0.01
 #define SOLVER_MESH_ADAPTATION_HMAX 0.5
 
 // Dimensionless numbers
 #define SOLVER_PE 1e4
-#define SOLVER_CN 0.02
+#define SOLVER_CN 0.01
 
 #define SOLVER_TMAX 250
 #define SOLVER_NITER 1e5
