@@ -8,8 +8,4 @@ func mu0  = 0;
 [phi, mu] = [phi0, mu0];
 
 // Define boundary conditions
-func contactAngles = CONTACT_ANGLE;
-varf varPhiBoundary([phi1,mu1], [phi2,mu2]) =
-  int1d(Th,1) (wetting(contactAngles) * mu2)
-  + int1d(Th,1) (wetting(contactAngles) * phi1 * phiOld * mu2)
-;
+func contactAngles = CONTACT_ANGLE * (label == 1) +  (pi/2.) * (label != 1);

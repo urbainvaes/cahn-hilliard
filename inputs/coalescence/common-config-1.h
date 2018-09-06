@@ -16,6 +16,7 @@
 #define SOLVER_METHOD OD2
 #define PROBLEM_CONF HERE/problem.pde
 #define SOLVER_POLYNOMIAL_ORDER 2
+#define SOLVER_BOUNDARY_CONDITION MODIFIED
 
 // Time step and number of iterations
 #define SOLVER_NITER 1e6
