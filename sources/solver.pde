@@ -889,7 +889,7 @@ for(int i = 0; i <= nIter && time <= tMax; i++)
 
   #if SOLVER_TIME_ADAPTATION_METHOD == AYMARD
   real parameterAdaptation = deltaPD;
-  bool additionalCondition = (increaseFreeEnergy > 0);
+  bool additionalCondition = (increaseFreeEnergy > tolMax/100.);
   #endif
 
   #if SOLVER_TIME_ADAPTATION_METHOD == GUILLEN
