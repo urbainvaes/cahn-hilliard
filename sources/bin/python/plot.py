@@ -9,6 +9,7 @@ import mesh  # gmsh
 import multiprocessing
 import numpy as np
 import os
+import re
 
 # Parse options
 parser = argparse.ArgumentParser()
@@ -79,7 +80,8 @@ matplotlib.rc('text', usetex=args.latex)
 if args.iteration:
     iterations = [int(args.iteration)]
 else:
-    n_files = len([f for f in os.listdir(args.input + '/done')])
+    files = [f for f in os.listdir(args.input + '/done')]
+    n_files = max([int(re.findall("\\d+", f)[0]) for f in files])
     n_plots = int(n_files / args.step)
     iterations = [args.step * i for i in range(n_plots)]
 
