@@ -9,3 +9,12 @@ func mu0  = 0;
 
 // Define boundary conditions
 func contactAngles = CONTACT_ANGLE * (label == 1) +  (pi/2.) * (label != 1);
+
+// The below boundary condition is correct, but it leads to the wrong wall
+// energy because the rest of the code also uses contactAngles.
+
+// func contactAngles = CONTACT_ANGLE;
+// varf varPhiBoundary([phi1,mu1], [phi2,mu2]) =
+//   int1d(Th,1) (wetting(contactAngles) * mu2)
+//   + int1d(Th,1) (wetting(contactAngles) * phi1 * phiOld * mu2)
+// ;
