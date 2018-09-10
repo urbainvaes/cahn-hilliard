@@ -13,7 +13,6 @@
 #define AUX_SOLVER_ELEMENTS(order) AUX_AUX_SOLVER_ELEMENTS(order)
 #define SOLVER_ELEMENTS AUX_SOLVER_ELEMENTS(SOLVER_POLYNOMIAL_ORDER)
 
-
 // Cahn-Hilliard parameters
 #ifndef SOLVER_PE
 #define SOLVER_PE 1
@@ -132,6 +131,11 @@
 
 #if DIMENSION == 3
 #define BOUNDARYDIM 2
+#endif
+
+// Misc parameters
+#ifndef SOLVER_SAVESTEP
+#define SOLVER_SAVESTEP 1
 #endif
 
 // }}}
@@ -749,44 +753,47 @@ for(int i = 0; i <= nIter && time <= tMax; i++)
 
   // }}}
   // Save data to files and stdout {{{
-  #if DIMENSION == 2
-      real[int,int] xy(3,1);
-      isoline(Th, phi, xy, close=false, iso=0.0, smoothing=0.1, file="output/iso/contactLine"+i+".dat");
-  #endif
+  if (i % SOLVER_SAVESTEP == 0)
+  {
+    #if DIMENSION == 2
+        real[int,int] xy(3,1);
+        isoline(Th, phi, xy, close=false, iso=0.0, smoothing=0.1, file="output/iso/contactLine"+i+".dat");
+    #endif
 
-  savegmsh("output/phi/phi-" + i + ".msh", "Cahn-Hilliard", time, i, phiOld);
-  savegmsh("output/mu/mu-" + i + ".msh", "Chemical potential", time, i, muOld);
-  savefreefem("output/phi/phi-" + i + ".txt", phiOld);
-  savefreefem("output/mu/mu-" + i + ".txt", muOld);
+    savegmsh("output/phi/phi-" + i + ".msh", "Cahn-Hilliard", time, i, phiOld);
+    savegmsh("output/mu/mu-" + i + ".msh", "Chemical potential", time, i, muOld);
+    savefreefem("output/phi/phi-" + i + ".txt", phiOld);
+    savefreefem("output/mu/mu-" + i + ".txt", muOld);
 
-  #ifdef SOLVER_NAVIER_STOKES
-  savegmsh("output/pressure/pressure-" + i + ".msh", "Pressure", time, i, p);
-  SAVEGMSHVEC(DIMENSION)("output/velocity/velocity-" + i + ".msh", "Velocity field", time, i, UVEC);
-  savefreefem("output/pressure/pressure-" + i + ".txt", p);
-  savefreefem("output/u/u-" + i + ".txt", u);
-  savefreefem("output/v/v-" + i + ".txt", v);
-  #if DIMENSION == 3
-  savefreefem("output/w/w-" + i + ".txt", w);
-  #endif
-  #endif
+    #ifdef SOLVER_NAVIER_STOKES
+    savegmsh("output/pressure/pressure-" + i + ".msh", "Pressure", time, i, p);
+    SAVEGMSHVEC(DIMENSION)("output/velocity/velocity-" + i + ".msh", "Velocity field", time, i, UVEC);
+    savefreefem("output/pressure/pressure-" + i + ".txt", p);
+    savefreefem("output/u/u-" + i + ".txt", u);
+    savefreefem("output/v/v-" + i + ".txt", v);
+    #if DIMENSION == 3
+    savefreefem("output/w/w-" + i + ".txt", w);
+    #endif
+    #endif
 
-  #ifdef SOLVER_MESH_ADAPTATION
-  savemeshgmsh("output/mesh/mesh-" + i + ".msh", Vh, Th);
-  #if SOLVER_POLYNOMIAL_ORDER == 2
-    savemeshgmsh("output/mesh/low-order-mesh-" + i + ".msh", VhLow, Th);
-  #endif
-  system(xstr(GITROOT) + "/sources/bin/msh2pos output/mesh/mesh-" + i + ".msh"
-              + " output/phi/phi-" + i + ".msh"
-              + " output/mu/mu-" + i + ".msh"
-              #ifdef SOLVER_NAVIER_STOKES
-              + " output/pressure/pressure-" + i + ".msh"
-              + " output/velocity/velocity-" + i + ".msh"
-              #endif
-        );
-  #endif
-  // ! phi[]
+    #ifdef SOLVER_MESH_ADAPTATION
+    savemeshgmsh("output/mesh/mesh-" + i + ".msh", Vh, Th);
+    #if SOLVER_POLYNOMIAL_ORDER == 2
+      savemeshgmsh("output/mesh/low-order-mesh-" + i + ".msh", VhLow, Th);
+    #endif
+    system(xstr(GITROOT) + "/sources/bin/msh2pos output/mesh/mesh-" + i + ".msh"
+                + " output/phi/phi-" + i + ".msh"
+                + " output/mu/mu-" + i + ".msh"
+                #ifdef SOLVER_NAVIER_STOKES
+                + " output/pressure/pressure-" + i + ".msh"
+                + " output/velocity/velocity-" + i + ".msh"
+                #endif
+          );
+    #endif
+    // ! phi[]
 
-  cout << "Save data to files and stdout: " << tic() << endl;
+    cout << "Save data to files and stdout: " << tic() << endl;
+  }
   //}}}
   // Visualize solution at current time step {{{
   #ifdef PLOT

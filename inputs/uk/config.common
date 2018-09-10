@@ -10,6 +10,7 @@
 /***********
 *  SOLVER  *
 ************/
+#define SOLVER_SAVESTEP 10
 #define PROBLEM_CONF HERE/problem.pde
 
 #define SOLVER_METHOD OD2
