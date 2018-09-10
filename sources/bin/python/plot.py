@@ -173,6 +173,7 @@ def plot_iteration(iteration):
             tricontourf = plt.tricontourf(
                 tri_data, data[f], 40, cmap='jet')
                 # tri_data, data[f], levels=np.linspace(-4, 2.5, 80), cmap='jet')
+                # tri_data, data[f], levels=np.linspace(0, 8, 80), cmap='jet')
         elif f == 'pressure':
             tricontourf = plt.tricontourf(
                 tri_data, data[f], 40, cmap='jet')
@@ -188,10 +189,12 @@ def plot_iteration(iteration):
                         tricontourf, orientation=c_orientation,
                         fraction=c_fraction, pad=0.01)
                         # fraction=c_fraction, pad=0.01, ticks=[-1, -.5, 0, .5, 1])
-            # elif f == 'mu':
-            #     colorbar = plt.colorbar(
-            #             tricontourf, orientation=c_orientation,
-            #             fraction=c_fraction, pad=0.01, ticks=[-4, -3, -2, -1,  0, 1, 2])
+            elif f == 'mu':
+                colorbar = plt.colorbar(
+                        tricontourf, orientation=c_orientation,
+                        fraction=c_fraction, pad=0.01)
+                        # fraction=c_fraction, pad=0.01, ticks=[-4, -3, -2, -1, 0, 1, 2])
+                        # fraction=c_fraction, pad=0.01, ticks=list(range(9)))
             else:
                 colorbar = plt.colorbar(
                         tricontourf, orientation=c_orientation,
