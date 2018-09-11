@@ -25,9 +25,12 @@
 
 // Dimensionless numbers
 #define SOLVER_PE 1e4
+#define SOLVER_CN 0.02
 
 // Mesh adaptation
 #define SOLVER_MESH_ADAPTATION
+#define SOLVER_MESH_ADAPTATION_HMIN 0.002
+#define SOLVER_MESH_ADAPTATION_HMAX 0.02
 
 /***********
 *  Plots  *
