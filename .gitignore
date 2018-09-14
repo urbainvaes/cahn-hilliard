@@ -18,6 +18,7 @@
 !.bunches/convergence_time
 !.bunches/convergence_space_pilots
 !.bunches/convergence_time_pilots
+!.bunches/cube_textured
 
 __pycache__
 
