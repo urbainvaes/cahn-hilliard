@@ -1,4 +1,5 @@
 #include "./config.common"
+#define SOLVER_METHOD OD2
 #define SOLVER_TIME_ADAPTATION
 #define SOLVER_TIME_ADAPTATION_METHOD AYMARD
 #define SOLVER_TIME_ADAPTATION_FACTOR sqrt(2)

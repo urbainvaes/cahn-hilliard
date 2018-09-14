@@ -589,6 +589,9 @@ for(int i = 0; i <= nIter && time <= tMax; i++)
       + energyB * 0.5 * (Grad(phi)'*Grad(phi))
       );
   real wallFE = INTEGRAL(BOUNDARYDIM)(Th,labBoundary) (wetting(contactAngles) * (phi^3/3 - phi));
+
+  // #if SOLVER_BOUNDARY_CONDITION == MODIFIED
+  // #endif
   freeEnergy = bulkFE + wallFE;
   #ifdef SOLVER_NAVIER_STOKES
   kineticEnergy = INTEGRAL(DIMENSION)(Th) (.5*[UVEC]'*[UVEC]);

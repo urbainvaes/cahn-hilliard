@@ -13,7 +13,6 @@
 #define SOLVER_SAVESTEP 10
 #define PROBLEM_CONF HERE/problem.pde
 
-#define SOLVER_METHOD OD2
 #define SOLVER_POLYNOMIAL_ORDER 1
 #define SOLVER_BOUNDARY_CONDITION MODIFIED
 
@@ -32,6 +31,6 @@
 #define SOLVER_DT SOLVER_TMAX/1e4
 
 // Flags for plots
-#define PLOT_FLAGS --nocolorbar --extension "png" --step 10
+#define PLOT_FLAGS --nocolorbar --extension "png" --step 100
 
 // vim: ft=cpp
