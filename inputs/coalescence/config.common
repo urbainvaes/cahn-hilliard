@@ -19,8 +19,7 @@
 // Time step and number of iterations
 #define SOLVER_NITER 1e6
 #define SOLVER_TMAX 400
-// #define SOLVER_DT 2*Pe*(energyB/energyA^2)
-#define SOLVER_DT 0.01
+#define SOLVER_DT 2*Pe*(energyB/energyA^2)
 
 // Dimensionless numbers
 #define SOLVER_PE 1e4
@@ -28,8 +27,8 @@
 
 // Mesh adaptation
 #define SOLVER_MESH_ADAPTATION
-#define SOLVER_MESH_ADAPTATION_HMIN 0.002
-#define SOLVER_MESH_ADAPTATION_HMAX 0.02
+#define SOLVER_MESH_ADAPTATION_HMIN 0.001
+#define SOLVER_MESH_ADAPTATION_HMAX 0.01
 
 /***********
 *  Plots  *
