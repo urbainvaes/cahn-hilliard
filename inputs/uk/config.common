@@ -23,10 +23,10 @@
 #define SOLVER_MESH_ADAPTATION_HMAX 0.5
 
 // Dimensionless numbers
-#define SOLVER_PE 1e4
+#define SOLVER_PE 1e3
 #define SOLVER_CN 0.02
 
-#define SOLVER_TMAX 1000
+#define SOLVER_TMAX 100
 #define SOLVER_NITER 1e5
 #define SOLVER_DT SOLVER_TMAX/1e4
 
