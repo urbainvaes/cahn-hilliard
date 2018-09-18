@@ -322,10 +322,9 @@ varf varPhiBoundary([phi1,mu1], [phi2,mu2]) =
 #endif
 
 #if SOLVER_BOUNDARY_CONDITION == MODIFIED
-Vh oneVh = 1; Vh zeroVh = 0;
 varf varPhiBoundary([phi1,mu1], [phi2,mu2]) =
-  INTEGRAL(BOUNDARYDIM)(Th) (wetting(contactAngles) * (1 + min(1 - phiOld, zeroVh) + min(1 + phiOld, zeroVh)) * mu2)
-  +  INTEGRAL(BOUNDARYDIM)(Th) (wetting(contactAngles) * max(-oneVh, min(phiOld, oneVh)) * phi1 * mu2)
+  INTEGRAL(BOUNDARYDIM)(Th) (wetting(contactAngles) * (1 + min(1 - phiOld, 0.) + min(1 + phiOld, 0.)) * mu2)
+  +  INTEGRAL(BOUNDARYDIM)(Th) (wetting(contactAngles) * projection(-1., phiOld, 1.) * phi1 * mu2)
 ;
 #endif
 
