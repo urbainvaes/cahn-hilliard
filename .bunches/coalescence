@@ -13,3 +13,6 @@ coalescence/cubic/theta-pio4/time_adaptation
 coalescence/modified_od1/theta-pio4/no_time_adaptation
 coalescence/modified_od1/theta-pio2/no_time_adaptation
 coalescence/modified_od1/theta-3pio4/no_time_adaptation
+coalescence/modified/theta-3pio4/no_time_adaptation_alternative
+coalescence/modified/theta-pio2/no_time_adaptation_alternative
+coalescence/modified/theta-pio4/no_time_adaptation_alternative
