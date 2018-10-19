@@ -307,6 +307,21 @@ macro Normal [N.x, N.y, N.z] //EOM
 //}}}
 // Include problem file {{{
 #include xstr(PROBLEM_CONF)
+
+# First iteration
+int i0 = 0;
+
+#ifdef SOLVER_RESUME
+// Mesh for initial condition
+MESH ThResume = gmshload("./output/mesh/low-order-mesh-" + xstr(SOLVER_RESUME) + ".msh");
+fespace VhResume(ThResume,SOLVER_ELEMENTS);
+VhResume resumePhi, resumeMu;
+i0 = SOLVER_RESUME; time = SOLVER_RESUME*dt;
+readfreefem("./output/phi/phi-" + xstr(SOLVER_RESUME) + ".txt", resumePhi);
+readfreefem("./output/mu/mu-" + xstr(SOLVER_RESUME) + ".txt", resumeMu);
+[phi, mu] = [resumePhi, resumeMu];
+#endif
+
 #if SOLVER_BOUNDARY_CONDITION == LINEAR
 varf varPhiBoundary([phi1,mu1], [phi2,mu2]) =
   INTEGRAL(BOUNDARYDIM)(Th) (wetting(contactAngles) * mu2)
@@ -477,6 +492,7 @@ varf varP(p,test) =
 // Loop in time {{{
 
 // Clear and create output file {{{
+#ifndef SOLVER_RESUME
 {
     ofstream thermodynamics("output/thermodynamics.txt");
     thermodynamics << "iteration "
@@ -498,9 +514,9 @@ varf varP(p,test) =
                    << "int_numerical_dissipation_wall "
                    << "recalculations "
                    << endl;
-
-    ofstream params("parameters.txt");
 };
+#endif
+ofstream params("parameters.txt");
 // }}}
 // Declare macroscopic variables {{{
 
@@ -533,7 +549,7 @@ int[int] labBoundary = [1,2,3,4,5,6,7,8,9,10,11,12,13,14,15,16,17,18,19,20];
 // Time step at previous iteration
 real dtPrev = dt;
 
-for(int i = 0; i <= nIter && time <= tMax; i++)
+for(int i = i0; i <= nIter && time <= tMax; i++)
 {
   tic();
   // Adapt mesh {{{

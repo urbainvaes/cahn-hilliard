@@ -9,7 +9,7 @@
 #endif
 
 #ifndef GEOMETRY_S
-#define GEOMETRY_S 0.005
+#define GEOMETRY_S 0.002
 #endif
 
 #ifndef GEOMETRY_CENTERED_AT_0_X
