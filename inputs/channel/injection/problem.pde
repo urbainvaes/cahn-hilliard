@@ -1,34 +1,18 @@
-func phi0 = (y > 0 ? 1 : -1);
+func phi0 = -1;
 func mu0  = 0;
 [phi, mu] = [phi0, mu0];
 
+real pInlet = 100;
+real pOutlet = 0;
+func contactAngles = pi/2;
+
 // Define boundary conditions
 varf varPhiBoundary([phi1,mu1], [phi2,mu2]) =
-  int1d(Th,3) (0*mu2)
-  + int1d(Th,1) (0*mu2)
-  + on (4, phi1 = -1)
-  + on (6, phi1 = 1);
+  on (4, phi1 = -1) + on (6, phi1 = 1)
+  + int1d(Th) (wetting(contactAngles) * mu2)
+  + int1d(Th) (wetting(contactAngles) * phi1 * phiOld * mu2)
 ;
 
 varf varUBoundary(u, unused) = on(1,3,5,7, u = 0);
 varf varVBoundary(v, unused) = on(1,3,5,7, v = 0);
-varf varPBoundary(p, unused) = on(6, p = 500) + on(4, p = 160) + on(2, p = 0);
-
-// Time step
-dt = .5e-2;
-
-// Number of iterations
-nIter = 4000;
-
-// Discretization of the capillary term
-muGradPhi = 1;
-
-// Dimensionless numbers
-Re = 1;
-Pe = 25;
-We = 1.11e-1;
-Cn = 1e-2;
-
-// Mesh
-hmax = 0.2;
-hmin = hmax/10;
+varf varPBoundary(p, unused) = on(6, p = pInlet) + on(4, p = pInlet) + on(2, p = pOutlet);

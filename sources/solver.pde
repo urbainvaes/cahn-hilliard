@@ -308,7 +308,7 @@ macro Normal [N.x, N.y, N.z] //EOM
 // Include problem file {{{
 #include xstr(PROBLEM_CONF)
 
-# First iteration
+// First iteration
 int i0 = 0;
 
 #ifdef SOLVER_RESUME
@@ -609,7 +609,8 @@ for(int i = i0; i <= nIter && time <= tMax; i++)
   // #endif
   freeEnergy = bulkFE + wallFE;
   #ifdef SOLVER_NAVIER_STOKES
-  kineticEnergy = INTEGRAL(DIMENSION)(Th) (.5*[UVEC]'*[UVEC]);
+  kineticEnergy = INTEGRAL(DIMENSION)(Th) (.5*[UVEC]'*
+                                            [UVEC]);
   #endif
   // }}}
   // Differential and integral quantities {{{
@@ -621,13 +622,13 @@ for(int i = i0; i <= nIter && time <= tMax; i++)
     intPDFE += dtPrev*ratePDFE;
 
     #ifdef SOLVER_NAVIER_STOKES
-    rateKineticEnergy = (kineticEnergy - kineticEnergyOld)/dtPrev;
-    ratePDKE = INTEGRAL(DIMENSION)(Th) ((1/Re) * (Grad(u)'*Grad(u) + Grad(v)'*Grad(v)
-    intPDKE += dtPrev*ratePDKE;
-      #if DIMENSION == 3
-      + Grad(w)'*Grad(w)
-      #endif
-      ));
+    // rateKineticEnergy = (kineticEnergy - kineticEnergyOld)/dtPrev;
+    // ratePDKE = INTEGRAL(DIMENSION)(Th) ((1/Re) * (Grad(u)'*Grad(u) + Grad(v)'*Grad(v)
+    // intPDKE += dtPrev*ratePDKE;
+      // #if DIMENSION == 3
+      // + Grad(w)'*Grad(w)
+      // #endif
+      // ));
     #endif
 
     // Philic numerical dissipation
