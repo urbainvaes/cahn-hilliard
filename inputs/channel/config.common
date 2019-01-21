@@ -21,10 +21,10 @@
 // #define SOLVER_CN 0.01
 
 // Dimensionless numbers
-#define SOLVER_PE 1000
+#define SOLVER_PE 5e4
 #define SOLVER_RE 1
-#define SOLVER_CN 2e-2
-#define SOLVER_WE 10
+#define SOLVER_CN 1e-2
+#define SOLVER_WE .5
 
 #define PLOT_FLAGS --parallel --step 10 --flow --extension "pdf"
 // #define SOLVER_PE = 100

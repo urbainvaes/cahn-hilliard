@@ -1,7 +1,7 @@
 Lx = 11.5; // export
 Ly = 1; // export
 cx1 = 1.5;
-cx2 = 1.55;
+cx2 = 1.6;
 s = 0.02;
 
 If (!Exists(Lx))
