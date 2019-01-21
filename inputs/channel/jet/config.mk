@@ -1,7 +1,0 @@
-DIMENSION = 2
-GEOMETRY = channel.geo
-VIEW = views/view-2d.py
-
-SOLVER_MESH_ADAPTATION = 1
-SOLVER_NAVIER_STOKES = 1
-# PLOT = 1
