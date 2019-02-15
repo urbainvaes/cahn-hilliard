@@ -19,7 +19,7 @@
 #define SOLVER_BOUNDARY_CONDITION CUBIC
 
 // Dimensionless numbers
-#define SOLVER_PE 1;
+#define SOLVER_PE 1
 
 // Adaptation in sapce and time
 #define NO_SOLVER_TIME_ADAPTATION
@@ -30,6 +30,6 @@
 // Time step and number of iterations
 #define SOLVER_NITER 1e4
 #define CONFIG_BASE_CN 50e-4
-#define SOLVER_DT 100*Pe*CONFIG_BASE_CN^3
+#define SOLVER_DT 1e-5
 
 // vim: ft=cpp
