@@ -256,7 +256,7 @@ n_blocks = 5;
 delta = 0.2;
 width = 0.2;
 
-height = (yt - yb - delta*n_blocks)/n_blocks;
+height = (yt - yb - delta*(n_blocks+1))/n_blocks;
 period = height + delta;
 
 // Coordinates with respect to left-right corner
@@ -271,10 +271,10 @@ Physical Line("Blocks", 4) = {};
 For i In {0:n_blocks - 1}
   // Left
   p = newp;
-  Point(p + 0) = {xl - x1, yb + delta/2 + i*period + y1, 0, s2};
-  Point(p + 1) = {xl - x2, yb + delta/2 + i*period + y2, 0, s2};
-  Point(p + 2) = {xl - x3, yb + delta/2 + i*period + y3, 0, s2};
-  Point(p + 3) = {xl - x4, yb + delta/2 + i*period + y4, 0, s2};
+  Point(p + 0) = {xl - x1, yb + delta + i*period + y1, 0, s2};
+  Point(p + 1) = {xl - x2, yb + delta + i*period + y2, 0, s2};
+  Point(p + 2) = {xl - x3, yb + delta + i*period + y3, 0, s2};
+  Point(p + 3) = {xl - x4, yb + delta + i*period + y4, 0, s2};
 
   l = newl;
   Line(l + 0) = {p + 0, p + 1};
