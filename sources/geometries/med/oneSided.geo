@@ -253,8 +253,8 @@ xr = 6.411453101;
 // width = .1;
 
 n_blocks = 5;
-delta = 0.2;
-width = 0.2;
+delta = 0.1;
+width = 0.3;
 
 height = (yt - yb - delta*(n_blocks+1))/n_blocks;
 period = height + delta;
