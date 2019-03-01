@@ -1,6 +1,7 @@
 // INITIAL CONDITIONS
 // func phi0 = 1;
 func phi0 = (x > 5.71 && x < 6.51 && (y > 16 || y < 15) && (y > 14 || y < 13) ? -1 : 1);
+// func phi0 = (x > 5.71 && x < 6.51) ? -1 : 1;
 func mu0  = 0;
 [phi, mu] = [phi0, mu0];
 
@@ -13,7 +14,7 @@ real pInlet = 2;
 real pCentralOutlet = 0;
 real pLateralOutlets = 0;
 
-func contactAngles = theta*((label == 4) + (label == 5) + (label == 6));
+func contactAngles = theta*((label == 4) + (label == 5) + (label == 6) + (label==2));
 
 varf varPhiBoundary([phi1,mu1], [phi2,mu2]) =
   // -------------

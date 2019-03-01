@@ -3,7 +3,7 @@
 #define DIMENSION 2
 
 // General solver paraeters
-#define SOLVER_DT 0.2
+#define SOLVER_DT 0.02
 #define SOLVER_NITER 1e6
 
 #define SOLVER_MESH_ADAPTATION
