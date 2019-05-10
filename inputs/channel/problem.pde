@@ -2,8 +2,8 @@ func phi0 = y > 0 ? 1 : -1;
 func mu0  = 0;
 [phi, mu] = [phi0, mu0];
 
-real pInlet0 = 5;
-real pInlet1 = 15;
+real pInlet0 = 2;
+real pInlet1 = 4;
 real pOutlet = 0;
 
 // func contactAngles = (label == 1 || label == 3) * (pi/3) + (label != 1 && label != 3) * (pi/2)

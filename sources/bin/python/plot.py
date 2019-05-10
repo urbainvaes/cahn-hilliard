@@ -168,7 +168,7 @@ def plot_iteration(iteration):
         if f == 'phi':
             tricontourf = plt.tricontourf(
                 tri_data, data[f], levels=np.linspace(-1.1, 1.1, 40),
-                cmap='blue_green')
+                cmap='jet')
         elif f == 'mu':
             tricontourf = plt.tricontourf(
                 tri_data, data[f], 40, cmap='jet')

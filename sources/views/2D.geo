@@ -5,7 +5,7 @@ adapt = 1;
 #endif
 
 If(!Exists(field))
-  field = "phi";
+  field = "mu";
 EndIf
 
 If(!Exists(video))
